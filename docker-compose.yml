@@ -1,0 +1,53 @@
+version: "3.9"
+
+
+services:
+
+  # Django
+  web:
+    build: .
+    volumes:
+      - .:/cycle_proj
+      - static_volume:/cycle_proj/static
+      - media_volume:/cycle_proj/media
+    ports:
+      - '8000:8000'
+    env_file:
+      - web.env
+    image: cycle_proj
+    container_name: django_cycle_api
+    command: >
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate  && gunicorn -b 0.0.0.0:8000 core.wsgi:application"
+    depends_on:
+      - db
+
+
+  # PostgreSQL
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    env_file:
+      - web.env
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+
+
+  nginx:
+    image: nginx
+    depends_on:
+      - web
+    ports:
+      - '80:80'
+    volumes:
+      - static_volume:/cycle_proj/static
+      - media_volume:/cycle_proj/media
+
+
+volumes:
+  db:
+    driver: local
+
+  static_volume:
+  media_volume:
