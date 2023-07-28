@@ -8,24 +8,26 @@ on:
     branches:
       - '*'
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: [ 3.11 ]
+        python-version: [3.11]
 
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Build with Docker Compose
-        run:
-          docker-compose --env-file ../../web.env up --build --abort-on-container-exit
+        env:
+          DOCKER_ENV: ${{ github.workspace }}/web.env
+        run: |
+          cat $DOCKER_ENV
+          docker-compose --env-file $DOCKER_ENV up --build --abort-on-container-exit
       - name: Lint with flake8 and isort
         run:
           flake8
@@ -34,6 +36,5 @@ jobs:
         run:
           coverage run manage.py test
           coverage report
-
       - name: Test project
         run: python manage.py test
