@@ -24,10 +24,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build with Docker Compose
         env:
-          DOCKER_ENV: ${{ github.workspace }}/web.env
-        run: |
-          cat $DOCKER_ENV
-          docker-compose --env-file $DOCKER_ENV up --build --abort-on-container-exit
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        run:
+          docker-compose up --build --abort-on-container-exit
       - name: Lint with flake8 and isort
         run:
           flake8
