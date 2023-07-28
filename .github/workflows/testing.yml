@@ -22,24 +22,17 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Build with Docker Compose
+      - name: Create env file
         run: |
-          # Replace the placeholders with actual values from GitHub Secrets
-          POSTGRES_HOST="${{ secrets.POSTGRES_HOST }}"
-          POSTGRES_PORT="${{ secrets.POSTGRES_PORT }}"
-          POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-          POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-          POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-
-          # Print the values for verification
-          echo "POSTGRES_HOST=$POSTGRES_HOST"
-          echo "POSTGRES_PORT=$POSTGRES_PORT"
-          echo "POSTGRES_USER=$POSTGRES_USER"
-          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
-          echo "POSTGRES_DB=$POSTGRES_DB"
-
-          # Run docker-compose with the specified environment variables
-          POSTGRES_HOST=$POSTGRES_HOST POSTGRES_PORT=$POSTGRES_PORT POSTGRES_USER=$POSTGRES_USER POSTGRES_PASSWORD=$POSTGRES_PASSWORD POSTGRES_DB=$POSTGRES_DB docker-compose up --build --abort-on-container-exit
+          echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> web.env
+          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> web.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> web.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> web.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> web.env
+      - name: Build with Docker Compose
+        run: docker-compose --env-file web.env up --build --abort-on-container-exit
+      - name: Cleanup env file
+        run: rm web.env
       - name: Lint with flake8 and isort
         run: |
           flake8
