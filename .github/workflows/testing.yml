@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build with Docker Compose
         run:
-          docker-compose up --build --abort-on-container-exit
+          docker-compose --env-file ./web.env up --build --abort-on-container-exit
       - name: Lint with flake8 and isort
         run:
           flake8
