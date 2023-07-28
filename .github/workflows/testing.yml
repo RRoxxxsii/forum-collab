@@ -8,39 +8,37 @@ on:
     branches:
       - '*'
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: [3.11]
+        python-version: [ 3.11 ]
 
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Create env file
-        run: |
-          echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> web.env
-          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> web.env
-          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> web.env
-          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> web.env
-          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> web.env
-      - name: Build with Docker Compose
-        run: docker-compose --env-file web.env up --build --abort-on-container-exit
-      - name: Cleanup env file
-        run: rm web.env
+      - name: Install dependencies
+        run:
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install dependencies for testing
+        run:
+          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+
       - name: Lint with flake8 and isort
-        run: |
+        run:
           flake8
           isort .
       - name: Coverage report
-        run: |
+        run:
           coverage run manage.py test
           coverage report
+
       - name: Test project
-        run: |
-          python manage.py test
+        run: python manage.py test
