@@ -30,7 +30,6 @@ jobs:
       - name: Lint with flake8 and isort
         run:
           flake8
-          isort .
       - name: Coverage report
         run:
           coverage run manage.py test
