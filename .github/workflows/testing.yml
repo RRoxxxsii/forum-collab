@@ -22,6 +22,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -30,7 +31,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build with Docker Compose
         run:
-          docker-compose up --build --abort-on-container-exit
+          env:
+            POSTGRES_HOST: ${{ env.POSTGRES_HOST }}
+            POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+            POSTGRES_USER: ${{ env.POSTGRES_USER }}
+            POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+            POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          command: docker-compose up --build --abort-on-container-exit
       - name: Lint with flake8 and isort
         run:
           flake8
