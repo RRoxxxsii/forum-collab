@@ -36,9 +36,5 @@ jobs:
       - name: Lint with flake8
         run:
           flake8
-      - name: Coverage report
-        run:
-          coverage run manage.py test
-          coverage report
       - name: Test project
         run: python manage.py test
