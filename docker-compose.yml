@@ -39,11 +39,12 @@ services:
 
 
   nginx:
-    image: nginx:latest
+    build:
+      dockerfile: ./Dockerfile
+      context: ./nginx
     ports:
       - '80:80'
     volumes:
-      - .nginx/nginx.conf:/etc/nginx/conf.d
       - static_volume:/backend/static
       - media_volume:/backend/media
     depends_on:
