@@ -1,6 +1,6 @@
 
 # Project exclude paths
-.idea/
+../.idea/
 
 # Created by https://www.gitignore.io/api/macos,linux,django,python,pycharm
 
@@ -157,7 +157,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.coverage
+backend/.coverage
 .coverage.*
 .cache
 nosetests.xml
@@ -196,7 +196,7 @@ celerybeat-schedule
 *.sage.py
 
 # dotenv
-web.env
+../web.env
 
 # virtualenv
 /.venv/
@@ -213,4 +213,10 @@ ENV/
 # mkdocs documentation
 /site
 
+# django static
+
+static/admin
+static/rest_framework
+
 # End of https://www.gitignore.io/api/macos,linux,django,python,pycharm
+

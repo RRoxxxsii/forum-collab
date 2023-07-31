@@ -1,53 +1,60 @@
-version: "3.9"
-
-
 services:
 
-  # Django
-  web:
-    build: .
-    volumes:
-      - .:/cycle_proj
-      - static_volume:/cycle_proj/static
-      - media_volume:/cycle_proj/media
-    ports:
-      - '8000:8000'
-    env_file:
-      - web.env
-    image: cycle_proj
-    container_name: django_cycle_api
-    command: >
-      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate  && gunicorn -b 0.0.0.0:8000 core.wsgi:application"
-    depends_on:
-      - db
-
-
-  # PostgreSQL
   db:
     image: postgres:14.1-alpine
     restart: always
     env_file:
-      - web.env
+      - backend/web.env
     ports:
       - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
 
 
-  nginx:
-    image: nginx
+
+  backend:
+    build:
+      context: ./backend
+    command: bash -c "./manage.py collectstatic --noinput && ./manage.py migrate  && gunicorn -b 0.0.0.0:8000 core.wsgi:application"
+    ports:
+      - "8000:8000"
     depends_on:
-      - web
+      - db
+    env_file:
+      - backend/web.env
+    volumes:
+      - static_volume:/backend/static
+      - media_volume:/backend/media
+
+
+
+  frontend:
+    build:
+      context: ./frontend
+    command: serve -s /frontend/build -l 3000
+    volumes:
+      - react_build:/react/build
+    ports:
+      - '3000:3000'
+
+
+  nginx:
+    image: nginx:latest
     ports:
       - '80:80'
     volumes:
-      - static_volume:/cycle_proj/static
-      - media_volume:/cycle_proj/media
+      - .nginx/nginx.conf:/etc/nginx/conf.d
+      - static_volume:/backend/static
+      - media_volume:/backend/media
+    depends_on:
+      - backend
+      - frontend
+      - db
 
 
 volumes:
   db:
     driver: local
-
+  react_build:
   static_volume:
   media_volume:
