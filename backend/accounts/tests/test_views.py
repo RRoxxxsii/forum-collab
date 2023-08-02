@@ -26,4 +26,3 @@ class TestRegistrationAPI(APITestCase):
         response = self.client.post(self.url, data={'email': 'a@a.ru', 'user_name': 'test-user',
                                                     'password': '12345'})
         self.assertEqual(response.status_code, 400)
-
