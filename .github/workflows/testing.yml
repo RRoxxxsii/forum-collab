@@ -13,24 +13,54 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.11
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
-      - name: Set up PostgreSQL for testing
-        run: |
-          docker run --name test-postgres -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -e POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} -d -p 5432:5432 postgres:14.1-alpine
-          sleep 5
-      - name: Lint with flake8
-        run: flake8 backend
-      - name: Test project
-        run: python backend/manage.py test
-      - name: Clean up PostgreSQL container
-        run: docker rm -f test-postgres
+    strategy:
+      matrix:
+        python-version: [ 3.11 ]
+    env:
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
 
+    services:
+      # label used to access the service container
+      postgres:
+        image: postgres:14.1-alpine
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./backend
+        run:
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Lint with flake8
+        working-directory: ./backend
+        run:
+          flake8
+      - name: Test project
+        working-directory: ./backend
+        run: python manage.py test
