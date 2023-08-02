@@ -1,6 +1,8 @@
-from rest_framework.serializers import ModelSerializer, ValidationError as SerializerValidationError
 from django.contrib.auth import password_validation
 from django.core.validators import ValidationError
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import \
+    ValidationError as SerializerValidationError
 
 from .models import NewUser
 
