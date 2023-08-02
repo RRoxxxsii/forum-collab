@@ -8,7 +8,7 @@ ENV PYTHONBUFFERED=1
 
 EXPOSE 8000
 
-WORKDIR /django
+WORKDIR /backend
 
 RUN pip install --upgrade pip
 

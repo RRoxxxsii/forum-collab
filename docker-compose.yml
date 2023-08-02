@@ -15,7 +15,7 @@ services:
   backend:
     build:
       context: ./backend
-    command: bash -c "./manage.py collectstatic --noinput && ./manage.py migrate  && gunicorn -b 0.0.0.0:8000 core.wsgi:application"
+    command: bash -c "./manage.py collectstatic --noinput && gunicorn -b 0.0.0.0:8000 core.wsgi:application --log-level debug"
     ports:
       - "8000:8000"
     depends_on:
@@ -23,6 +23,7 @@ services:
     env_file:
       - backend/web.env
     volumes:
+      - ./backend/:/backend
       - static_volume:/backend/static
       - media_volume:/backend/media
 
@@ -58,4 +59,8 @@ volumes:
     driver: local
   react_build:
   static_volume:
+    driver: local  # Используем именованный том для статических файлов
   media_volume:
+    driver: local  # Используем именованный том для медиа-файлов
+
+
