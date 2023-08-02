@@ -25,7 +25,7 @@ jobs:
           pip install -r backend/requirements.txt
       - name: Set up PostgreSQL for testing
         run: |
-          docker run --name test-postgres -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -d -p 5432:5432 postgres:14.1-alpine
+          docker run --name test-postgres -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -e POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} -d -p 5432:5432 postgres:14.1-alpine
           sleep 5
       - name: Lint with flake8
         run: flake8 backend
