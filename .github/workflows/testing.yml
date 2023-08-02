@@ -33,3 +33,4 @@ jobs:
         run: python backend/manage.py test
       - name: Clean up PostgreSQL container
         run: docker rm -f test-postgres
+
