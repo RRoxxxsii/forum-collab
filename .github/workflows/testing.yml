@@ -17,14 +17,21 @@ jobs:
       matrix:
         python-version: [ 3.11 ]
 
-    steps:
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - '5432:5432'
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
+
+    steps:
       - name: Setup database
-        run: PGPASSWORD=pro191Ji321 psql -h localhost -p 5432 -U cycle_user -d cycle_db
+        run: docker compose up --build
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
