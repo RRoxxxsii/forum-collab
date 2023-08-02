@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install --yes postgresql-client
 
       - name: Setup database
-        run: PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} psql -h localhost -p 5432 -U cycle_user -d cycle_db
+        run: PGPASSWORD=pro191Ji321 psql -h localhost -p 5432 -U cycle_user -d cycle_db
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
