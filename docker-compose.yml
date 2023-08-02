@@ -59,8 +59,8 @@ volumes:
     driver: local
   react_build:
   static_volume:
-    driver: local  # Используем именованный том для статических файлов
+    driver: local
   media_volume:
-    driver: local  # Используем именованный том для медиа-файлов
+    driver: local
 
 

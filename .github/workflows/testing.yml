@@ -8,44 +8,31 @@ on:
     branches:
       - '*'
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: [ 3.11 ]
-    env:
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-        ports:
-          - ${{ env.POSTGRES_PORT }}:${{ env.POSTGRES_PORT }}
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.11
       - name: Install dependencies
-        working-directory: ./backend
-        run:
+        run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+      - name: Set up PostgreSQL for testing
+        run: |
+          docker run --name test-postgres -e POSTGRES_DB=${{ secrets.POSTGRES_HOST }} 
+          -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} 
+          -d -p 5432:5432 postgres:14.1-alpine
+          # Add a delay to allow PostgreSQL to start up
+          sleep 5
       - name: Lint with flake8
-        working-directory: ./backend
-        run:
-          flake8
+        run: flake8 backend
       - name: Test project
-        working-directory: ./backend
-        run: python manage.py test
+        run: python backend/manage.py test
+      - name: Clean up PostgreSQL container
+        run: docker rm -f test-postgres
