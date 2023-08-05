@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
@@ -43,7 +45,15 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     about = models.TextField(verbose_name='Описание', max_length=500, blank=True)
 
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+
+    # Если is_active is False, в таком случае аккаунт пользователя удален.
+    is_active = models.BooleanField(default=True)
+
+    # Если is_banned is True, то пользователь не имеет доступа к сайту.
+    is_banned = models.BooleanField(default=False)
+
+    # Подтвержденный почтовый адрес дает некоторые привилегии пользователю
+    email_confirmed = models.BooleanField(default=False)
 
     objects = CustomAccountManager()
 
@@ -56,3 +66,9 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.user_name
+
+
+class EmailConfirmationToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE)

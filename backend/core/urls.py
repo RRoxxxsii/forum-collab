@@ -20,9 +20,10 @@ from django.urls import include, path
 
 from . import settings
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/account/', include('accounts.urls'))
+    path('api/v1/account/', include('accounts.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
