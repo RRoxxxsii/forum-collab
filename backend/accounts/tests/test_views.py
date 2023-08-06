@@ -1,3 +1,6 @@
+import re
+
+from django.core import mail
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -32,9 +35,11 @@ class TestRegistrationAPI(APITestCase):
 class TestEmailConfirmAPIView(APITestCase):
 
     def setUp(self) -> None:
-        self.url = reverse('confirm-email')
+        self.url = reverse('confirm-email-request')
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True)
 
     def test_send_request_user_not_authenticated(self):
         """
@@ -45,10 +50,44 @@ class TestEmailConfirmAPIView(APITestCase):
 
     def test_send_request_user_authenticated(self):
         """
-        Проверка отправки письма пользователю
+        Проверка отправки письма пользователю и факта получения.
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url)
-        # email_msg = mail.outbox
+        email_msg = mail.outbox
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # self.assertEqual(len(email_msg), 1)
+        self.assertEqual(len(email_msg), 1)
+
+    def test_email_content(self):
+        """
+        Проверка содержимого отправленого пользователю письма.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url)
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        self.assertIsNotNone(link)
+
+    def test_email_confirm(self):
+        """
+        Проверка изменения статуса пользователя email_confirmed.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url)
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        response = self.client.get(link, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.email_confirmed)
+
+    def test_send_request_email_already_confirmed(self):
+        """
+        Попытка отправить запрос на получение письма, при этом эл. почта у пользователя
+        уже подтверждена.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.post(self.url)
+        email_msg = mail.outbox
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(email_msg), 0)

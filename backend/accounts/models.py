@@ -13,6 +13,7 @@ class CustomAccountManager(BaseUserManager):
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
+        other_fields.setdefault('email_confirmed', True)
 
         if other_fields.get('is_staff') is not True:
             raise ValueError(

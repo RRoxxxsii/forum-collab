@@ -6,7 +6,8 @@ from accounts import views
 
 urlpatterns = [
     path('create-account/', views.CustomUserRegisterAPIView.as_view(), name='create-account'),
-    path('confirm-email/', views.RequestEmailToConfirmAPIView.as_view(), name='confirm-email'),
+    path('confirm-email/', views.RequestEmailToConfirmAPIView.as_view(), name='confirm-email-request'),
+    path('email-confirmation-result/', views.ConfirmEmailAPIView.as_view(), name='email-confirmation-result'),
 
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),

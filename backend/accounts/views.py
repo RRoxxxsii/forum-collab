@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import EmailConfirmationToken
+from .permissions import EmailIsNotConfirmed
 from .serializers import RegisterUserSerializer
-from .utils import send_confirmation_email
+from .utils import get_current_site, send_confirmation_email
 
 
 class CustomUserRegisterAPIView(APIView):
@@ -28,22 +29,20 @@ class CustomUserRegisterAPIView(APIView):
 
 class RequestEmailToConfirmAPIView(APIView):
     """
-    Подтверждение адреса электронной почты пользователя.
-    Пользователь должен быть аутентифицирован.
+    Подтверждение адреса электронной почты пользователя. Пользователь должен быть аутентифицирован.
     Возвращает сообщение о том, что письмо было отправлено и статус 201.
+    Для того чтобы отправить запрос, статус пользователя email_confirmed должен быть False.
     """
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, EmailIsNotConfirmed]
 
     def post(self, request):
-        scheme = request.scheme  # http или https
-        domain = request.get_host()  # доменное имя
-        path = request.path  # путь к странице без query params
-        current_url = f"{scheme}://{domain}{path}"
+        current_url = get_current_site(request, path='email-confirmation-result')   # Часть url для подтверждения
 
         user = request.user
         data = {'message': 'Сообщение на электронную почту отправлено. Перейдите по ссылке'
-                           'внутри письма, чтобы подтвердить почтовый адрес.'}
+                           ' внутри письма, чтобы подтвердить почтовый адрес.'}
 
+        # Создание токена (будет частью url-адреса) для того, чтобы в дальнейшем подтвердить эл. почту.
         token = EmailConfirmationToken.objects.get_or_create(user=user)
         send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url,
                                 email=user.email, token_id=token[0].pk, user_id=user.id)
@@ -51,6 +50,20 @@ class RequestEmailToConfirmAPIView(APIView):
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 
-class ConfirmEmailAPIView:
+class ConfirmEmailAPIView(APIView):
+    """
+    Пользователь отправляет GET запрос и статус его аккаунта email_confirmed становится положительным.
+    """
+    success_message = 'Почтовый адрес успешно подтвержден!'
+    error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
 
-    pass
+    def get(self, request):
+        token_id = request.GET.get('token_id', None)
+        try:
+            token = EmailConfirmationToken.objects.get(pk=token_id)
+            user = token.user
+            user.email_confirmed = True
+            user.save()
+            return Response({'message': self.success_message}, status=200)
+        except EmailConfirmationToken.DoesNotExist:
+            return Response({'message': self.error_message}, status=400)
