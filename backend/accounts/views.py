@@ -54,4 +54,3 @@ class RequestEmailToConfirmAPIView(APIView):
 class ConfirmEmailAPIView:
 
     pass
-

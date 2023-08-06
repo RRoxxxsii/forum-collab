@@ -34,7 +34,8 @@ class TestEmailConfirmAPIView(APITestCase):
 
     def setUp(self) -> None:
         self.url = reverse('confirm-email')
-        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser', password='Ax6!a7OpNvq')
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
 
     def test_send_request_user_not_authenticated(self):
         """
@@ -49,7 +50,6 @@ class TestEmailConfirmAPIView(APITestCase):
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url)
-        email_msg = mail.outbox
+        # email_msg = mail.outbox
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        #self.assertEqual(len(email_msg), 1)
-
+        # self.assertEqual(len(email_msg), 1)
