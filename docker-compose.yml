@@ -11,7 +11,6 @@ services:
       - db:/var/lib/postgresql/data
 
 
-
   backend:
     build:
       context: ./backend
@@ -28,16 +27,18 @@ services:
       - media_volume:/backend/media
 
 
-
   frontend:
+    container_name: frontend
     build:
       context: ./frontend
+    restart: unless-stopped
     command: serve -s /frontend/build -l 3000
+    depends_on:
+      - backend
     volumes:
-      - react_build:/react/build
+      - ./frontend/:/frontend
     ports:
       - '3000:3000'
-
 
   nginx:
     build:
