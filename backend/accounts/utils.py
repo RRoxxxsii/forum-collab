@@ -8,7 +8,7 @@ def get_current_site(request, path: str) -> str:
     """
     scheme = request.scheme  # http или https
     domain = request.get_host()  # доменное имя
-    path = request.path.replace('confirm-email', path)  # путь к странице без query params
+    path = '/'.join(str(request.path).split('/')[:-2]) + f'/{path}/'  # путь к странице без query params
     current_url = f"{scheme}://{domain}{path}"
     return current_url
 

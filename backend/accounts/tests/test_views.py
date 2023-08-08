@@ -91,3 +91,77 @@ class TestEmailConfirmAPIView(APITestCase):
         email_msg = mail.outbox
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(email_msg), 0)
+
+
+class TestChangeEmailAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.url = reverse('change-email-confirm')
+        self.email_to_change = 'somemail@gmail.com'     # Адрес, на который необходимо изменить
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True)
+
+    def test_response_user_not_authenticated(self):
+        """
+        Тестируем смену почты, когда пользователь не аутентифицирован. Предполагаем код ответа - 401.
+        """
+        response = self.client.post(self.url, data={'email': 'somemail@gmail.com'})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_response_status_code(self):
+        """
+        Пользователь аутентифицирован, ожидаемый статус код - 200.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': self.email_to_change})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_session_key_exists(self):
+        """
+        Проверка на то, был ли добавлен почтовый адрес в сессию.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_change})
+        self.assertIsNotNone(self.client.session)
+
+    def test_response_email_already_exists(self):
+        """
+        Попытка указать почтовый адрес, который уже существует для другого пользователя.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': 'testuser@gmail.com'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_content(self):
+        """
+        Проверка содержимого в письме.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_change})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        self.assertIsNotNone(link)
+
+    def test_change_email_status_code(self):
+        """
+        Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_change})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        response = self.client.get(link, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_change_email_result(self):
+        """
+        Проверка, действительно ли в базе данных изменился email пользователя.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_change})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        self.client.get(link, follow=True)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, self.email_to_change)
+        self.assertTrue(self.user.email_confirmed)

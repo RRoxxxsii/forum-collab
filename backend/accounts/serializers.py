@@ -1,13 +1,13 @@
 from django.contrib.auth import password_validation
 from django.core.validators import ValidationError
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from rest_framework.serializers import \
     ValidationError as SerializerValidationError
 
 from .models import NewUser
 
 
-class RegisterUserSerializer(ModelSerializer):
+class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NewUser
@@ -27,3 +27,8 @@ class RegisterUserSerializer(ModelSerializer):
         instance = self.Meta.model(**validated_data)
         instance.save()
         return instance
+
+
+class ChangeEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
