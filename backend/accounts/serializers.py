@@ -31,4 +31,3 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 class ChangeEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
