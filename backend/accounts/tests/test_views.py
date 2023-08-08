@@ -165,3 +165,20 @@ class TestChangeEmailAPIView(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, self.email_to_change)
         self.assertTrue(self.user.email_confirmed)
+
+
+class TestActiveUserMiddleware(APITestCase):
+
+    def setUp(self) -> None:
+        self.url = reverse('change-email-confirm')      # Здесь может быть абсолютно любой url-адрес
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', is_banned=True)
+
+    def test_user_is_banned_but_try_accessing_the_site(self):
+        """
+        Аутентифицированный и забаненый(is_banned=True) пользователь пытается получить ресурс.
+        Должно возбуждаться исключение 403.
+        """
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data={'email': 'somemail@a.ru'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
