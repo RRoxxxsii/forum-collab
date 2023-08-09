@@ -15,16 +15,16 @@ class CustomUserRegisterAPIView(APIView):
     При успешном запросе: status 201
     В противном случае: status 400
     """
-
     permission_classes = [AllowAny]
+    serializer_class = RegisterUserSerializer
 
     def post(self, request):
-        serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                return Response(status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if user:
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestEmailToConfirmAPIView(APIView):
@@ -35,7 +35,7 @@ class RequestEmailToConfirmAPIView(APIView):
     """
     permission_classes = [IsAuthenticated, EmailIsNotConfirmed]
 
-    def post(self, request):
+    def get(self, request):
         current_url = get_current_site(request, path='email-confirmation-result')   # Часть url для подтверждения
 
         user = request.user
@@ -127,3 +127,23 @@ class ConfirmNewEmailAPIView(APIView):
             return Response({'message': self.success_message}, status=200)
         except EmailConfirmationToken.DoesNotExist:
             return Response({'message': self.error_message}, status=400)
+
+
+class DeleteAccountAPIView(APIView):
+    """
+    Удаление аккаунта. Пользователь отправляет GET-запрос на url и при успешном запросе
+    его аккаунт 'удаляется' (остается в БД в течение определенного времени, но до процедуры
+    восстановления пользователь не имеет доступ).
+    При переходе по запросу аккаунт становится is_active=False.
+    """
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request):
+        user = request.user
+        user.is_active = False
+        user.save()
+        return Response(data={'message': 'Аккаунт удален. Вы можете восстановить его в течение двух '}, status=status.HTTP_200_OK)
+
+
+
+
