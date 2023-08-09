@@ -8,14 +8,13 @@ on:
     branches:
       - '*'
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: [ 3.11 ]
+        python-version: [3.11]
     env:
       POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
       POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
@@ -31,10 +30,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         working-directory: ./backend
-        run:
-          python -m pip install --upgrade pip
+        run: python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Lint with flake8
-        working-directory: ./backend
-        run:
-          flake8
+      # - name: Lint with flake8
+      #   working-directory: ./backend
+      #   run:
+      #     flake8

@@ -1,11 +1,16 @@
+# Install dependencies only when needed
 FROM node:18-alpine
 
-WORKDIR /react
+WORKDIR /next
+
+# Install dependencies based on the preferred package manager
+COPY package*.json ./
 
 COPY . .
 
+# Exposing the Application Port
+EXPOSE 3000
 
-RUN npm install -g serve
 RUN npm install
 
 RUN npm run build
