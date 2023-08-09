@@ -139,7 +139,8 @@ class DeleteAccountAPIView(APIView):
         user = request.user
         user.is_active = False
         user.save()
-        return Response(data={'message': 'Аккаунт удален. Вы можете восстановить его в течение двух '}, status=status.HTTP_200_OK)
+        return Response(data={'message': 'Аккаунт удален. Вы можете восстановить его в течение двух '}, 
+        status=status.HTTP_200_OK)
 
 
 class RestoreAccountAPIView(APIView):
