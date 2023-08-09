@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgres:14.1-alpine
     restart: always
@@ -10,13 +9,12 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
-
   backend:
     build:
       context: ./backend
-    command: bash -c "./manage.py collectstatic --noinput && gunicorn -b 0.0.0.0:8000 core.wsgi:application --log-level debug"
+    command: bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn -b 0.0.0.0:8000 core.wsgi:application —log-level debug"
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       - db
     env_file:
@@ -26,17 +24,16 @@ services:
       - static_volume:/backend/static
       - media_volume:/backend/media
 
-
   frontend:
-    container_name: frontend
     build:
       context: ./frontend
-    restart: unless-stopped
-    command: serve -s /frontend/build -l 3000
+    command: npm run dev
     depends_on:
       - backend
     volumes:
-      - ./frontend/:/frontend
+      - .:/app/frontend
+      - /app/node_modules
+      - /app/.next
     ports:
       - '3000:3000'
 
@@ -54,7 +51,6 @@ services:
       - frontend
       - db
 
-
 volumes:
   db:
     driver: local
@@ -63,5 +59,3 @@ volumes:
     driver: local
   media_volume:
     driver: local
-
-
