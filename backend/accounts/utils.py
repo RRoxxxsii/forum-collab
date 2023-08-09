@@ -1,6 +1,8 @@
 from django.core.mail import send_mail
 from django.template.loader import get_template
 
+from accounts.models import NewUser
+
 
 def get_current_site(request, path: str) -> str:
     """
@@ -25,3 +27,19 @@ def send_confirmation_email(template_name: str, current_url: str, email: str, to
               from_email='admin@ourweb.com',
               recipient_list=[email],
               fail_silently=True)
+
+
+def check_email_exists(email: str) -> bool:
+    """
+    Проверка на то, существует ли электронный адрес. Если да, возвращает True,
+    в противном случае False.
+    """
+    email_exists = False
+    try:
+        NewUser.objects.get(email=email)
+    except NewUser.DoesNotExist:
+        pass
+    else:
+        email_exists = True
+
+    return email_exists

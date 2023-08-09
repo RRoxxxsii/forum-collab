@@ -116,6 +116,14 @@ class TestChangeEmailAPIView(APITestCase):
         response = self.client.post(self.url, data={'email': self.email_to_change})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_response_email_incorrect(self):
+        """
+        Введеный почтовый адрес некорректен. Ожидаемый статус код - 400.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': 'email-incorrect'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_session_key_exists(self):
         """
         Проверка на то, был ли добавлен почтовый адрес в сессию.
@@ -214,3 +222,82 @@ class TestDeleteAccountAPIView(APITestCase):
         self.client.force_authenticate(self.user)
         self.client.get(self.url)
         self.assertFalse(self.user.is_active)
+
+
+class TestRestoreAccountAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.url = reverse('restore-account')
+        self.email_to_request = 'testuser@gmail.com'
+        self.user = NewUser.objects.create_user(email=self.email_to_request, user_name='testuser',
+                                                password='Ax6!a7OpNvq', is_active=False)
+        self.user2 = NewUser.objects.create_user(email='emailowned-byanother@user.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq', is_active=False)
+
+    def test_restore_account_response(self):
+        """
+        Проверка статуса ответа. Ожидаемый статус - 200.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': self.email_to_request})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_response_email_does_not_exist(self):
+        """
+        Проверка статуса ответа при некорректно введенном почтовом адресе. Ожидаемый статус - 400.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': 'another-email@gmail.com'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_response_user_is_active(self):
+        """
+        Проверка статуса ответа в случае, когда аккаунт пользователя активен
+        (нет необходимости восстанавливать). Ожидаемый статус - 400.
+        """
+        self.user.is_active = True
+        self.user.save()
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': self.email_to_request})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_response_when_email_email_is_owned_by_another_user(self):
+        """
+        Отправка сообщения на почту, которая принадлежит другому пользователю сайта.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data={'email': 'emailowned-byanother@user.com'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_response_content(self):
+        """
+        Проверка, было ли отправлено сообщение на почту.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_request})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        self.assertIsNotNone(link)
+
+    def test_restore_account_status_code(self):
+        """
+        Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_request})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        response = self.client.get(link, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_restore_account_user_is_active(self):
+        """
+        Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data={'email': self.email_to_request})
+        email_msg = mail.outbox[0]
+        link = re.search(r'http://.+', email_msg.body).group()
+        self.client.get(link, follow=True)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_active)

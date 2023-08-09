@@ -17,7 +17,12 @@ urlpatterns = [
          name='new-email-confirmation-result'),
 
     # Удаление аккаунта
-    path('delete-account', views.DeleteAccountAPIView.as_view(), name='delete-account'),
+    path('delete-account/', views.DeleteAccountAPIView.as_view(), name='delete-account'),
+
+    # Восстановление аккаунта
+    path('restore-account/', views.RestoreAccountAPIView.as_view(), name='restore-account'),
+    path('restore-account-email-confirm/', views.RestoreAccountFromEmailAPIView.as_view(),
+         name='restore-account-email-confirm'),
 
     # Аутентификация по JWT-токенам
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

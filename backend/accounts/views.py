@@ -3,10 +3,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import EmailConfirmationToken, NewUser
+from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import ChangeEmailSerializer, RegisterUserSerializer
-from .utils import get_current_site, send_confirmation_email
+from .serializers import EmailSerializer, RegisterUserSerializer
+from .utils import (check_email_exists, get_current_site,
+                    send_confirmation_email)
 
 
 class CustomUserRegisterAPIView(APIView):
@@ -75,9 +76,9 @@ class ChangeEmailAddressAPIView(APIView):
     """
     Запрос пользователя на смену почтового адреса. Входные данные - новый почтовый адрес.
     """
-    serializer_class = ChangeEmailSerializer
+    serializer_class = EmailSerializer
     permission_classes = [IsAuthenticated, ]
-    success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы восстановить аккаунт.'
+    success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы изменить почтовый адрес.'
     error_message = 'Пользователь с таким почтовым адресом уже существует.'
 
     def post(self, request):
@@ -85,12 +86,7 @@ class ChangeEmailAddressAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         # Проверка на то, существует ли такой адрес в БД.
-        email_exists = True
-        try:
-            NewUser.objects.get(email=email)
-        except NewUser.DoesNotExist:
-            email_exists = False
-        if email_exists:
+        if check_email_exists(email):
             return Response(data={'message': self.error_message}, status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
@@ -114,6 +110,7 @@ class ConfirmNewEmailAPIView(APIView):
     """
     success_message = 'Вы успешно поменяли адрес электронной почты!'
     error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
+    permission_classes = [IsAuthenticated, ]
 
     def get(self, request):
         token_id = request.GET.get('token_id', None)
@@ -145,5 +142,51 @@ class DeleteAccountAPIView(APIView):
         return Response(data={'message': 'Аккаунт удален. Вы можете восстановить его в течение двух '}, status=status.HTTP_200_OK)
 
 
+class RestoreAccountAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailSerializer
+    success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы восстановить аккаунт.'
+    error_message = 'Введенный вами адрес электронной почты недействителен.'
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        user = request.user
+        # Проверка на то, существует ли такой адрес в БД и активен ли пользователь.
+        if not check_email_exists(email) or user.is_active:
+            return Response(data={'message': self.error_message}, status=status.HTTP_400_BAD_REQUEST)
+        elif user.email == email:
+            # Создаем новый токен
+            token = EmailConfirmationToken.objects.create(user=user)
+            current_url = get_current_site(request=request, path='restore-account-email-confirm')
+            send_confirmation_email(template_name='email/restore_account.txt', email=email, user_id=user.id,
+                                    current_url=current_url, token_id=token.id)
+
+            return Response(data={'message': self.success_message}, status=status.HTTP_200_OK)
+        # В случае, если что-то пошло не так
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class RestoreAccountFromEmailAPIView(APIView):
+    """
+    Пользователь отправляет GET запрос и его аккаунт восстанавливается;
+    статус его аккаунта is_active становится положительным.
+    GET запрос отправляется на url-адрес, полученный в почтовом сообщении.
+    """
+    success_message = 'Вы успешно восстановили свой аккаунт!'
+    error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
+
+    def get(self, request):
+        token_id = request.GET.get('token_id', None)
+        user_id = request.GET.get('user_id', None)
+        try:
+            token = EmailConfirmationToken.objects.get(id=token_id, user=user_id)
+            user = token.user
+            user.is_active = True
+            user.save()
+            return Response({'message': self.success_message}, status=200)
+        except EmailConfirmationToken.DoesNotExist:
+            return Response({'message': self.error_message}, status=400)
 
 

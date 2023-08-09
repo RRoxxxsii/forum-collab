@@ -29,5 +29,5 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ChangeEmailSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
