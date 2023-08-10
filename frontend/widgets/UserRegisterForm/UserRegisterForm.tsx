@@ -1,17 +1,14 @@
-import {
-	UserLoginSchema,
-	UserLoginType,
-	UserRegisterSchema,
-	UserRegisterType,
-} from '@/lib/UserAuthSchema'
+import { UserRegisterSchema, UserRegisterType } from '@/lib/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, FormControl, TextField } from '@mui/material'
+import LoadingButton from '@mui/lab/LoadingButton'
+import { CircularProgress, FormControl, TextField } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
+
 export const UserRegisterForm = () => {
 	const {
 		control,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isLoading },
 	} = useForm<UserRegisterType>({
 		mode: 'onChange',
 		resolver: zodResolver(UserRegisterSchema),
@@ -19,6 +16,10 @@ export const UserRegisterForm = () => {
 	})
 
 	const onSubmit = (data: UserRegisterType) => console.log('click:' + data)
+
+	if (isLoading) {
+		return <CircularProgress />
+	}
 
 	return (
 		<FormControl
@@ -62,7 +63,6 @@ export const UserRegisterForm = () => {
 				}) => (
 					<TextField
 						label='Почтовый адрес'
-						autoFocus
 						placeholder='example@gmail.com'
 						id='email'
 						className={`${error && 'border-red-500'}`}
@@ -99,9 +99,13 @@ export const UserRegisterForm = () => {
 					/>
 				)}
 			/>
-			<Button sx={{ p: 2 }} type='submit'>
+			<LoadingButton
+				variant='outlined'
+				loading={isLoading}
+				sx={{ p: 2 }}
+				type='submit'>
 				Создать аккаунт
-			</Button>
+			</LoadingButton>
 		</FormControl>
 	)
 }

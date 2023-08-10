@@ -56,7 +56,7 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 							sx={{ color: '#444', mr: 2, transform: 'translateY(-2px)' }}
 						/>
 						<Typography variant='h6' noWrap component='div'>
-							Вопрос-ответ NEXT
+							Вопрос-Ответ
 						</Typography>
 					</Toolbar>
 				</AppBar>
@@ -79,12 +79,14 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 					<List>
 						{LINKS.map(({ text, href, icon: Icon }) => (
 							<ListItem key={href} disablePadding>
-								<ListItemButton>
-									<ListItemIcon>
-										<Icon />
-									</ListItemIcon>
-									<ListItemText primary={text} />
-								</ListItemButton>
+								<Link href={href} className='w-full'>
+									<ListItemButton>
+										<ListItemIcon>
+											<Icon />
+										</ListItemIcon>
+										<ListItemText primary={text} />
+									</ListItemButton>
+								</Link>
 							</ListItem>
 						))}
 					</List>

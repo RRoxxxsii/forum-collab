@@ -1,12 +1,14 @@
 import { UserLoginSchema, UserLoginType } from '@/lib/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, FormControl, TextField } from '@mui/material'
+import LoadingButton from '@mui/lab/LoadingButton'
+import { FormControl, TextField } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
+
 export const UserLoginForm = () => {
 	const {
 		control,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isLoading },
 	} = useForm<UserLoginType>({
 		mode: 'onChange',
 		resolver: zodResolver(UserLoginSchema),
@@ -66,9 +68,13 @@ export const UserLoginForm = () => {
 					/>
 				)}
 			/>
-			<Button sx={{ p: 2 }} type='submit'>
+			<LoadingButton
+				loading={isLoading}
+				variant='outlined'
+				sx={{ p: 2 }}
+				type='submit'>
 				Войти
-			</Button>
+			</LoadingButton>
 		</FormControl>
 	)
 }
