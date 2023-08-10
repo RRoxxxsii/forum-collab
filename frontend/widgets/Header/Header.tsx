@@ -1,3 +1,4 @@
+import { Login } from '@mui/icons-material'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import HomeIcon from '@mui/icons-material/Home'
 import LiveHelpIcon from '@mui/icons-material/LiveHelp'
@@ -5,7 +6,6 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import SettingsIcon from '@mui/icons-material/Settings'
 import SupportIcon from '@mui/icons-material/Support'
-import LoginIcon from '@mui/icons-material/Login'
 import {
 	AppBar,
 	Box,
@@ -20,7 +20,6 @@ import {
 	Typography,
 } from '@mui/material'
 import Link from 'next/link'
-import { Login } from '@mui/icons-material'
 
 export const metadata = {
 	title: 'Header',
@@ -36,9 +35,9 @@ const LINKS = [
 ]
 
 const PUBLIC_USER_LINKS = [
-	{ text: 'Settings', icon: SettingsIcon },
-	{ text: 'Support', icon: SupportIcon },
-	{ text: 'Login', icon: Login },
+	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
+	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
+	{ text: 'Войти', icon: Login, href: '/login' },
 ]
 
 const PRIVATE_USER_LINKS = [
@@ -57,7 +56,7 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 							sx={{ color: '#444', mr: 2, transform: 'translateY(-2px)' }}
 						/>
 						<Typography variant='h6' noWrap component='div'>
-							Вопрос-ответ
+							Вопрос-ответ NEXT
 						</Typography>
 					</Toolbar>
 				</AppBar>
@@ -80,7 +79,7 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 					<List>
 						{LINKS.map(({ text, href, icon: Icon }) => (
 							<ListItem key={href} disablePadding>
-								<ListItemButton component={Link} href={href}>
+								<ListItemButton>
 									<ListItemIcon>
 										<Icon />
 									</ListItemIcon>
@@ -91,14 +90,16 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 					</List>
 					<Divider sx={{ mt: 'auto' }} />
 					<List>
-						{PUBLIC_USER_LINKS.map(({ text, icon: Icon }) => (
+						{PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
 							<ListItem key={text} disablePadding>
-								<ListItemButton>
-									<ListItemIcon>
-										<Icon />
-									</ListItemIcon>
-									<ListItemText primary={text} />
-								</ListItemButton>
+								<Link href={href} className='w-full'>
+									<ListItemButton>
+										<ListItemIcon>
+											<Icon />
+										</ListItemIcon>
+										<ListItemText primary={text} />
+									</ListItemButton>
+								</Link>
 							</ListItem>
 						))}
 					</List>
