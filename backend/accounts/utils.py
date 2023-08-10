@@ -16,6 +16,9 @@ def get_current_site(request, path: str) -> str:
 
 
 def send_confirmation_email(template_name: str, current_url: str, email: str, token_id: int, user_id: int):
+    """
+    Отправляет письмо для подтверждения определенных действий.
+    """
     data = {
         'current_site': str(current_url),
         'token_id': str(token_id),

@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
 from .serializers import EmailSerializer, RegisterUserSerializer
@@ -31,10 +32,9 @@ class CustomUserRegisterAPIView(APIView):
 
 class RequestEmailToConfirmAPIView(APIView):
     """
-    Подтверждение адреса электронной почты пользователя. Пользователь должен быть аутентифицирован.
-    Для того чтобы отправить запрос, статус пользователя email_confirmed должен быть False.
-    При успешном запросе: status 201 и success message;
-    В противном случае: status 400 и error message.
+    Подтверждение адреса электронной почты пользователя. Право отправить запрос имеет пользователь, чей
+    стаутс email_confirmed=False.
+    При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
     """
     permission_classes = [IsAuthenticated, EmailIsNotConfirmed]
     success_message = 'Сообщение на электронную почту отправлено. Перейдите по ссылке ' \
@@ -53,26 +53,17 @@ class RequestEmailToConfirmAPIView(APIView):
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
 
-class ConfirmEmailAPIView(APIView):
+class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
     """
-    Пользователь отправляет GET запрос и статус его аккаунта email_confirmed становится положительным.
-    GET запрос отправляется на url-адрес, полученный в почтовом сообщении.
+    Пользователь отправляет GET запрос на url-адрес, полученный в почтовом сообщении и email_confirmed=True.
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
     """
     success_message = 'Почтовый адрес успешно подтвержден!'
     error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
 
-    def get(self, request):
-        token_id = request.GET.get('token_id', None)
-        user_id = request.GET.get('user_id', None)
-        try:
-            token = EmailConfirmationToken.objects.get(id=token_id, user=user_id)
-            user = token.user
-            user.email_confirmed = True
-            user.save()
-            return Response(data=self.success_message, status=200)
-        except EmailConfirmationToken.DoesNotExist:
-            return Response(data=self.error_message, status=400)
+    def perform_action(self, user):
+        user.email_confirmed = True
+        user.save()
 
 
 class ChangeEmailAddressAPIView(APIView):
@@ -106,40 +97,28 @@ class ChangeEmailAddressAPIView(APIView):
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
 
-class ConfirmNewEmailAPIView(APIView):
+class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
     """
-    Пользователь отправляет GET запрос и ему присваивается новый почтовый адрес;
-    статус его аккаунта email_confirmed становится положительным.
-    GET запрос отправляется на url-адрес, полученный в почтовом сообщении.
+    Пользователь отправляет GET запрос на адрес, полученный в почтовом сообщении и email_confirmed=True.
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
     """
     success_message = 'Вы успешно поменяли адрес электронной почты!'
     error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
     permission_classes = [IsAuthenticated, ]
 
-    def get(self, request):
-        token_id = request.GET.get('token_id', None)
-        user_id = request.GET.get('user_id', None)
-        try:
-            token = EmailConfirmationToken.objects.get(id=token_id, user=user_id)
-            user = token.user
-            email = request.session.get('email')
-            user.email = email
-            user.save()
-            return Response(data=self.success_message, status=200)
-        except EmailConfirmationToken.DoesNotExist:
-            return Response(data=self.error_message, status=400)
+    def perform_action(self, user):
+        email = self.request.session.get('email')
+        user.email = email
+        user.save()
 
 
 class DeleteAccountAPIView(APIView):
     """
-    Удаление аккаунта. Пользователь отправляет GET-запрос на url и при успешном запросе
-    его аккаунт 'удаляется' (остается в БД в течение определенного времени, но до процедуры
-    восстановления пользователь не имеет доступ).
-    При переходе по запросу аккаунт становится is_active=False.
+    GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД в течение определенного времени.
+    При успешном выполнении возвращается код статуса 200 и success_message.
     """
     permission_classes = [IsAuthenticated, ]
-    success_message = 'Аккаунт удален. Вы можете восстановить его в течение двух '
+    success_message = 'Аккаунт удален. Вы можете восстановить его в течение 6 месяцев '
 
     def get(self, request):
         user = request.user
@@ -179,23 +158,14 @@ class RestoreAccountAPIView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class RestoreAccountFromEmailAPIView(APIView):
+class RestoreAccountFromEmailAPIView(BaseEmailConfirmAPIView):
     """
-    Пользователь отправляет GET запрос и его аккаунт восстанавливается; статус его аккаунта is_active
-    становится положительным. GET запрос отправляется на url-адрес, полученный в почтовом сообщении.
+    GET запрос на адрес, полученный в почтовом сообщении - восстановление аккаунта (is_active=True).
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
     """
     success_message = 'Вы успешно восстановили свой аккаунт!'
     error_message = 'К сожалению, что-то пошло не так. Пожалуйста, попробуйте снова.'
 
-    def get(self, request):
-        token_id = request.GET.get('token_id', None)
-        user_id = request.GET.get('user_id', None)
-        try:
-            token = EmailConfirmationToken.objects.get(id=token_id, user=user_id)
-            user = token.user
-            user.is_active = True
-            user.save()
-            return Response(data=self.success_message, status=200)
-        except EmailConfirmationToken.DoesNotExist:
-            return Response(data=self.error_message, status=400)
+    def perform_action(self, user):
+        user.is_active = True
+        user.save()
