@@ -110,11 +110,11 @@ class TestChangeEmailAPIView(APITestCase):
 
     def test_response_status_code(self):
         """
-        Пользователь аутентифицирован, ожидаемый статус код - 200.
+        Пользователь аутентифицирован, ожидаемый статус код - 201.
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data={'email': self.email_to_change})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_response_email_incorrect(self):
         """
@@ -236,11 +236,11 @@ class TestRestoreAccountAPIView(APITestCase):
 
     def test_restore_account_response(self):
         """
-        Проверка статуса ответа. Ожидаемый статус - 200.
+        Проверка статуса ответа. Ожидаемый статус - 201.
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data={'email': self.email_to_request})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_response_email_does_not_exist(self):
         """
