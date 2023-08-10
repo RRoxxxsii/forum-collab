@@ -1,13 +1,12 @@
 'use client'
-
-import { UserLoginForm } from '@/widgets/UserLoginForm'
+import { UserRegisterForm } from '@/widgets/UserRegisterForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-	title: 'Login',
-	description: 'Login to your account',
+	title: 'Register',
+	description: 'Register the account',
 }
 
 export default function LoginPage() {
@@ -23,18 +22,19 @@ export default function LoginPage() {
 				<div className='flex flex-col space-y-2 text-center'>
 					<LogoDev className='mx-auto h-6 w-6' />
 					<h1 className='text-2xl font-semibold tracking-tight'>
-						И снова здравствуйте
+						Создание аккаунта
 					</h1>
 					<p className='text-sm text-muted-foreground'>
-						Введите свой почтовый адрес и пароль для входа в аккаунт
+						Введите свое имя пользователя, почтовый адрес и пароль для создания
+						аккаунта
 					</p>
 				</div>
-				<UserLoginForm />
+				<UserRegisterForm />
 				<p className='px-8 text-center text-sm text-muted-foreground'>
 					<Link
-						href='/register'
+						href='/login'
 						className='hover:text-brand underline underline-offset-4'>
-						Нет аккаунта? Зарегистрироваться
+						Есть аккаунт? Войти
 					</Link>
 				</p>
 			</div>
