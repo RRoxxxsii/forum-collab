@@ -1,5 +1,5 @@
 import { CategoryTabs } from '@/widgets/CategoryTabs'
-import { QuestionList } from '@/widgets/QuestionPost'
+import { QuestionList } from '@/widgets/QuestionList'
 import { AccountCircle } from '@mui/icons-material'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import { Box, Button, InputAdornment, TextField, styled } from '@mui/material'
