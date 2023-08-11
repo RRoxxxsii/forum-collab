@@ -34,4 +34,4 @@ jobs:
           pip install -r requirements.txt
       - name: Run frontend unit tests
         working-directory: ./frontend
-        run: npm run test
+        run: npm run cy:run-c
