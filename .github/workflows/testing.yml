@@ -42,11 +42,13 @@ jobs:
       - name: Run E2E tests
         uses: cypress-io/github-action@v5
         with:
+          browser: chrome
           working-directory: ./frontend
 
-      - name: Run Component Testing
+      - name: Run Unit Tests
         uses: cypress-io/github-action@v5
         with:
+          browser: chrome
           install: false
           component: true
           working-directory: ./frontend
