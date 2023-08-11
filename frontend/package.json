@@ -9,6 +9,7 @@
 		"lint": "next lint",
 		"cypress:open": "cypress open",
 		"cy:run-c": "cypress run --component"
+
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.1",

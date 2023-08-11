@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
 	return (
 		<div className=' flex h-screen w-screen flex-col items-center justify-center relative'>
-			<Link className='absolute top-4 left-4' href='/'>
+			<Link data-cy='home-link' className='absolute top-4 left-4' href='/'>
 				<>
 					<ChevronLeft className='mr-2 h-4 w-4' />
 					Back
