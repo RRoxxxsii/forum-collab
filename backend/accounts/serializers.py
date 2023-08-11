@@ -30,6 +30,9 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 class UserEmailSerializer(serializers.Serializer):
+    """
+    Сериализатор для почтового адреса пользователя.
+    """
     email = serializers.EmailField()
 
 
