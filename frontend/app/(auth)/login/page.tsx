@@ -32,6 +32,7 @@ export default function LoginPage() {
 				<UserLoginForm />
 				<p className='px-8 text-center text-sm text-muted-foreground'>
 					<Link
+						data-cy='register-link'
 						href='/register'
 						className='hover:text-brand underline underline-offset-4'>
 						Нет аккаунта? Зарегистрироваться
