@@ -8,8 +8,9 @@
 		"start": "next start",
 		"lint": "next lint",
 		"cypress:open": "cypress open",
-		"cy:run-c": "cypress run --component"
-
+		"cy:run-c": "cypress run --component --port 3005 --browser chrome",
+		"cy:run-e2e": "cypress run --e2e --port 3004 --browser chrome",
+		"test": "cypress run"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.1",
