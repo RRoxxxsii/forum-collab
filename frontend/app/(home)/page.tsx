@@ -2,11 +2,12 @@ import { CategoryTabs } from '@/widgets/CategoryTabs'
 import { QuestionList } from '@/widgets/QuestionList'
 import { AccountCircle } from '@mui/icons-material'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import { Box, Button, InputAdornment, TextField, styled } from '@mui/material'
+import { Box, Button, InputAdornment, TextField } from '@mui/material'
 
 export default function HomePage() {
 	return (
-		<Box className='flex min-h-screen items-start max-h-80 relative'>
+		<Box
+			className='flex min-h-screen items-start max-h-80 relative'>
 			<CategoryTabs />
 			<Box sx={{ px: 3, width: '100%' }}>
 				<Box sx={{ display: 'flex' }}>
