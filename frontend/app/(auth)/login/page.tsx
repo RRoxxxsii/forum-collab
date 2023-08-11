@@ -1,5 +1,3 @@
-'use client'
-
 import { UserLoginForm } from '@/widgets/UserLoginForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'

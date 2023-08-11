@@ -1,3 +1,4 @@
+'use client'
 import { UserLoginSchema, UserLoginType } from '@/lib/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'

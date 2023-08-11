@@ -9,7 +9,7 @@ export default defineConfig({
 	},
 
 	e2e: {
-		specPattern: '**/*.cy.ts',
+		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
 		setupNodeEvents(on, config) {},
 	},
 })
