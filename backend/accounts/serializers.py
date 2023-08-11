@@ -31,3 +31,10 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class DummySerializer(serializers.Serializer):
+    """
+    Сериалзиатор-заглушка.
+    """
+    dummy_field = serializers.CharField(required=False, read_only=True, help_text='Поле-заглушка')
