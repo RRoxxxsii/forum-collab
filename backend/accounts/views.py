@@ -1,17 +1,17 @@
 from rest_framework import status
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import EmailSerializer, RegisterUserSerializer
+from .serializers import EmailSerializer, RegisterUserSerializer, DummySerializer
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
 
-class CustomUserRegisterAPIView(APIView):
+class CustomUserRegisterAPIView(GenericAPIView):
     """
     Создания аккаунта пользователя.
     При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
@@ -30,7 +30,7 @@ class CustomUserRegisterAPIView(APIView):
         return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RequestEmailToConfirmAPIView(APIView):
+class RequestEmailToConfirmAPIView(GenericAPIView):
     """
     Подтверждение адреса электронной почты пользователя. Право отправить запрос имеет пользователь, чей
     стаутс email_confirmed=False.
@@ -39,6 +39,7 @@ class RequestEmailToConfirmAPIView(APIView):
     permission_classes = [IsAuthenticated, EmailIsNotConfirmed]
     success_message = 'Сообщение на электронную почту отправлено. Перейдите по ссылке ' \
                       'внутри письма, чтобы подтвердить почтовый адрес.'
+    serializer_class = DummySerializer
 
     def get(self, request):
         current_url = get_current_site(request, path='email-confirmation-result')   # Часть url для подтверждения
@@ -66,7 +67,7 @@ class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
         user.save()
 
 
-class ChangeEmailAddressAPIView(APIView):
+class ChangeEmailAddressAPIView(GenericAPIView):
     """
     Запрос пользователя на смену почтового адреса. Входные данные - новый почтовый адрес.
     При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
@@ -112,13 +113,14 @@ class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
         user.save()
 
 
-class DeleteAccountAPIView(APIView):
+class DeleteAccountAPIView(GenericAPIView):
     """
     GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД в течение определенного времени.
     При успешном выполнении возвращается код статуса 200 и success_message.
     """
     permission_classes = [IsAuthenticated, ]
     success_message = 'Аккаунт удален. Вы можете восстановить его в течение 6 месяцев '
+    serializer_class = DummySerializer
 
     def get(self, request):
         user = request.user
@@ -127,7 +129,7 @@ class DeleteAccountAPIView(APIView):
         return Response(data=self.success_message, status=status.HTTP_200_OK)
 
 
-class RestoreAccountAPIView(APIView):
+class RestoreAccountAPIView(GenericAPIView):
     """
     Восстановление аккаунта.
     Возвращает статус 201 и success_message если успешно;
