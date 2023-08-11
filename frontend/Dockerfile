@@ -13,4 +13,4 @@ EXPOSE 3000
 
 RUN npm install
 
-RUN npm start
+RUN npm run build
