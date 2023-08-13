@@ -1,4 +1,4 @@
-import { IQuestionItem } from '@/widgets/QuestionList/QuestionList'
+import { IQuestionItem } from '@/types/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Avatar, Box, CardContent, IconButton, Typography } from '@mui/material'
 

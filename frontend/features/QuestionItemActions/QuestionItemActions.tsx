@@ -1,5 +1,6 @@
 'use client'
-import { IChip } from '@/widgets/QuestionList/QuestionList'
+
+import { IChip } from '@/types/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import {
 	Box,

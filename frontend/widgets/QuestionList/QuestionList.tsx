@@ -1,5 +1,5 @@
 import { QuestionItemContent } from '@/entities/QuestionItemContent'
-import { QuestionItemActions } from '@/features/QuestionItemActions/QuestionItemActions'
+import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemWrapper } from '@/shared/QuestionItemWrapper'
 import { IQuestionItem } from '@/types/types'
 
