@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import EmailSerializer, RegisterUserSerializer, DummySerializer
+from .serializers import (ChangePasswordSerializer, DummySerializer,
+                          RegisterUserSerializer, UserEmailSerializer)
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
@@ -72,7 +73,7 @@ class ChangeEmailAddressAPIView(GenericAPIView):
     Запрос пользователя на смену почтового адреса. Входные данные - новый почтовый адрес.
     При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
     """
-    serializer_class = EmailSerializer
+    serializer_class = UserEmailSerializer
     permission_classes = [IsAuthenticated, ]
     success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы изменить почтовый адрес.'
     error_message = 'Пользователь с таким почтовым адресом уже существует.'
@@ -81,13 +82,13 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
+        user = request.user
         # Проверка на то, существует ли такой адрес в БД.
         if check_email_exists(email):
             return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
         current_url = get_current_site(request, path='new-email-confirmation-result')   # Часть url для подтверждения
-        user = request.user
 
         # Создаем новый токен
         token = EmailConfirmationToken.objects.create(user=user)
@@ -136,7 +137,7 @@ class RestoreAccountAPIView(GenericAPIView):
     В противном случае 400 и error_message.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = EmailSerializer
+    serializer_class = UserEmailSerializer
     success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы восстановить аккаунт.'
     error_message = 'Введенный вами адрес электронной почты недействителен.'
 
@@ -171,3 +172,4 @@ class RestoreAccountFromEmailAPIView(BaseEmailConfirmAPIView):
     def perform_action(self, user):
         user.is_active = True
         user.save()
+
