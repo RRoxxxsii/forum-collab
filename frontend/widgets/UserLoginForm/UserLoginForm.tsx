@@ -1,3 +1,4 @@
+'use client'
 import { UserLoginSchema, UserLoginType } from '@/lib/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
@@ -30,6 +31,7 @@ export const UserLoginForm = () => {
 					fieldState: { error },
 				}) => (
 					<TextField
+						data-cy='email'
 						label='Почтовый адрес'
 						autoFocus
 						placeholder='example@gmail.com'
@@ -55,6 +57,7 @@ export const UserLoginForm = () => {
 					fieldState: { error },
 				}) => (
 					<TextField
+						data-cy='password'
 						label='Пароль'
 						id='password'
 						className={error && `border-red-500`}
@@ -69,6 +72,7 @@ export const UserLoginForm = () => {
 				)}
 			/>
 			<LoadingButton
+				data-cy='submit-button'
 				loading={isLoading}
 				variant='outlined'
 				sx={{ p: 2 }}

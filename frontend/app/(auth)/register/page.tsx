@@ -1,4 +1,4 @@
-'use client'
+
 import { UserRegisterForm } from '@/widgets/UserRegisterForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
