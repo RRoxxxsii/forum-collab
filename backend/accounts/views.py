@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import (ChangePasswordSerializer, DummySerializer,
+from .serializers import (DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer)
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
