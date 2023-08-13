@@ -19,7 +19,6 @@ export const QuestionList = () => {
 			],
 			description: 'test description',
 			title: 'test title',
-			comments: [{}],
 		},
 		{
 			id: '1',

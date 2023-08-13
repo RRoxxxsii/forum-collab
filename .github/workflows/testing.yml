@@ -46,7 +46,7 @@ jobs:
           working-directory: ./frontend
           install: npm ci
           start: npm run dev
-          start-windows: npm run start:windows:server
+          start-windows: npm run dev:windows:server
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           browser: chrome
@@ -55,6 +55,8 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           working-directory: ./frontend
-          install: false
+          install: npm ci
+          start: npm run dev
+          start-windows: npm run dev:windows:server
           component: true
           browser: chrome
