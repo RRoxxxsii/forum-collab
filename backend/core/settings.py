@@ -43,8 +43,9 @@ INSTALLED_APPS = [
     'django_password_validators.password_history',
     'drf_yasg',
     'rest_framework_simplejwt',
+    'django_rest_passwordreset',
 
-    # Accounts
+    # Custom applications
     'accounts',
 ]
 
@@ -115,6 +116,14 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -198,3 +207,5 @@ SIMPLE_JWT = {
 
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
+
+
