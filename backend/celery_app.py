@@ -15,7 +15,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'delete-inactive-users': {
         'task': 'accounts.tasks.delete_inactive_accounts',
-        'schedule': crontab(minute=0, hour='*/20isort .'),
+        'schedule': crontab(minute=0, hour='*/20'),
     },
 }
 
