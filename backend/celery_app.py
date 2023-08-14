@@ -1,7 +1,7 @@
 import os
-import time
 
 from celery import Celery
+from celery.schedules import crontab
 from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -12,7 +12,10 @@ app.conf.broker_url = settings.CELERY_BROKER_URL
 app.autodiscover_tasks()
 
 
-@app.task()
-def debug_task():
-    time.sleep(20)
-    print('Hello form debug_task')
+app.conf.beat_schedule = {
+    'delete-inactive-users': {
+        'task': 'accounts.tasks.delete_inactive_accounts',
+        'schedule': crontab(minute=0, hour='*/20isort .'),
+    },
+}
+

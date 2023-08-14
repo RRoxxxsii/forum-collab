@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -6,8 +7,9 @@ from rest_framework.response import Response
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import (DummySerializer,
-                          RegisterUserSerializer, UserEmailSerializer)
+from .serializers import (DummySerializer, RegisterUserSerializer,
+                          UserEmailSerializer)
+from .tasks import delete_inactive_accounts
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
@@ -126,7 +128,10 @@ class DeleteAccountAPIView(GenericAPIView):
     def get(self, request):
         user = request.user
         user.is_active = False
+        user.time_deleted = timezone.now()
         user.save()
+
+        delete_inactive_accounts()
         return Response(data=self.success_message, status=status.HTTP_200_OK)
 
 
@@ -171,5 +176,6 @@ class RestoreAccountFromEmailAPIView(BaseEmailConfirmAPIView):
 
     def perform_action(self, user):
         user.is_active = True
+        user.time_deleted = None
         user.save()
 
