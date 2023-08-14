@@ -42,3 +42,5 @@ rest_framework_simplejwt
 drf_yasg
 celery[redis]==5.2.7
 django_rest_passwordreset
+pytest-django
+django_celery_beat
