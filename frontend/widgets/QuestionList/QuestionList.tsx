@@ -1,7 +1,9 @@
 import { QuestionItemContent } from '@/entities/QuestionItemContent'
 import { QuestionItemActions } from '@/features/QuestionItemActions'
+import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { QuestionItemWrapper } from '@/shared/QuestionItemWrapper'
 import { IQuestionItem } from '@/types/types'
+import { Box } from '@mui/material'
 
 export const QuestionList = () => {
 	const questions: IQuestionItem[] = [
@@ -41,9 +43,12 @@ export const QuestionList = () => {
 	return (
 		<>
 			{questions.map((question) => (
-				<QuestionItemWrapper href={question.id} key={question.id}>
-					<QuestionItemContent questionData={question} />
-					<QuestionItemActions chips={question.chips} />
+				<QuestionItemWrapper href={`question/${question.id}`} key={question.id}>
+					<QuestionItemRating />
+					<Box sx={{ width: '100%', ml: 1 }}>
+						<QuestionItemContent questionData={question} />
+						<QuestionItemActions chips={question.chips} />
+					</Box>
 				</QuestionItemWrapper>
 			))}
 		</>

@@ -1,9 +1,40 @@
 'use client'
-import { UserRegisterSchema, UserRegisterType } from '@/lib/UserAuthSchema'
+import {
+	UserRegisterSchema,
+	UserRegisterType,
+} from '@/lib/validation/auth/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { CircularProgress, FormControl, TextField } from '@mui/material'
+import axios from 'axios'
+import { NextResponse } from 'next/server'
 import { Controller, useForm } from 'react-hook-form'
+
+export const registerUser = async (credentials: UserRegisterType) => {
+	const { email, password, username } = credentials
+	try {
+		const res = await axios(
+			'http://localhost:8000/api/v1/account/create-account/',
+			{
+				method: 'POST',
+				data: JSON.stringify({
+					email: email,
+					user_name: username,
+					password: password,
+				}),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}
+		)
+		if (!res.data) {
+			console.log(res)
+		}
+	} catch (error) {
+		console.log(error)
+	}
+	return NextResponse.json
+}
 
 export const UserRegisterForm = () => {
 	const {
@@ -13,10 +44,12 @@ export const UserRegisterForm = () => {
 	} = useForm<UserRegisterType>({
 		mode: 'onChange',
 		resolver: zodResolver(UserRegisterSchema),
-		defaultValues: { email: '', password: '' },
+		defaultValues: { username: '', email: '', password: '' },
 	})
 
-	const onSubmit = (data: UserRegisterType) => console.log('click:' + data)
+	const onSubmit = (data: UserRegisterType) => {
+		registerUser(data)
+	}
 
 	if (isLoading) {
 		return <CircularProgress />
@@ -27,6 +60,30 @@ export const UserRegisterForm = () => {
 			component={'form'}
 			onSubmit={handleSubmit(onSubmit)}
 			className='w-full'>
+			<Controller
+				name='email'
+				rules={{
+					required: true,
+				}}
+				control={control}
+				render={({
+					field: { onChange, onBlur, value },
+					fieldState: { error },
+				}) => (
+					<TextField
+						label='Почтовый адрес'
+						placeholder='example@gmail.com'
+						id='email'
+						className={`${error && 'border-red-500'}`}
+						sx={{ mb: 1, height: 70, WebkitBoxShadow: 'none' }}
+						error={!!error}
+						helperText={error ? error.message : null}
+						onChange={onChange}
+						onBlur={onBlur}
+						value={value}
+					/>
+				)}
+			/>
 			<Controller
 				name='username'
 				rules={{
@@ -42,30 +99,6 @@ export const UserRegisterForm = () => {
 						autoFocus
 						placeholder='example@gmail.com'
 						id='username'
-						className={`${error && 'border-red-500'}`}
-						sx={{ mb: 1, height: 70, WebkitBoxShadow: 'none' }}
-						error={!!error}
-						helperText={error ? error.message : null}
-						onChange={onChange}
-						onBlur={onBlur}
-						value={value}
-					/>
-				)}
-			/>
-			<Controller
-				name='email'
-				rules={{
-					required: true,
-				}}
-				control={control}
-				render={({
-					field: { onChange, onBlur, value },
-					fieldState: { error },
-				}) => (
-					<TextField
-						label='Почтовый адрес'
-						placeholder='example@gmail.com'
-						id='email'
 						className={`${error && 'border-red-500'}`}
 						sx={{ mb: 1, height: 70, WebkitBoxShadow: 'none' }}
 						error={!!error}

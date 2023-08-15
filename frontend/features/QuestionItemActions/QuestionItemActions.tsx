@@ -17,14 +17,13 @@ const ListItem = styled('li')(({ theme }) => ({
 
 export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
 	return (
-		<CardActions sx={{ width: '100%', justifyContent: 'space-between' }}>
+		<CardActions sx={{ width: '100%', justifyContent: 'space-between', p: 0 }}>
 			<Box
 				sx={{
 					display: 'flex',
 					justifyContent: 'center',
 					flexWrap: 'wrap',
 					listStyle: 'none',
-					p: 0.5,
 					m: 0,
 				}}
 				component='ul'>
