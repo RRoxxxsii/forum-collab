@@ -13,17 +13,16 @@ export const CategoryTabs = () => {
 	}
 
 	return (
-		// <Box sx={{ position: 'relative', height: '100vh' }}>
-		<Tabs
-			sx={{ position: 'sticky' }}
-			orientation='vertical'
-			value={value}
-			onChange={handleChange}
-			aria-label='icon label tabs example'>
-			<Tab icon={<AccessTimeIcon />} label='ПОСЛЕДНИЕ' />
-			<Tab icon={<WhatshotIcon />} label='ОТКРЫТЫЕ' />
-			<Tab icon={<StarIcon />} label='ЛУЧШИЕ' />
-		</Tabs>
-		// </Box>
+		<Box sx={{ position: 'sticky', top: 80 }}>
+			<Tabs
+				orientation='vertical'
+				value={value}
+				onChange={handleChange}
+				aria-label='icon label tabs example'>
+				<Tab icon={<AccessTimeIcon />} label='ПОСЛЕДНИЕ' />
+				<Tab icon={<WhatshotIcon />} label='ОТКРЫТЫЕ' />
+				<Tab icon={<StarIcon />} label='ЛУЧШИЕ' />
+			</Tabs>
+		</Box>
 	)
 }

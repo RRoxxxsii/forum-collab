@@ -1,9 +1,50 @@
 'use client'
-import { UserLoginSchema, UserLoginType } from '@/lib/UserAuthSchema'
+import {
+	UserLoginSchema,
+	UserLoginType,
+} from '@/lib/validation/auth/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { FormControl, TextField } from '@mui/material'
+import axios from 'axios'
+import { NextRequest } from 'next/server'
 import { Controller, useForm } from 'react-hook-form'
+import cookie from 'js-cookie'
+
+const Login = async ({ token }: { token: any }) => {
+	cookie.set('token', token, { expires: 1 })
+}
+
+export const LoginUser = async (
+	req: NextRequest,
+	credentials: UserLoginType
+) => {
+	const { email, password } = credentials
+	const { cookies } = req
+
+	try {
+		const res = await fetch('http://localhost:8000/api/v1/account/token/', {
+			method: 'POST',
+			body: JSON.stringify({
+				email: email,
+				password: password,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		if (!res.ok) {
+			console.log(res)
+			return
+		}
+
+		const { token } = await res.json()
+		await Login({ token })
+	} catch (error) {
+		console.log(error)
+	}
+}
 
 export const UserLoginForm = () => {
 	const {
@@ -16,7 +57,7 @@ export const UserLoginForm = () => {
 		defaultValues: { email: '', password: '' },
 	})
 
-	const onSubmit = (data: UserLoginType) => console.log('click:' + data)
+	const onSubmit = (data: UserLoginType) => {}
 
 	return (
 		<FormControl component={'form'} onSubmit={handleSubmit(onSubmit)}>

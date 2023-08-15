@@ -18,8 +18,11 @@ export const QuestionItemWrapper = ({
 				'&:hover': { border: 1, transition: 0.3, borderColor: 'teal' },
 				cursor: 'pointer',
 				mb: 2,
+				p: 0.8,
 			}}>
-			<Link href={href}>{children}</Link>
+			<Link href={href} className='flex'>
+				{children}
+			</Link>
 		</Card>
 	)
 }
