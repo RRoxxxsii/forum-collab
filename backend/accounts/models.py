@@ -60,6 +60,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomAccountManager()
 
+    EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'user_name'
     REQUIRED_FIELDS = ['email']
 
