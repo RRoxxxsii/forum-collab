@@ -29,6 +29,6 @@ urlpatterns = [
     path('password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 
     # Аутентификация по JWT-токенам
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("token/", views.EmailTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

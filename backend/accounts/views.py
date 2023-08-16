@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
 from .serializers import (DummySerializer, RegisterUserSerializer,
-                          UserEmailSerializer)
-from .tasks import delete_inactive_accounts
+                          UserEmailSerializer, CustomTokenObtainPairSerializer)
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
@@ -118,7 +118,7 @@ class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
 
 class DeleteAccountAPIView(GenericAPIView):
     """
-    GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД в течение определенного времени.
+    GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД.
     При успешном выполнении возвращается код статуса 200 и success_message.
     """
     permission_classes = [IsAuthenticated, ]
@@ -131,7 +131,6 @@ class DeleteAccountAPIView(GenericAPIView):
         user.time_deleted = timezone.now()
         user.save()
 
-        delete_inactive_accounts()
         return Response(data=self.success_message, status=status.HTTP_200_OK)
 
 
@@ -179,3 +178,9 @@ class RestoreAccountFromEmailAPIView(BaseEmailConfirmAPIView):
         user.time_deleted = None
         user.save()
 
+
+class EmailTokenObtainPairView(TokenObtainPairView):
+    """
+    На вход принимает пароль и почтовый адрес пользователя. Возвращает access и refresh_token.
+    """
+    serializer_class = CustomTokenObtainPairSerializer
