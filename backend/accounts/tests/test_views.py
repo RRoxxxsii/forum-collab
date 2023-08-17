@@ -23,6 +23,33 @@ class TestRegistrationAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNotNone(new_user)
 
+    def test_user_account_register_without_password(self):
+        """
+        Регистрация пользователя без указания пароля. Ожидается возбуждение исключения.
+        """
+        response = self.client.post(self.url, data={'email': 'a@a.ru', 'user_name': 'test-user'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        try:
+            new_user = NewUser.objects.get(email='a@a.ru')
+        except NewUser.DoesNotExist:
+            assert True
+        else:
+            assert False
+
+    def test_user_account_register_with_empty_password(self):
+        """
+        Регистрация пользователя c пустым паролем.
+        """
+        response = self.client.post(self.url, data={'email': 'a@a.ru', 'user_name': 'test-user',
+                                                    'password': ''})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        try:
+            new_user = NewUser.objects.get(email='a@a.ru')
+        except NewUser.DoesNotExist:
+            assert True
+        else:
+            assert False
+
     def test_register_user_simple_password(self):
         """
         Пароль слишком простой, ожидается возбуждение исключения.
@@ -301,3 +328,20 @@ class TestRestoreAccountAPIView(APITestCase):
         self.client.get(link, follow=True)
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_active)
+
+
+class TestEmailTokenObtainPairView(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse('token_obtain_pair')
+        self.email_to_request = 'testuser@gmail.com'
+
+        self.user = NewUser.objects.create_user(email=self.email_to_request, user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+
+    def test_obtain_token(self):
+        """False
+        Получение refresh и access токенов.
+        """
+        response = self.client.post(self.url, data={'email': self.email_to_request,
+                                                    'password': 'Ax6!a7OpNvq'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
