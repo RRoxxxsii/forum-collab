@@ -1,12 +1,15 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import EmailSerializer, RegisterUserSerializer, DummySerializer
+from .serializers import (DummySerializer, RegisterUserSerializer,
+                          UserEmailSerializer, CustomTokenObtainPairSerializer)
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
@@ -72,7 +75,7 @@ class ChangeEmailAddressAPIView(GenericAPIView):
     Запрос пользователя на смену почтового адреса. Входные данные - новый почтовый адрес.
     При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
     """
-    serializer_class = EmailSerializer
+    serializer_class = UserEmailSerializer
     permission_classes = [IsAuthenticated, ]
     success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы изменить почтовый адрес.'
     error_message = 'Пользователь с таким почтовым адресом уже существует.'
@@ -81,13 +84,13 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
+        user = request.user
         # Проверка на то, существует ли такой адрес в БД.
         if check_email_exists(email):
             return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
         current_url = get_current_site(request, path='new-email-confirmation-result')   # Часть url для подтверждения
-        user = request.user
 
         # Создаем новый токен
         token = EmailConfirmationToken.objects.create(user=user)
@@ -115,7 +118,7 @@ class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
 
 class DeleteAccountAPIView(GenericAPIView):
     """
-    GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД в течение определенного времени.
+    GET-запрос - аккаунт пользователя удаляется(is_active=False), но остается в БД.
     При успешном выполнении возвращается код статуса 200 и success_message.
     """
     permission_classes = [IsAuthenticated, ]
@@ -125,7 +128,9 @@ class DeleteAccountAPIView(GenericAPIView):
     def get(self, request):
         user = request.user
         user.is_active = False
+        user.time_deleted = timezone.now()
         user.save()
+
         return Response(data=self.success_message, status=status.HTTP_200_OK)
 
 
@@ -136,7 +141,7 @@ class RestoreAccountAPIView(GenericAPIView):
     В противном случае 400 и error_message.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = EmailSerializer
+    serializer_class = UserEmailSerializer
     success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы восстановить аккаунт.'
     error_message = 'Введенный вами адрес электронной почты недействителен.'
 
@@ -170,4 +175,12 @@ class RestoreAccountFromEmailAPIView(BaseEmailConfirmAPIView):
 
     def perform_action(self, user):
         user.is_active = True
+        user.time_deleted = None
         user.save()
+
+
+class EmailTokenObtainPairView(TokenObtainPairView):
+    """
+    На вход принимает пароль и почтовый адрес пользователя. Возвращает access и refresh_token.
+    """
+    serializer_class = CustomTokenObtainPairSerializer

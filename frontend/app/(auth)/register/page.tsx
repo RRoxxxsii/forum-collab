@@ -1,4 +1,4 @@
-'use client'
+
 import { UserRegisterForm } from '@/widgets/UserRegisterForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 	description: 'Register the account',
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
 	return (
 		<div className=' flex h-screen w-screen flex-col items-center justify-center relative'>
 			<Link className='absolute top-4 left-4' href='/'>

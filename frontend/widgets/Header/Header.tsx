@@ -39,7 +39,7 @@ const PUBLIC_USER_LINKS = [
 	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
 	{ text: 'Войти', icon: Login, href: '/login' },
 ]
-
+//test
 const PRIVATE_USER_LINKS = [
 	{ text: 'Settings', icon: SettingsIcon },
 	{ text: 'Support', icon: SupportIcon },

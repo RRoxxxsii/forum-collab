@@ -4,7 +4,7 @@ export const UserRegisterSchema = z.object({
 	username: z.string().trim().min(1, { message: 'Введите имя пользователя' }),
 	email: z
 		.string()
-		.email({ message: 'Почтовый адрес должен включать в себя @' })
+		.email({ message: 'Неправильный формат почтового адреса' })
 		.min(1, { message: 'Введите почтовый адрес' }),
 	password: z
 		.string()
@@ -16,7 +16,7 @@ export type UserRegisterType = z.infer<typeof UserRegisterSchema>
 export const UserLoginSchema = z.object({
 	email: z
 		.string()
-		.email({ message: 'Почтовый адрес должен включать в себя @' })
+		.email({ message: 'Неправильный формат почтового адреса' })
 		.min(1, { message: 'Введите почтовый адрес' }),
 	password: z
 		.string()

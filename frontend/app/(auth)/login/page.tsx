@@ -1,5 +1,3 @@
-'use client'
-
 import { UserLoginForm } from '@/widgets/UserLoginForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
@@ -13,7 +11,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
 	return (
 		<div className=' flex h-screen w-screen flex-col items-center justify-center relative'>
-			<Link className='absolute top-4 left-4' href='/'>
+			<Link data-cy='home-link' className='absolute top-4 left-4' href='/'>
 				<>
 					<ChevronLeft className='mr-2 h-4 w-4' />
 					Back
@@ -32,6 +30,7 @@ export default function LoginPage() {
 				<UserLoginForm />
 				<p className='px-8 text-center text-sm text-muted-foreground'>
 					<Link
+						data-cy='register-link'
 						href='/register'
 						className='hover:text-brand underline underline-offset-4'>
 						Нет аккаунта? Зарегистрироваться

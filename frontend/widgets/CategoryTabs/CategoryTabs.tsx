@@ -13,18 +13,16 @@ export const CategoryTabs = () => {
 	}
 
 	return (
-		<Box className='w-32 h-screen'>
-			<Box className='flex flex-col justify-between items-center fixed'>
-				<Tabs
-					orientation='vertical'
-					value={value}
-					onChange={handleChange}
-					aria-label='icon label tabs example'>
-					<Tab icon={<AccessTimeIcon />} label='ПОСЛЕДНИЕ' />
-					<Tab icon={<WhatshotIcon />} label='ОТКРЫТЫЕ' />
-					<Tab icon={<StarIcon />} label='ЛУЧШИЕ' />
-				</Tabs>
-			</Box>
+		<Box sx={{ position: 'sticky', top: 80 }}>
+			<Tabs
+				orientation='vertical'
+				value={value}
+				onChange={handleChange}
+				aria-label='icon label tabs example'>
+				<Tab icon={<AccessTimeIcon />} label='ПОСЛЕДНИЕ' />
+				<Tab icon={<WhatshotIcon />} label='ОТКРЫТЫЕ' />
+				<Tab icon={<StarIcon />} label='ЛУЧШИЕ' />
+			</Tabs>
 		</Box>
 	)
 }

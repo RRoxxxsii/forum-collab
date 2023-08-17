@@ -1,4 +1,4 @@
-name: Tests
+name: ForumCI
 
 on:
   push:
@@ -32,7 +32,31 @@ jobs:
         working-directory: ./backend
         run: python -m pip install --upgrade pip
           pip install -r requirements.txt
-      # - name: Lint with flake8
-      #   working-directory: ./backend
-      #   run:
-      #     flake8
+
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run E2E tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: ./frontend
+          install: npm ci
+          start: npm run dev
+          start-windows: npm run dev:windows:server
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          browser: chrome
+
+      - name: Run Unit Tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: ./frontend
+          install: npm ci
+          start: npm run dev
+          start-windows: npm run dev:windows:server
+          component: true
+          browser: chrome
