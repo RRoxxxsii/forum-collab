@@ -62,9 +62,8 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomAccountManager()
 
-    EMAIL_FIELD = 'email'
-    USERNAME_FIELD = 'user_name'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['user_name']
 
     class Meta:
         verbose_name = 'Пользователь'
