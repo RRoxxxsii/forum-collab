@@ -40,6 +40,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/account/', include('accounts.urls')),
+    path('api/v1/forum/', include('forum.urls')),
 
     # Docs
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
