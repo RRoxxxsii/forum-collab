@@ -18,5 +18,3 @@
 #     # Удаляем неактивные аккаунты
 #     for account in inactive_accounts:
 #         account.delete()
-
-
