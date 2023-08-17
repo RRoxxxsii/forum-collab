@@ -339,7 +339,7 @@ class TestEmailTokenObtainPairView(APITestCase):
                                                 password='Ax6!a7OpNvq')
 
     def test_obtain_token(self):
-        """False
+        """
         Получение refresh и access токенов.
         """
         response = self.client.post(self.url, data={'email': self.email_to_request,
