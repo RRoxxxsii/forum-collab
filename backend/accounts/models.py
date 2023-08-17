@@ -39,8 +39,10 @@ class CustomAccountManager(BaseUserManager):
 
 class NewUser(AbstractBaseUser, PermissionsMixin):
 
-    email = models.EmailField(verbose_name='Почтовый адрес', unique=True)
-    user_name = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(verbose_name='Почтовый адрес', unique=True,
+                              error_messages={'unique': 'Такой почтовый адрес уже занят'})
+    user_name = models.CharField(max_length=150, unique=True,
+                                 error_messages={'unique': 'Такое имя уже занято'})
 
     created = models.DateTimeField(default=timezone.now)
     about = models.TextField(verbose_name='Описание', max_length=500, blank=True)

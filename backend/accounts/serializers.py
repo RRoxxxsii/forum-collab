@@ -25,7 +25,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
-        password = self.validate_password(password)  # Call the custom validation method
+        password = self.validate_password(password)
         instance = self.Meta.model(**validated_data)
         instance.save()
         return instance
