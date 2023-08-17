@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     # Custom applications
     'accounts',
+    'forum',
 ]
 
 MIDDLEWARE = [
