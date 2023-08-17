@@ -52,7 +52,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     # Если is_active is False, в таком случае аккаунт пользователя удален.
     is_active = models.BooleanField(default=True)
     # Время, на протяжении какого пользователь считается удаленным.
-    time_deleted = models.DateTimeField(null=True)
+    time_deleted = models.DateTimeField(null=True, blank=True)
 
     # Если is_banned is True, то пользователь не имеет доступа к сайту.
     is_banned = models.BooleanField(default=False)
