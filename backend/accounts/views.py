@@ -8,8 +8,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .helpers import BaseEmailConfirmAPIView
 from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
-from .serializers import (DummySerializer, RegisterUserSerializer,
-                          UserEmailSerializer, CustomTokenObtainPairSerializer)
+from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
+                          RegisterUserSerializer, UserEmailSerializer)
 from .utils import (check_email_exists, get_current_site,
                     send_confirmation_email)
 
