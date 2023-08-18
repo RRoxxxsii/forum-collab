@@ -188,3 +188,11 @@ class TestUserAskQuestionGet(APITestCase):
         self.assertEqual(first_dict.get('use_count'), 2)
         self.assertEqual(second_dict.get('tag'), 'django-rest-framework')
         self.assertEqual(second_dict.get('use_count'), 1)
+
+    def test_request_with_tag_does_not_exist(self):
+        """
+        Совпадений с тегом не найдено. Ожидается исключение 400.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(f'{self.url}?q=no-similarities')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

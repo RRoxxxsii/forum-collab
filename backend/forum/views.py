@@ -27,9 +27,15 @@ class AskQuestionAPIView(GenericAPIView):
         Отстортировано по статусу релевантности.
         """
         tag = request.query_params.get('q')
+
         if not tag:
             raise ValidationError('Тег не указан.')
+
         suggested_tags = ThemeTag.objects.filter(tag__icontains=tag).order_by('is_user_tag')
+
+        if not suggested_tags:
+            raise ValidationError('Теги не указан.')
+
         serializer = self.get_serializer_class()(suggested_tags, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
