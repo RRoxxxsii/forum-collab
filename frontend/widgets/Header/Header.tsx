@@ -1,3 +1,4 @@
+import { authOptions } from '@/lib/auth/AuthOptions'
 import { Login } from '@mui/icons-material'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import HomeIcon from '@mui/icons-material/Home'
@@ -19,6 +20,7 @@ import {
 	Toolbar,
 	Typography,
 } from '@mui/material'
+import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 
 export const metadata = {
@@ -39,14 +41,16 @@ const PUBLIC_USER_LINKS = [
 	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
 	{ text: 'Войти', icon: Login, href: '/login' },
 ]
-//test
+
 const PRIVATE_USER_LINKS = [
-	{ text: 'Settings', icon: SettingsIcon },
-	{ text: 'Support', icon: SupportIcon },
-	{ text: 'Logout', icon: LogoutIcon },
+	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
+	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
+	{ text: 'Выйти', icon: LogoutIcon, href: '/api/auth/signout' },
 ]
 
-export const Header = ({ children }: { children: React.ReactNode }) => {
+export const Header = async ({ children }: { children: React.ReactNode }) => {
+	const session = await getServerSession(authOptions)
+
 	return (
 		<>
 			<header>
@@ -92,18 +96,31 @@ export const Header = ({ children }: { children: React.ReactNode }) => {
 					</List>
 					<Divider sx={{ mt: 'auto' }} />
 					<List>
-						{PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
-							<ListItem key={text} disablePadding>
-								<Link href={href} className='w-full'>
-									<ListItemButton>
-										<ListItemIcon>
-											<Icon />
-										</ListItemIcon>
-										<ListItemText primary={text} />
-									</ListItemButton>
-								</Link>
-							</ListItem>
-						))}
+						{session
+							? PRIVATE_USER_LINKS.map(({ text, icon: Icon, href }) => (
+									<ListItem key={href} disablePadding>
+										<Link href={href} className='w-full'>
+											<ListItemButton>
+												<ListItemIcon>
+													<Icon />
+												</ListItemIcon>
+												<ListItemText primary={text} />
+											</ListItemButton>
+										</Link>
+									</ListItem>
+							  ))
+							: PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
+									<ListItem key={href} disablePadding>
+										<Link href={href} className='w-full'>
+											<ListItemButton>
+												<ListItemIcon>
+													<Icon />
+												</ListItemIcon>
+												<ListItemText primary={text} />
+											</ListItemButton>
+										</Link>
+									</ListItem>
+							  ))}
 					</List>
 				</Drawer>
 			</header>

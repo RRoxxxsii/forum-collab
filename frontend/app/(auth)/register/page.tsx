@@ -1,4 +1,4 @@
-
+import { OauthActions } from '@/features/OauthActions/OauthActions'
 import { UserRegisterForm } from '@/widgets/UserRegisterForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
@@ -37,6 +37,10 @@ export default function RegisterPage() {
 						Есть аккаунт? Войти
 					</Link>
 				</p>
+				<p className='px-8 text-center text-sm text-muted-foreground text-slate-500'>
+					Или же войти с помощью
+				</p>
+				<OauthActions />
 			</div>
 		</div>
 	)
