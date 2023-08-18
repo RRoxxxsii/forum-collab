@@ -1,16 +1,18 @@
+import json
+
+from accounts.models import NewUser
 from django.db.models import QuerySet
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
 from forum.models import Question, ThemeTag
 from forum.serializers import TagFieldSerializer
 
 
 class TestUserAskQuestionPost(APITestCase):
     """
-    Тестирует AskQuestionAPIView; создание вопроса.
+    Тестирует AskQuestionAPIView; создание вопроса. Отправка post-запроса.
     """
     def setUp(self) -> None:
         self.url = reverse('ask-question')
@@ -25,19 +27,29 @@ class TestUserAskQuestionPost(APITestCase):
                                                 password='Ax6!a7OpNvq')
 
         self.ask_data = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
-                         "tag_ids": [tag1.id]}
+                         "tags": ['django']}
         self.ask_data2 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
-                          'tag_ids': [tag1.id, tag2.id]}
+                          'tags': ['django', 'react']}
         self.ask_data3 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
-                          'tag_ids': [tag1.id, tag2.id, tag3.id, tag4.id, tag5.id, tag6.id]}
+                          'tags': ['django', 'react', 'python', 'nextjs', 'C#',
+                                   'django-rest-framework']}
+        self.ask_data4 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+                          "tags": ['dj']}
+        self.ask_data5 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+                          "tags": ['django', 'r', 'react']}
+        self.ask_data6 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+                          "tags": []}
+        self.ask_data7 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему.."}
+
+
 
     def test_user_not_authenticated(self):
-        response = self.client.post(self.url, data=self.ask_data, format='json')
+        response = self.client.post(self.url, data=self.ask_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_request_with_one_tag(self):
         self.client.force_authenticate(self.user)
-        response = self.client.post(self.url, data=self.ask_data, format='json')
+        response = self.client.post(self.url, data=self.ask_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_request_with_several_tags(self):
@@ -54,13 +66,45 @@ class TestUserAskQuestionPost(APITestCase):
         response = self.client.post(self.url, data=self.ask_data3)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_send_request_with_tag_does_not_exist(self):
+        """
+        Отправка запроса с одним тегом, которого не сущетсвует.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data4)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_send_request_with_tags_dont_exist(self):
+        """
+        Отправка запроса с тегами, среди которых есть существующие и несуществующие.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data5)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_send_request_without_empty_tags(self):
+        """
+        Отправка запросов с пустым списком тегов.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data6)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_send_request_without_tags(self):
+        """
+        Отправка запросов без тегов.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data7)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class TestUserAskQuestionGet(APITestCase):
     """
     Тестирует AskQuestionAPIView; работа с тегами через query_params.
     """
     def setUp(self) -> None:
-        self.url = reverse('ask-question')
+        self.url = '/api/v1/forum/ask-question/'
 
         self.tag1 = ThemeTag.objects.create(tag='django')
         self.tag2 = ThemeTag.objects.create(tag='react')
@@ -70,25 +114,41 @@ class TestUserAskQuestionGet(APITestCase):
         self.tag6 = ThemeTag.objects.create(tag='Java')
         self.tag7 = ThemeTag.objects.create(tag='django-rest-framework')
 
+        self.question1 = Question.objects.create(title='Заголовок', content='Контент')
+        self.question1.tags.add(self.tag1.id, self.tag7.id)
+
+        self.question2 = Question.objects.create(title='Заголовок', content='Контент')
+        self.question2.tags.add(self.tag1.id)
+
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
-        self.ask_data = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
-                         "tag_ids": [self.tag1.id]}
-        self.ask_data2 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
-                          'theme_tags': [self.tag1, self.tag2]}
-        self.ask_data3 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
-                          'theme_tags': [self.tag1, self.tag2, self.tag3, self.tag4, self.tag5, self.tag6]}
-
     def test_get_request_without_query_params(self):
+        """
+        Отправка GET запроса, без указания query_params.
+        """
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_request_with_query_params(self):
+    def test_get_request_with_query_params_status_code(self):
+        """
+        Тестирование статус-кода ответа. Ожидается 200.
+        """
         self.client.force_authenticate(self.user)
-        response = self.client.get(self.url, data={'q': 'dja'})
-        self.assertEqual(response.content.decode(), TagFieldSerializer(data=['django', 'django_rest_framework']))
+        response = self.client.get(f'{self.url}?q=dj')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_get_request_with_query_params_content(self):
+        """
+        Тестирование содержимого ответа.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(f'{self.url}?q=dj')
+        content = json.loads(response.content.decode())
+        first_dict, second_dict = content[0], content[1]
 
+        self.assertEqual(first_dict.get('tag'), 'django')
+        self.assertEqual(first_dict.get('use_count'), 2)
+        self.assertEqual(second_dict.get('tag'), 'django-rest-framework')
+        self.assertEqual(second_dict.get('use_count'), 1)

@@ -1,14 +1,22 @@
-from django.db import models
-
 from accounts.models import NewUser
+from django.db import models
 
 
 class ThemeTag(models.Model):
     """
     Тег (подтема).
     """
-    tag = models.CharField(max_length=255, verbose_name='Подтема / Тег', unique=True)
+    tag = models.CharField(max_length=255, verbose_name='Тег', unique=True)
     descriptions = models.TextField(verbose_name='Описание', null=True, blank=True)
+
+    is_relevant = models.BooleanField(default=True, verbose_name='Релеватный тег')
+    is_user_tag = models.BooleanField(default=False, verbose_name='Авторский тег')
+    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, null=True,
+                             verbose_name='Автор, если есть', editable=False,
+                             related_name='tags')
+
+    creation_date = models.DateTimeField(auto_now_add=True, null=True, blank=True,
+                                         editable=False)
 
     def __str__(self):
         return self.tag
@@ -17,14 +25,19 @@ class ThemeTag(models.Model):
         verbose_name = 'Тема'
         verbose_name_plural = 'Темы'
 
+    def save(self, *args, **kwargs):
+        if self.user:
+            self.is_user_tag = True
+        super(ThemeTag, self).save(*args, **kwargs)
+
 
 class Question(models.Model):
     """
     Вопрос.
     """
-    tags = models.ManyToManyField(ThemeTag, verbose_name='Тег', related_name='theme_tags')
+    tags = models.ManyToManyField(ThemeTag, verbose_name='Тег', related_name='questions')
     author = models.ForeignKey(NewUser, on_delete=models.SET_NULL, verbose_name='Автор',
-                               related_name='tags', null=True)
+                               related_name='questions', null=True)
 
     title = models.CharField(max_length=255, verbose_name='Заголовок вопроса')
     content = models.TextField(verbose_name='Вопрос')

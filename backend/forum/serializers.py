@@ -1,21 +1,27 @@
 from rest_framework import serializers
 
-from forum.models import Question
-from forum.validators import validate_tags
+from forum.models import Question, ThemeTag
+from forum.validators import validate_tags_amount, validate_tags_exist
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
-    tag_ids = serializers.ListField(required=True, validators=[validate_tags, ])
+    tags = serializers.ListField(required=True, validators=[validate_tags_amount, validate_tags_exist],
+                                 allow_empty=False)
 
     class Meta:
         model = Question
-        fields = ('tag_ids', 'author', 'title', 'content')
+        fields = ('tags', 'author', 'title', 'content')
 
 
-class TagFieldSerializer(serializers.Serializer):
-    tags = serializers.ListField()
+class TagFieldSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор тегов для GET-запроса.
+    """
+    use_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('tags',)
+        fields = ('tag', 'use_count', 'is_relevant', 'is_user_tag')
+        model = ThemeTag
 
-
+    def get_use_count(self, obj: ThemeTag):
+        return obj.questions.all().count()
