@@ -4,10 +4,9 @@ import { AccountCircle } from '@mui/icons-material'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import { Box, Button, InputAdornment, TextField } from '@mui/material'
 
-export default function HomePage() {
+export default async function HomePage() {
 	return (
-		<Box
-			className='flex min-h-screen items-start max-h-80 relative'>
+		<Box className='flex min-h-screen items-start max-h-80 relative'>
 			<CategoryTabs />
 			<Box sx={{ px: 3, width: '100%' }}>
 				<Box sx={{ display: 'flex' }}>

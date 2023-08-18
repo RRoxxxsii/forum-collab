@@ -1,5 +1,7 @@
+import { OauthActions } from '@/features/OauthActions/OauthActions'
 import { UserLoginForm } from '@/widgets/UserLoginForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
+import { IconButton } from '@mui/material'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -36,6 +38,10 @@ export default function LoginPage() {
 						Нет аккаунта? Зарегистрироваться
 					</Link>
 				</p>
+				<p className='px-8 text-center text-sm text-muted-foreground text-slate-500'>
+					Или же войти с помощью
+				</p>
+				<OauthActions />
 			</div>
 		</div>
 	)

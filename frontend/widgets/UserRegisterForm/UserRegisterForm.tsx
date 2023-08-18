@@ -7,33 +7,57 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { CircularProgress, FormControl, TextField } from '@mui/material'
 import axios from 'axios'
-import { NextResponse } from 'next/server'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
 export const registerUser = async (credentials: UserRegisterType) => {
 	const { email, password, username } = credentials
+	const registerToast = toast.loading('Авторизация...')
 	try {
-		const res = await axios(
+		const res = await axios.post(
 			'http://localhost:8000/api/v1/account/create-account/',
 			{
-				method: 'POST',
-				data: JSON.stringify({
-					email: email,
-					user_name: username,
-					password: password,
-				}),
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				email,
+				password,
+				user_name: username,
+			},
+			{
+				headers: { 'Content-Type': 'application/json' },
 			}
 		)
-		if (!res.data) {
-			console.log(res)
-		}
-	} catch (error) {
+
+		toast.update(registerToast, {
+			render: res?.data,
+			type: 'success',
+			isLoading: false,
+			autoClose: 3000,
+		})
+	} catch (error: any) {
 		console.log(error)
+		let errorMessage = ''
+		if (error.response.data.email) {
+			error.response.data.email.forEach((error: string) => {
+				errorMessage += error + ' '
+			})
+		}
+		if (error.response.data.user_name) {
+			error.response.data.user_name.forEach((error: string) => {
+				errorMessage += error + ' '
+			})
+		}
+		if (error.response.data.password) {
+			error.response.data.password.forEach((error: string) => {
+				errorMessage += error + ' '
+			})
+		}
+		console.log(errorMessage)
+		toast.update(registerToast, {
+			render: errorMessage,
+			type: 'error',
+			isLoading: false,
+			autoClose: 3000,
+		})
 	}
-	return NextResponse.json
 }
 
 export const UserRegisterForm = () => {
