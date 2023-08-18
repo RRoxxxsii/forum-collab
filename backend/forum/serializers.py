@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
 from forum.models import Question, ThemeTag
-from forum.validators import validate_tags_amount, validate_tags_exist
+from forum.validators import validate_tags_amount
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
-    tags = serializers.ListField(required=True, validators=[validate_tags_amount, validate_tags_exist],
+    tags = serializers.ListField(required=True, validators=[validate_tags_amount],
                                  allow_empty=False)
 
     class Meta:
         model = Question
-        fields = ('tags', 'author', 'title', 'content')
+        fields = ('tags', 'user', 'title', 'content')
 
 
 class TagFieldSerializer(serializers.ModelSerializer):

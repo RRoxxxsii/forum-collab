@@ -36,8 +36,8 @@ class Question(models.Model):
     Вопрос.
     """
     tags = models.ManyToManyField(ThemeTag, verbose_name='Тег', related_name='questions')
-    author = models.ForeignKey(NewUser, on_delete=models.SET_NULL, verbose_name='Автор',
-                               related_name='questions', null=True)
+    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, verbose_name='Автор',
+                             related_name='questions', null=True)
 
     title = models.CharField(max_length=255, verbose_name='Заголовок вопроса')
     content = models.TextField(verbose_name='Вопрос')

@@ -26,22 +26,20 @@ class TestUserAskQuestionPost(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
-        self.ask_data = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+        self.ask_data = {"title": "Заголовок1", "content": "Вопрос. Не знаю как решить пробелему..",
                          "tags": ['django']}
-        self.ask_data2 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
+        self.ask_data2 = {'title': 'Заголовок2', 'content': 'Вопрос. Не знаю как решить пробелему..',
                           'tags': ['django', 'react']}
-        self.ask_data3 = {'title': 'Заголовок', 'content': 'Вопрос. Не знаю как решить пробелему..',
+        self.ask_data3 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
                           'tags': ['django', 'react', 'python', 'nextjs', 'C#',
                                    'django-rest-framework']}
-        self.ask_data4 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+        self.ask_data4 = {"title": "Заголовок4", "content": "Вопрос. Не знаю как решить пробелему..",
                           "tags": ['dj']}
-        self.ask_data5 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+        self.ask_data5 = {"title": "Заголовок5", "content": "Вопрос. Не знаю как решить пробелему..",
                           "tags": ['django', 'r', 'react']}
-        self.ask_data6 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему..",
+        self.ask_data6 = {"title": "Заголовок6", "content": "Вопрос. Не знаю как решить пробелему..",
                           "tags": []}
-        self.ask_data7 = {"title": "Заголовок", "content": "Вопрос. Не знаю как решить пробелему.."}
-
-
+        self.ask_data7 = {"title": "Заголовок7", "content": "Вопрос. Не знаю как решить пробелему.."}
 
     def test_user_not_authenticated(self):
         response = self.client.post(self.url, data=self.ask_data)
@@ -66,21 +64,59 @@ class TestUserAskQuestionPost(APITestCase):
         response = self.client.post(self.url, data=self.ask_data3)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_send_request_with_tag_does_not_exist(self):
+    def test_send_request_with_tag_does_not_exist_status_code(self):
         """
         Отправка запроса с одним тегом, которого не сущетсвует.
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.ask_data4)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_send_request_with_tags_dont_exist(self):
+    def test_send_request_with_tag_does_not_exist_content(self):
+        """
+        Отправка запроса с одним тегом, которого не сущетсвует.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data4)
+        new_tag = ThemeTag.objects.get(tag='dj')
+
+        self.assertEqual(new_tag.tag, 'dj')
+        self.assertEqual(new_tag.user, self.user)
+
+        self.assertFalse(new_tag.is_relevant)
+        self.assertTrue(new_tag.is_user_tag)
+
+    def test_send_request_with_tags_dont_exist_status_code(self):
         """
         Отправка запроса с тегами, среди которых есть существующие и несуществующие.
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.ask_data5)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_send_request_with_tags_dont_exist_content(self):
+        """
+        Отправка запроса с тегами, среди которых есть существующие и несуществующие.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data5)
+        new_tag = ThemeTag.objects.get(tag='r')
+
+        self.assertEqual(new_tag.tag, 'r')
+        self.assertEqual(new_tag.user, self.user)
+
+        self.assertFalse(new_tag.is_relevant)
+        self.assertTrue(new_tag.is_user_tag)
+
+    def test_question_data(self):
+        """
+        Проверка, действительно ли теги сохраняются к вопросу.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data5)
+        question = Question.objects.get(title='Заголовок5')
+        tags = question.tags.all()
+        self.assertEqual(len(tags), 3)
 
     def test_send_request_without_empty_tags(self):
         """

@@ -6,6 +6,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from forum.logic import create_return_tags
 from forum.models import Question, ThemeTag
 from forum.serializers import AskQuestionSerializer, TagFieldSerializer
 
@@ -22,7 +23,8 @@ class AskQuestionAPIView(GenericAPIView):
     @swagger_auto_schema(manual_parameters=[q])
     def get(self, request, *args, **kwargs):
         """
-        Возвращается список тегов и количество использований. Отстортировано по релевантности.
+        Возвращается список тегов, количество использований, автор тега (если есть), релевантность.
+        Отстортировано по статусу релевантности.
         """
         tag = request.query_params.get('q')
         if not tag:
@@ -42,13 +44,13 @@ class AskQuestionAPIView(GenericAPIView):
         content = serializer.data.get('content')
         tags = serializer.data.get('tags')
         question = Question.objects.create(
-            author=request.user,
+            user=request.user,
             title=title,
             content=content
         )
-        tag_objects = ThemeTag.objects.in_bulk(tags, field_name='tag')
-        tag_ids = [tag_objects[tag].id for tag in tags]
+        tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
+
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
