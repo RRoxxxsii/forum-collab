@@ -1,12 +1,11 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from forum.logic import create_return_tags
+from forum.logic import create_return_tags, get_tags_or_error
 from forum.models import Question, ThemeTag
 from forum.serializers import AskQuestionSerializer, TagFieldSerializer
 
@@ -28,13 +27,7 @@ class AskQuestionAPIView(GenericAPIView):
         """
         tag = request.query_params.get('q')
 
-        if not tag:
-            raise ValidationError('Тег не указан.')
-
-        suggested_tags = ThemeTag.objects.filter(tag__icontains=tag).order_by('is_user_tag')
-
-        if not suggested_tags:
-            raise ValidationError('Теги не указан.')
+        suggested_tags = get_tags_or_error(tag)
 
         serializer = self.get_serializer_class()(suggested_tags, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
