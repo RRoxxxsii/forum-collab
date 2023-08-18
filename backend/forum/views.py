@@ -5,6 +5,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from forum.logic import create_return_tags, get_tags_or_error
 from forum.models import Question, ThemeTag
 from forum.serializers import AskQuestionSerializer, TagFieldSerializer
 
@@ -16,21 +17,19 @@ class AskQuestionAPIView(GenericAPIView):
     success_message = 'Вопрос успешно опубликован.'
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
-                          type=openapi.TYPE_STRING)
+                          type=openapi.TYPE_STRING, required=True)
 
     @swagger_auto_schema(manual_parameters=[q])
     def get(self, request, *args, **kwargs):
         """
-        Возвращается список тегов.
+        Возвращается список тегов, количество использований, автор тега (если есть), релевантность.
+        Отстортировано по статусу релевантности.
         """
-
-        # Сделать сортировку по количеству запросов
-        raise NotImplementedError
         tag = request.query_params.get('q')
-        suggested_tags = ThemeTag.objects.filter(tag__icontains=tag).values_list('tag', flat=True)
-        print(suggested_tags)
-        serializer = self.get_serializer_class()(data=suggested_tags, many=True)
-        serializer.is_valid(raise_exception=True)
+
+        suggested_tags = get_tags_or_error(tag)
+
+        serializer = self.get_serializer_class()(suggested_tags, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
@@ -42,13 +41,15 @@ class AskQuestionAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         title = serializer.data.get('title')
         content = serializer.data.get('content')
-        tag_ids = serializer.data.get('tag_ids')
+        tags = serializer.data.get('tags')
         question = Question.objects.create(
-            author=request.user,
+            user=request.user,
             title=title,
             content=content
         )
+        tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
+
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
