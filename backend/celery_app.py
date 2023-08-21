@@ -12,10 +12,10 @@ app.conf.broker_url = settings.CELERY_BROKER_URL
 app.autodiscover_tasks()
 
 
-app.conf.beat_schedule = {
-    'delete-inactive-users': {
-        'task': 'accounts.tasks.delete_inactive_accounts',
-        'schedule': crontab(minute=0, hour='*/20'),
-    },
-}
+# app.conf.beat_schedule = {
+#     'delete-inactive-users': {
+#         'task': 'forum.tasks.',
+#         'schedule': crontab(minute=0, hour='*/20'),
+#     },
+# }
 

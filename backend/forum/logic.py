@@ -1,10 +1,10 @@
 from typing import Iterator
 
-from accounts.models import NewUser
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import ThemeTag
+from accounts.models import NewUser
+from forum.models import Question, ThemeTag
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -36,3 +36,14 @@ def get_tags_or_error(tag: str) -> QuerySet[ThemeTag]:
         raise ValidationError('Теги не указан.')
 
     return suggested_tags
+
+
+def make_tag_relevant_on_question_save(question: Question):
+    """
+    Делает релеватными тег, количество вопросов по которому >= 10.
+    """
+    tags = question.tags.filter(is_user_tag=True, is_relevant=False)
+    for tag in tags:
+        if tag.questions.count() >= 10:
+            tag.is_relevant = True
+            tag.save(update_fields=['is_relevant'])
