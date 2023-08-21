@@ -1,11 +1,11 @@
 import json
 
-from accounts.models import NewUser
 from django.db.models import QuerySet
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import Question, ThemeTag
 from forum.serializers import TagFieldSerializer
 
@@ -196,3 +196,54 @@ class TestUserAskQuestionGet(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(f'{self.url}?q=no-similarities')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
+    """
+    Тестирует изменение статуса тега на релевантный при создании вопроса.
+    """
+
+    def setUp(self) -> None:
+        self.url = '/api/v1/forum/ask-question/'
+
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.tag1 = ThemeTag.objects.create(tag='django', is_user_tag=True, is_relevant=False)
+        self.tag2 = ThemeTag.objects.create(tag='django-rest-framework', is_relevant=False)
+
+    def test_tag_is_relevant(self):
+
+        for i in range(9):
+            self.client.force_authenticate(self.user)
+            title, content = f'title{i}', f'content{i}'
+            self.client.post(self.url, {'title': title, 'content': content, 'tags': [self.tag1]})
+
+        self.tag1.refresh_from_db()
+        self.assertFalse(self.tag1.is_relevant)
+
+        # 10-ый вопрос, когда is_relevant становится True
+
+        self.client.post(self.url, {'title': 'title10', 'content': 'content10', 'tags': [self.tag1]})
+
+        self.tag1.refresh_from_db()
+        self.assertTrue(self.tag1.is_relevant)
+
+    def test_tag_relevant_but_not_user_tag(self):
+        """
+        Тег не является пользовательским и при количестве запросов больше 10
+        не должен автоматически становиться is_relevant=True
+        """
+        for i in range(9):
+            self.client.force_authenticate(self.user)
+            title, content = f'title{i}', f'content{i}'
+            self.client.post(self.url, {'title': title, 'content': content, 'tags': [self.tag2]})
+
+        self.tag1.refresh_from_db()
+        self.assertFalse(self.tag1.is_relevant)
+
+        # 10-ый вопрос, когда is_relevant становится True
+
+        self.client.post(self.url, {'title': 'title10', 'content': 'content10', 'tags': [self.tag2]})
+
+        self.tag1.refresh_from_db()
+        self.assertFalse(self.tag1.is_relevant)

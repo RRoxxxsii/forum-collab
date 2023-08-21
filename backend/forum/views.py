@@ -49,6 +49,7 @@ class AskQuestionAPIView(GenericAPIView):
         )
         tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
+        question.save()
 
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 

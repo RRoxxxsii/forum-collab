@@ -1,5 +1,6 @@
-from accounts.models import NewUser
 from django.db import models
+
+from accounts.models import NewUser
 
 
 class ThemeTag(models.Model):
@@ -25,11 +26,6 @@ class ThemeTag(models.Model):
         verbose_name = 'Тема'
         verbose_name_plural = 'Темы'
 
-    def save(self, *args, **kwargs):
-        if self.user:
-            self.is_user_tag = True
-        super(ThemeTag, self).save(*args, **kwargs)
-
 
 class Question(models.Model):
     """
@@ -50,6 +46,13 @@ class Question(models.Model):
     class Meta:
         verbose_name = 'Вопрос'
         verbose_name_plural = 'Вопросы'
+
+    def save(self, *args, **kwargs):
+        from forum.logic import \
+            make_tag_relevant_on_question_save  # Избегаем цикличного импорта
+
+        super(Question, self).save(*args, **kwargs)
+        make_tag_relevant_on_question_save(self)
 
 
 class QuestionRating(models.Model):
