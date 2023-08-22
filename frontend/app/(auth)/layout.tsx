@@ -1,4 +1,3 @@
-import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'

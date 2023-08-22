@@ -6,53 +6,14 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { FormControl, TextField } from '@mui/material'
-import cookie from 'js-cookie'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
-export const LoginUser = async (credentials: UserLoginType) => {
-	const { email, password } = credentials
-
-	const loginToast = toast.loading('Авторизация...')
-	try {
-		const res = await fetch('http://localhost:8000/api/v1/account/token/', {
-			method: 'POST',
-			body: JSON.stringify({
-				email: email,
-				password: password,
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-
-		if (!res.ok) {
-			console.log(res)
-			toast.update(loginToast, {
-				render: 'Неправильный почтовый адрес или пароль',
-				type: 'error',
-				isLoading: false,
-			})
-			return
-		}
-		const { access, refresh } = await res.json()
-
-		toast.update(loginToast, {
-			render: 'Вы успешно авторизовались!',
-			type: 'success',
-			isLoading: false,
-		})
-
-		cookie.set('access_token', access, { expires: 86400 }) // Сохраняем access токен в куках
-		cookie.set('refresh_token', refresh, { expires: 30 }) // Сохраняем refresh токен в куках
-		redirect('/')
-	} catch (error) {
-		console.log(error)
-	}
-}
-
 export const UserLoginForm = () => {
+	const router = useRouter()
+
 	const {
 		control,
 		handleSubmit,
@@ -63,8 +24,35 @@ export const UserLoginForm = () => {
 		defaultValues: { email: '', password: '' },
 	})
 
-	const onSubmit = (data: UserLoginType) => {
-		LoginUser(data)
+	async function onSubmit(credentials: UserLoginType) {
+		const loginToast = toast.loading('Авторизация...')
+		const response = await fetch('/api/auth/login', {
+			method: 'POST',
+			body: JSON.stringify({
+				email: credentials.email,
+				password: credentials.password,
+			}),
+			headers: { 'Content-Type': 'application/json' },
+		})
+
+		const result = await response.json()
+		console.log(result)
+		if (!response.ok) {
+			toast.update(loginToast, {
+				render: result.detail,
+				type: 'error',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			return null
+		}
+		toast.update(loginToast, {
+			render: result.message,
+			type: 'success',
+			isLoading: false,
+			autoClose: 3000,
+		})
+		router.push('/')
 	}
 
 	return (

@@ -1,4 +1,4 @@
-import { authOptions } from '@/lib/auth/AuthOptions'
+import { Navlink } from '@/features/Navlink'
 import { Login } from '@mui/icons-material'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import HomeIcon from '@mui/icons-material/Home'
@@ -7,6 +7,8 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import SettingsIcon from '@mui/icons-material/Settings'
 import SupportIcon from '@mui/icons-material/Support'
+import AccountBoxIcon from '@mui/icons-material/AccountBox'
+
 import {
 	AppBar,
 	Box,
@@ -17,11 +19,15 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
+	SvgIconProps,
+	SvgIconTypeMap,
 	Toolbar,
 	Typography,
 } from '@mui/material'
-import { getServerSession } from 'next-auth'
+import { OverridableComponent } from '@mui/material/OverridableComponent'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
+import { ReactElement, JSXElementConstructor, ElementType } from 'react'
 
 export const metadata = {
 	title: 'Header',
@@ -30,26 +36,42 @@ export const metadata = {
 
 const DRAWER_WIDTH = 240
 
-const LINKS = [
+export interface LinkType {
+	text: string
+	href: string
+	//YO WTF IS THIS DEMON TYPE?
+	icon:
+		| ReactElement<SvgIconProps, string | JSXElementConstructor<any>>
+		| (OverridableComponent<SvgIconTypeMap<{}, 'svg'>> & {
+				muiName: string
+		  })
+		| ElementType
+}
+
+const LINKS: LinkType[] = [
 	{ text: 'Главная', href: '/', icon: HomeIcon },
 	{ text: 'Вопросы', href: '/questions', icon: QuestionAnswerIcon },
 	{ text: 'Спросить', href: '/ask', icon: LiveHelpIcon },
 ]
 
-const PUBLIC_USER_LINKS = [
+const PUBLIC_USER_LINKS: LinkType[] = [
 	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
 	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
 	{ text: 'Войти', icon: Login, href: '/login' },
 ]
 
-const PRIVATE_USER_LINKS = [
+const PRIVATE_USER_LINKS: LinkType[] = [
 	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
 	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
-	{ text: 'Выйти', icon: LogoutIcon, href: '/api/auth/signout' },
+	{
+		text: 'Профиль',
+		icon: AccountBoxIcon,
+		href: '/profile',
+	},
 ]
 
 export const Header = async ({ children }: { children: React.ReactNode }) => {
-	const session = await getServerSession(authOptions)
+	const session = cookies().has('access_token')
 
 	return (
 		<>
@@ -82,44 +104,17 @@ export const Header = async ({ children }: { children: React.ReactNode }) => {
 					<Divider />
 					<List>
 						{LINKS.map(({ text, href, icon: Icon }) => (
-							<ListItem key={href} disablePadding>
-								<Link href={href} className='w-full'>
-									<ListItemButton>
-										<ListItemIcon>
-											<Icon />
-										</ListItemIcon>
-										<ListItemText primary={text} />
-									</ListItemButton>
-								</Link>
-							</ListItem>
+							<Navlink key={href} text={text} href={href} icon={Icon} />
 						))}
 					</List>
 					<Divider sx={{ mt: 'auto' }} />
 					<List>
 						{session
 							? PRIVATE_USER_LINKS.map(({ text, icon: Icon, href }) => (
-									<ListItem key={href} disablePadding>
-										<Link href={href} className='w-full'>
-											<ListItemButton>
-												<ListItemIcon>
-													<Icon />
-												</ListItemIcon>
-												<ListItemText primary={text} />
-											</ListItemButton>
-										</Link>
-									</ListItem>
+									<Navlink key={href} text={text} href={href} icon={Icon} />
 							  ))
 							: PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
-									<ListItem key={href} disablePadding>
-										<Link href={href} className='w-full'>
-											<ListItemButton>
-												<ListItemIcon>
-													<Icon />
-												</ListItemIcon>
-												<ListItemText primary={text} />
-											</ListItemButton>
-										</Link>
-									</ListItem>
+									<Navlink key={href} text={text} href={href} icon={Icon} />
 							  ))}
 					</List>
 				</Drawer>
