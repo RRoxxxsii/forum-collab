@@ -1,13 +1,12 @@
 import { Navlink } from '@/features/Navlink'
 import { Login } from '@mui/icons-material'
+import AccountBoxIcon from '@mui/icons-material/AccountBox'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import HomeIcon from '@mui/icons-material/Home'
 import LiveHelpIcon from '@mui/icons-material/LiveHelp'
-import LogoutIcon from '@mui/icons-material/Logout'
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import SettingsIcon from '@mui/icons-material/Settings'
 import SupportIcon from '@mui/icons-material/Support'
-import AccountBoxIcon from '@mui/icons-material/AccountBox'
 
 import {
 	AppBar,
@@ -15,19 +14,10 @@ import {
 	Divider,
 	Drawer,
 	List,
-	ListItem,
-	ListItemButton,
-	ListItemIcon,
-	ListItemText,
-	SvgIconProps,
-	SvgIconTypeMap,
 	Toolbar,
 	Typography,
 } from '@mui/material'
-import { OverridableComponent } from '@mui/material/OverridableComponent'
 import { cookies } from 'next/headers'
-import Link from 'next/link'
-import { ReactElement, JSXElementConstructor, ElementType } from 'react'
 
 export const metadata = {
 	title: 'Header',
@@ -39,13 +29,7 @@ const DRAWER_WIDTH = 240
 export interface LinkType {
 	text: string
 	href: string
-	//YO WTF IS THIS DEMON TYPE?
-	icon:
-		| ReactElement<SvgIconProps, string | JSXElementConstructor<any>>
-		| (OverridableComponent<SvgIconTypeMap<{}, 'svg'>> & {
-				muiName: string
-		  })
-		| ElementType
+	icon: any
 }
 
 const LINKS: LinkType[] = [
