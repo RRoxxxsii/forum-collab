@@ -1,13 +1,16 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from forum.logic import create_return_tags, get_tags_or_error
 from forum.models import Question, ThemeTag
-from forum.serializers import AskQuestionSerializer, TagFieldSerializer
+from forum.permissions import IsOwner
+from forum.serializers import AskQuestionSerializer, TagFieldSerializer, AnswerQuestionSerializer, \
+    UpdateQuestionSerializer
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -57,9 +60,18 @@ class AskQuestionAPIView(GenericAPIView):
         return self.serializer_classes.get(self.request.method)
 
 
-class LeaveAnswerAPIView(GenericAPIView):
+class AnswerQuestionAPIView(CreateAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
-    pass
+    serializer_class = AnswerQuestionSerializer
+    permission_classes = [IsAuthenticated, ]
+
+
+class UpdateAnswerAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin):
+    """
+    Обновление и удаление ответа на вопрос. Можно обновить только текст ответа.
+    """
+    serializer_class = UpdateQuestionSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
 

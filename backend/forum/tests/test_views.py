@@ -140,7 +140,7 @@ class TestUserAskQuestionGet(APITestCase):
     Тестирует AskQuestionAPIView; работа с тегами через query_params.
     """
     def setUp(self) -> None:
-        self.url = '/api/v1/forum/ask-question/'
+        self.url = reverse('ask-question')
 
         self.tag1 = ThemeTag.objects.create(tag='django')
         self.tag2 = ThemeTag.objects.create(tag='react')
@@ -204,7 +204,7 @@ class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
     """
 
     def setUp(self) -> None:
-        self.url = '/api/v1/forum/ask-question/'
+        self.url = reverse('ask-question')
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
@@ -247,3 +247,50 @@ class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
 
         self.tag1.refresh_from_db()
         self.assertFalse(self.tag1.is_relevant)
+
+
+class TestLeaveAnswerAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.url = reverse('answer-question')
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент')
+        self.tag = ThemeTag.objects.create(tag='django')
+
+        self.question.tags.add(self.tag)
+        self.answer_data = {'answer': 'Ответ...', 'question': self.question.id}
+
+    def test_answer_question_user_not_authenticated(self):
+        """
+        Пользователь не аутентифицирован.
+        """
+        response = self.client.post(self.url, data=self.answer_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_answer_question(self):
+        """
+        Пользователь аутентифицирован.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.answer_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class TestUpdateDestroyCommentAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.url = 'update-answer'
+
+    def test_update_answer_not_owner(self):
+        """
+        Обновление вопроса не являясь автором.
+        """
+        raise NotImplementedError
+
+    def test_update_answer_not_authenticated(self):
+        """
+        Пользователь не аутентифицирован.
+        """
+        raise NotImplementedError
