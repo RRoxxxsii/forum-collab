@@ -7,12 +7,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { CircularProgress, FormControl, TextField } from '@mui/material'
 import axios from 'axios'
+import { redirect } from 'next/navigation'
+import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
 export const registerUser = async (credentials: UserRegisterType) => {
 	const { email, password, username } = credentials
 	const registerToast = toast.loading('Авторизация...')
+
 	try {
 		const res = await axios.post(
 			'http://localhost:8000/api/v1/account/create-account/',
@@ -32,6 +35,7 @@ export const registerUser = async (credentials: UserRegisterType) => {
 			isLoading: false,
 			autoClose: 3000,
 		})
+		redirect('/login')
 	} catch (error: any) {
 		console.log(error)
 		let errorMessage = ''

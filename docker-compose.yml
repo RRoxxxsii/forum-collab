@@ -1,5 +1,4 @@
 services:
-
   # PostgreSQL
   db:
     image: postgres:14.1-alpine
@@ -34,9 +33,9 @@ services:
     depends_on:
       - backend
     volumes:
-      - .:/app/frontend
-      - /app/node_modules
-      - /app/.next
+      - ./frontend/:/frontend
+      - /frontend/:/node_modules
+      - /frontend/:/.next
     ports:
       - '3000:3000'
 
@@ -97,15 +96,13 @@ services:
     env_file:
       - backend/web.env
 
-
   # Flower
   flower:
     image: docker.io/mher/flower
-    command: ["celery", "--broker=redis://redis:6379/0", "flower", "--port=5555"]
+    command:
+      ['celery', '--broker=redis://redis:6379/0', 'flower', '--port=5555']
     ports:
       - 5555:5555
-
-
 
 volumes:
   db:

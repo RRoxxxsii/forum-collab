@@ -1,4 +1,3 @@
-import { AuthProvider } from '@/providers/AuthProvider'
 import ThemeRegistry from '@/shared/theme/ThemeRegistry'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
@@ -24,9 +23,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<head />
 			<body className={inter.className}>
-				<ThemeRegistry>
-					<AuthProvider>{children}</AuthProvider>
-				</ThemeRegistry>
+				<ThemeRegistry>{children}</ThemeRegistry>
 			</body>
 		</html>
 	)
