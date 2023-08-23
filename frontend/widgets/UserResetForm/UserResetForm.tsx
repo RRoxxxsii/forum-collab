@@ -1,38 +1,35 @@
 'use client'
 import {
-	UserLoginSchema,
-	UserLoginType,
+	UserResetSchema,
+	UserResetType,
 } from '@/lib/validation/auth/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
-import { Button, FormControl, TextField, Typography } from '@mui/material'
-import Link from 'next/link'
+import { FormControl, TextField } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
-export const UserLoginForm = () => {
+export const UserResetForm = () => {
 	const router = useRouter()
-	const [resetPassword, setResetPassword] = useState(false)
+
 	const {
 		control,
 		handleSubmit,
-		formState: { errors, isLoading },
-	} = useForm<UserLoginType>({
+		formState: { isLoading },
+	} = useForm<UserResetType>({
 		mode: 'onChange',
-		resolver: zodResolver(UserLoginSchema),
-		defaultValues: { email: '', password: '' },
+		resolver: zodResolver(UserResetSchema),
+		defaultValues: { email: '' },
 	})
 
-	async function onSubmit(credentials: UserLoginType) {
+	async function onSubmit(credentials: UserResetType) {
 		const loginToast = toast.loading('Авторизация...')
-		const response = await fetch('/api/auth/login', {
+		const response = await fetch('/api/auth/reset', {
 			method: 'POST',
 			body: JSON.stringify({
 				email: credentials.email,
-				password: credentials.password,
 			}),
 			headers: { 'Content-Type': 'application/json' },
 		})
@@ -46,7 +43,6 @@ export const UserLoginForm = () => {
 				isLoading: false,
 				autoClose: 3000,
 			})
-			setResetPassword(true)
 			return null
 		}
 		toast.update(loginToast, {
@@ -55,7 +51,7 @@ export const UserLoginForm = () => {
 			isLoading: false,
 			autoClose: 3000,
 		})
-		router.push('/')
+		router.push('/auth/login')
 	}
 
 	return (
@@ -87,44 +83,14 @@ export const UserLoginForm = () => {
 						/>
 					)}
 				/>
-				<Controller
-					name='password'
-					rules={{
-						required: true,
-					}}
-					control={control}
-					render={({
-						field: { onChange, onBlur, value },
-						fieldState: { error },
-					}) => (
-						<TextField
-							data-cy='password'
-							label='Пароль'
-							id='password'
-							className={error && `border-red-500`}
-							sx={{ mb: 2, height: 68 }}
-							error={!!error}
-							helperText={error ? error.message : null}
-							onBlur={onBlur}
-							onChange={onChange}
-							value={value}
-							type='password'
-						/>
-					)}
-				/>
 				<LoadingButton
 					data-cy='submit-button'
 					loading={isLoading}
 					variant='outlined'
 					sx={{ p: 2 }}
 					type='submit'>
-					Войти
+					Восстановить
 				</LoadingButton>
-				{resetPassword && (
-					<Typography sx={{ textAlign: 'center', mt: 2, color: 'lightblue' }}>
-						Забыли пароль? <Link href={'/auth/reset'}>Восстановить</Link>
-					</Typography>
-				)}
 			</FormControl>
 		</>
 	)

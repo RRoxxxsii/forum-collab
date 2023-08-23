@@ -8,7 +8,6 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import { CircularProgress, FormControl, TextField } from '@mui/material'
 import axios from 'axios'
 import { redirect } from 'next/navigation'
-import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -35,21 +34,21 @@ export const registerUser = async (credentials: UserRegisterType) => {
 			isLoading: false,
 			autoClose: 3000,
 		})
-		redirect('/login')
+		redirect('/auth/login')
 	} catch (error: any) {
 		console.log(error)
 		let errorMessage = ''
-		if (error.response.data.email) {
+		if (error?.response?.data?.email) {
 			error.response.data.email.forEach((error: string) => {
 				errorMessage += error + ' '
 			})
 		}
-		if (error.response.data.user_name) {
+		if (error?.response?.data?.user_name) {
 			error.response.data.user_name.forEach((error: string) => {
 				errorMessage += error + ' '
 			})
 		}
-		if (error.response.data.password) {
+		if (error?.response?.data?.password) {
 			error.response.data.password.forEach((error: string) => {
 				errorMessage += error + ' '
 			})
