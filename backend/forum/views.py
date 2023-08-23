@@ -1,16 +1,18 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, CreateAPIView, UpdateAPIView
-from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
 from forum.logic import create_return_tags, get_tags_or_error
-from forum.models import Question, ThemeTag
+from forum.models import Question, QuestionAnswer
 from forum.permissions import IsOwner
-from forum.serializers import AskQuestionSerializer, TagFieldSerializer, AnswerQuestionSerializer, \
-    UpdateQuestionSerializer
+from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
+                               TagFieldSerializer, UpdateQuestionSerializer, UpdateQuestionAnswerSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -60,6 +62,25 @@ class AskQuestionAPIView(GenericAPIView):
         return self.serializer_classes.get(self.request.method)
 
 
+class UpdateQuestionAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
+    """
+    Обновление, удаление, получение комментария.
+    """
+    queryset = Question.objects.all()
+    serializer_class = UpdateQuestionSerializer
+    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
+    allowed_methods = ['PUT', 'DELETE', 'GET']
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
 class AnswerQuestionAPIView(CreateAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
@@ -68,10 +89,21 @@ class AnswerQuestionAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated, ]
 
 
-class UpdateAnswerAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin):
+class UpdateQuestionAnswerAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
     """
-    Обновление и удаление ответа на вопрос. Можно обновить только текст ответа.
+    Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
-    serializer_class = UpdateQuestionSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = UpdateQuestionAnswerSerializer
+    queryset = QuestionAnswer.objects.all()
+    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
 
+    allowed_methods = ['PUT', 'DELETE', 'GET']
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
