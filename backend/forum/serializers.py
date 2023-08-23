@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from forum.models import Question, ThemeTag, QuestionAnswer
+from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.validators import validate_tags_amount
 
 
@@ -10,7 +10,7 @@ class AskQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('tags', 'user', 'title', 'content')
+        fields = ('tags', 'title', 'content')
 
 
 class TagFieldSerializer(serializers.ModelSerializer):
@@ -34,11 +34,15 @@ class AnswerQuestionSerializer(serializers.ModelSerializer):
         fields = ('question', 'answer')
 
 
-class UpdateQuestionSerializer(serializers.ModelSerializer):
+class UpdateQuestionAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswer
         fields = ('answer',)
 
 
+class UpdateQuestionSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Question
+        fields = ('content',)

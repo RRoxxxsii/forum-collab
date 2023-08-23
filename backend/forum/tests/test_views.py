@@ -1,12 +1,12 @@
 import json
 
+from accounts.models import NewUser
 from django.db.models import QuerySet
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
-from forum.models import Question, ThemeTag
+from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.serializers import TagFieldSerializer
 
 
@@ -17,12 +17,12 @@ class TestUserAskQuestionPost(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('ask-question')
 
-        tag1 = ThemeTag.objects.create(tag='django')
-        tag2 = ThemeTag.objects.create(tag='react')
-        tag3 = ThemeTag.objects.create(tag='python')
-        tag4 = ThemeTag.objects.create(tag='nextjs')
-        tag5 = ThemeTag.objects.create(tag='C#')
-        tag6 = ThemeTag.objects.create(tag='Java')
+        ThemeTag.objects.create(tag='django')
+        ThemeTag.objects.create(tag='react')
+        ThemeTag.objects.create(tag='python')
+        ThemeTag.objects.create(tag='nextjs')
+        ThemeTag.objects.create(tag='C#')
+        ThemeTag.objects.create(tag='Java')
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
@@ -198,6 +198,79 @@ class TestUserAskQuestionGet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+class TestUpdateDestroyQuestionAPIView(APITestCase):
+    """
+    Обновление вопроса.
+    """
+    def setUp(self) -> None:
+        self.tag1 = ThemeTag.objects.create(tag='django')
+
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question1 = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
+        self.question1.tags.add(self.tag1.id)
+
+        self.url = reverse('update-question', kwargs={'pk': self.question1.id})
+        self.data = {'content': 'Обновленный вопрос'}
+
+    def test_update_question_not_owner(self):
+        """
+        Обновление вопроса не являясь автором.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_question_not_authenticated(self):
+        """
+        Пользователь не аутентифицирован.
+        """
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_question(self):
+        """
+        Обновление ответа с помощью метода put.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_question_not_owner(self):
+        """
+        Get-запрос на вопрос, не являясь автором. Ожидается открытый доступ.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_not_authenticated(self):
+        """
+        Get-запрос, не аутентифицированный.
+        """
+        response = self.client.get(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_question_not_owner(self):
+        """
+        Удаление вопроса, не являясь его автором.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.delete(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_question(self):
+        """
+        Удаление вопроса автором.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.delete(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
 class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
     """
     Тестирует изменение статуса тега на релевантный при создании вопроса.
@@ -278,19 +351,75 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-class TestUpdateDestroyCommentAPIView(APITestCase):
-
+class TestUpdateDestroyAnswerAPIView(APITestCase):
+    """
+    Обновление ответа.
+    """
     def setUp(self) -> None:
-        self.url = 'update-answer'
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+        self.url = reverse('update-answer', kwargs={'pk': self.answer.id})
+        self.data = {'question': self.question, 'answer': 'Обновленный ответ...'}
 
     def test_update_answer_not_owner(self):
         """
-        Обновление вопроса не являясь автором.
+        Обновление ответа не являясь автором.
         """
-        raise NotImplementedError
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_answer_not_authenticated(self):
         """
         Пользователь не аутентифицирован.
         """
-        raise NotImplementedError
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_answer(self):
+        """
+        Обновление ответа с помощью метода put.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_answer_not_owner(self):
+        """
+        Get-запрос на ответ, не являясь автором. Ожидается открытый доступ.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_not_authenticated(self):
+        """
+        Get-запрос, не аутентифицированный.
+        """
+        response = self.client.get(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_answer_not_owner(self):
+        """
+        Удаление ответа, не являясь его автором.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.delete(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_answer(self):
+        """
+        Удаление ответа автором.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.delete(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
