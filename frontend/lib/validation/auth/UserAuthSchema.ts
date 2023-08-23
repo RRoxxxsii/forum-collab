@@ -27,3 +27,12 @@ export const UserLoginSchema = z.object({
 })
 
 export type UserLoginType = z.infer<typeof UserLoginSchema>
+
+export const UserResetSchema = z.object({
+	email: z
+		.string()
+		.email({ message: 'Неправильный формат почтового адреса' })
+		.min(1, { message: 'Введите почтовый адрес' }),
+})
+
+export type UserResetType = z.infer<typeof UserLoginSchema>

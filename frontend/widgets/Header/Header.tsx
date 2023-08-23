@@ -41,7 +41,7 @@ const LINKS: LinkType[] = [
 const PUBLIC_USER_LINKS: LinkType[] = [
 	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
 	{ text: 'Поддержка', icon: SupportIcon, href: '/support' },
-	{ text: 'Войти', icon: Login, href: '/login' },
+	{ text: 'Войти', icon: Login, href: '/auth/login' },
 ]
 
 const PRIVATE_USER_LINKS: LinkType[] = [
