@@ -2,15 +2,12 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import create_return_tags, get_tags_or_error
 from forum.models import Question, QuestionAnswer
-from forum.permissions import IsOwner
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                TagFieldSerializer,
                                UpdateQuestionAnswerSerializer,
@@ -64,23 +61,12 @@ class AskQuestionAPIView(GenericAPIView):
         return self.serializer_classes.get(self.request.method)
 
 
-class UpdateQuestionAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
+class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение комментария.
     """
     queryset = Question.objects.all()
     serializer_class = UpdateQuestionSerializer
-    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
-    allowed_methods = ['PUT', 'DELETE', 'GET']
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
 
 
 class AnswerQuestionAPIView(CreateAPIView):
@@ -91,21 +77,9 @@ class AnswerQuestionAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated, ]
 
 
-class UpdateQuestionAnswerAPIView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
+class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
     serializer_class = UpdateQuestionAnswerSerializer
     queryset = QuestionAnswer.objects.all()
-    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
-
-    allowed_methods = ['PUT', 'DELETE', 'GET']
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
