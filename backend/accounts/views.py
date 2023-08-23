@@ -140,7 +140,6 @@ class RestoreAccountAPIView(GenericAPIView):
     Возвращает статус 201 и success_message если успешно;
     В противном случае 400 и error_message.
     """
-    permission_classes = [IsAuthenticated]
     serializer_class = UserEmailSerializer
     success_message = 'Сообщение на почту отправлено. Подтвердите электронный адрес, чтобы восстановить аккаунт.'
     error_message = 'Введенный вами адрес электронной почты недействителен.'
