@@ -12,7 +12,9 @@ from forum.logic import create_return_tags, get_tags_or_error
 from forum.models import Question, QuestionAnswer
 from forum.permissions import IsOwner
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
-                               TagFieldSerializer, UpdateQuestionSerializer, UpdateQuestionAnswerSerializer)
+                               TagFieldSerializer,
+                               UpdateQuestionAnswerSerializer,
+                               UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):

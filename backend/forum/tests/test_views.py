@@ -1,11 +1,11 @@
 import json
 
+from accounts.models import NewUser
 from django.db.models import QuerySet
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.serializers import TagFieldSerializer
 
