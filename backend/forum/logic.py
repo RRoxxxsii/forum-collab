@@ -1,10 +1,10 @@
 from typing import Iterator
 
-from accounts.models import NewUser
-from django.db.models import Count, QuerySet
+from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import Question, ThemeTag
+from accounts.models import NewUser
+from forum.models import Question, QuestionImages, ThemeTag
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -47,3 +47,11 @@ def make_tag_relevant_on_question_save(question: Question):
         if tag.questions.count() >= 10:
             tag.is_relevant = True
             tag.save(update_fields=['is_relevant'])
+
+
+def add_image(images: list, question: Question):
+    """
+    Создание вложений(фотографий) для поста.
+    """
+    for image in images:
+        QuestionImages.objects.create(question=question, image=image)

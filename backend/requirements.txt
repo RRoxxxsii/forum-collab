@@ -45,3 +45,4 @@ django_rest_passwordreset
 pytest-django
 django_celery_beat
 django-cors-headers
+Pillow
