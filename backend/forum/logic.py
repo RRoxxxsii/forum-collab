@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from django.db.models import Count, QuerySet
+from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import NewUser

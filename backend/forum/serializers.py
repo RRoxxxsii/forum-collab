@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from forum.models import Question, QuestionAnswer, QuestionImages, ThemeTag
-from forum.validators import validate_tags_amount, validate_related_obj_amount
+from forum.models import Question, QuestionAnswer, ThemeTag
+from forum.validators import validate_related_obj_amount, validate_tags_amount
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
