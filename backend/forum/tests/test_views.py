@@ -36,6 +36,8 @@ class TestUserAskQuestionPost(APITestCase):
 
         photo = generate_photo_file()
         photo2 = generate_photo_file()
+        photo3 = generate_photo_file()
+        photo4 = generate_photo_file()
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
@@ -62,6 +64,10 @@ class TestUserAskQuestionPost(APITestCase):
         self.ask_data9 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
                           'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
                           'uploaded_images': [photo, photo2]}
+
+        self.ask_data10 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                           'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                           'uploaded_images': [photo, photo2, photo3, photo4]}
 
     def test_user_not_authenticated(self):
         response = self.client.post(self.url, data=self.ask_data)
@@ -156,7 +162,7 @@ class TestUserAskQuestionPost(APITestCase):
         response = self.client.post(self.url, data=self.ask_data7)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_ask_question_with_photo_status_code(self):
+    def test_ask_question_with_image_status_code(self):
         """
         Код ответа с одной отправленной фотографией.
         """
@@ -164,7 +170,7 @@ class TestUserAskQuestionPost(APITestCase):
         response = self.client.post(self.url, data=self.ask_data8)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_ask_question_with_two_photo_status_code(self):
+    def test_ask_question_with_two_images_status_code(self):
         """
         Код ответа с одной отправленной фотографией.
         """
@@ -172,7 +178,7 @@ class TestUserAskQuestionPost(APITestCase):
         response = self.client.post(self.url, data=self.ask_data9)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_ask_question_with_photo_content_created(self):
+    def test_ask_question_with_image_content_created(self):
         """
         Существует ли фотография в БД.
         """
@@ -182,14 +188,21 @@ class TestUserAskQuestionPost(APITestCase):
 
         self.assertEqual(len(QuestionImages.objects.all()), 1)
 
-    def test_ask_question_with_two_photos_content_create(self):
+    def test_ask_question_with_two_images_content_create(self):
         """
         Существует ли несколько переданных фотографий в БД.
         """
         self.client.force_authenticate(self.user)
         self.client.post(self.url, data=self.ask_data9)
-
         self.assertEqual(len(QuestionImages.objects.all()), 2)
+
+    def test_ask_question_with_more_than_three_images(self):
+        """
+        Отправляем запрос с числом вложений больше 3.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data10)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestUserAskQuestionGet(APITestCase):

@@ -1,21 +1,15 @@
 from rest_framework import serializers
 
 from forum.models import Question, QuestionAnswer, QuestionImages, ThemeTag
-from forum.validators import validate_tags_amount
-
-
-class QuestionImageSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = QuestionImages
-        fields = ('image',)
+from forum.validators import validate_tags_amount, validate_related_obj_amount
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(required=True, validators=[validate_tags_amount],
                                  allow_empty=False)
     uploaded_images = serializers.ListField(
-        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True)
+        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
+        validators=[validate_related_obj_amount]
     )
 
     class Meta:
