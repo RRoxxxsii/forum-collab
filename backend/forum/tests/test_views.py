@@ -1,13 +1,23 @@
+import io
 import json
+import random
 
-from accounts.models import NewUser
-from django.db.models import QuerySet
 from django.urls import reverse
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from forum.models import Question, QuestionAnswer, ThemeTag
-from forum.serializers import TagFieldSerializer
+from accounts.models import NewUser
+from forum.models import Question, QuestionAnswer, QuestionImages, ThemeTag
+
+
+def generate_photo_file():
+    file = io.BytesIO()
+    image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+    image.save(file, 'png')
+    file.name = f'test{random.randint(1, 1000000)}.png'
+    file.seek(0)
+    return file
 
 
 class TestUserAskQuestionPost(APITestCase):
@@ -23,6 +33,10 @@ class TestUserAskQuestionPost(APITestCase):
         ThemeTag.objects.create(tag='nextjs')
         ThemeTag.objects.create(tag='C#')
         ThemeTag.objects.create(tag='Java')
+
+        photo = generate_photo_file()
+        photo2 = generate_photo_file()
+
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
@@ -40,6 +54,14 @@ class TestUserAskQuestionPost(APITestCase):
         self.ask_data6 = {"title": "Заголовок6", "content": "Вопрос. Не знаю как решить пробелему..",
                           "tags": []}
         self.ask_data7 = {"title": "Заголовок7", "content": "Вопрос. Не знаю как решить пробелему.."}
+
+        self.ask_data8 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                          'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                          'uploaded_images': [photo]}
+
+        self.ask_data9 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                          'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                          'uploaded_images': [photo, photo2]}
 
     def test_user_not_authenticated(self):
         response = self.client.post(self.url, data=self.ask_data)
@@ -133,6 +155,41 @@ class TestUserAskQuestionPost(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.ask_data7)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_ask_question_with_photo_status_code(self):
+        """
+        Код ответа с одной отправленной фотографией.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data8)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_ask_question_with_two_photo_status_code(self):
+        """
+        Код ответа с одной отправленной фотографией.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data9)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_ask_question_with_photo_content_created(self):
+        """
+        Существует ли фотография в БД.
+        """
+
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data8)
+
+        self.assertEqual(len(QuestionImages.objects.all()), 1)
+
+    def test_ask_question_with_two_photos_content_create(self):
+        """
+        Существует ли несколько переданных фотографий в БД.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data9)
+
+        self.assertEqual(len(QuestionImages.objects.all()), 2)
 
 
 class TestUserAskQuestionGet(APITestCase):

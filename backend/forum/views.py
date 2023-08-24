@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import create_return_tags, get_tags_or_error
+from forum.logic import add_image, create_return_tags, get_tags_or_error
 from forum.models import Question, QuestionAnswer
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                TagFieldSerializer,
@@ -46,11 +46,16 @@ class AskQuestionAPIView(GenericAPIView):
         title = serializer.data.get('title')
         content = serializer.data.get('content')
         tags = serializer.data.get('tags')
+        images = serializer.data.get('uploaded_images')
         question = Question.objects.create(
             user=request.user,
             title=title,
             content=content
         )
+
+        if images:
+            add_image(images=images, question=question)
+
         tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
         question.save()

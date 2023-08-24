@@ -1,5 +1,6 @@
-from accounts.models import NewUser
 from django.db import models
+
+from accounts.models import NewUser
 
 
 class ThemeTag(models.Model):
@@ -54,6 +55,24 @@ class Question(models.Model):
         make_tag_relevant_on_question_save(self)
 
 
+class QuestionImages(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_images')
+    image = models.ImageField(verbose_name='Изображение', upload_to='question_img/%Y/%m/%d/')
+    alt_text = models.CharField(
+        verbose_name="Альтернативый текст",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Вложение к вопросу'
+        verbose_name_plural = 'Вложения к вопросу'
+
+    def __str__(self):
+        return str(self.image)
+
+
 class QuestionRating(models.Model):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
@@ -88,6 +107,21 @@ class QuestionAnswer(models.Model):
     class Meta:
         verbose_name = 'Ответ на вопрос'
         verbose_name_plural = 'Ответы на вопросы'
+
+
+class QuestionAnswerImages(models.Model):
+    question_answer = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answer_images')
+    image = models.ImageField(verbose_name='Изображение', upload_to='answer_img/%Y/%m/%d/')
+    alt_text = models.CharField(
+        verbose_name="Альтернативый текст",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Вложение к ответу на вопрос'
+        verbose_name_plural = 'Вложения к ответу на вопрос'
 
 
 class QuestionAnswerRating(models.Model):
