@@ -12,8 +12,9 @@ from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
     """
-    Yields tags. If tag does not exist, create it marking the tag as
-    user's non-relevant tag. Returns tag ID.
+
+    Возвращает ID тегов с помощью yield. Если тега не существует, если тега не существует,
+    создает тег как пользовательский нерелвантный.
     """
     for tag in tags:
 
@@ -52,13 +53,10 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.save(update_fields=['is_relevant'])
 
 
-def add_image(images: list, obj_model: [Question | QuestionAnswer]):
+def add_image(images: list, obj_model: [Question | QuestionAnswer],
+              attachment_model: [QuestionImages | QuestionAnswerImages]):
     """
     Создание вложений(фотографий) для поста.
     """
-    if isinstance(obj_model, Question):
-        for image in images:
-            QuestionImages.objects.create(question=obj_model, image=image)
-    elif isinstance(obj_model, QuestionAnswer):
-        for image in images:
-            QuestionAnswerImages.objects.create(question_answer=obj_model, image=image)
+    for image in images:
+        attachment_model.objects.create(image=image, parent=obj_model)

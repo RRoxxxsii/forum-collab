@@ -7,6 +7,9 @@ from forum.validators import (validate_answer_related_obj_amount,
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания вопроса.
+    """
     tags = serializers.ListField(required=True, validators=[validate_tags_amount],
                                  allow_empty=False)
     uploaded_images = serializers.ListField(
@@ -34,6 +37,9 @@ class TagFieldSerializer(serializers.ModelSerializer):
 
 
 class AnswerQuestionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для ответа на вопрос.
+    """
     uploaded_images = serializers.ListField(
         required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
         validators=[validate_answer_related_obj_amount]
@@ -45,14 +51,18 @@ class AnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class UpdateQuestionAnswerSerializer(serializers.ModelSerializer):
-
+    """
+    Сериализатор для обновления ответа на вопрос.
+    """
     class Meta:
         model = QuestionAnswer
         fields = ('answer',)
 
 
 class UpdateQuestionSerializer(serializers.ModelSerializer):
-
+    """
+    Серилизатор для обновления вопроса.
+    """
     class Meta:
         model = Question
         fields = ('content', )

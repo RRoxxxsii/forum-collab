@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
-from forum.models import Question, QuestionAnswer
+from forum.models import Question, QuestionAnswer, QuestionAnswerImages, QuestionImages
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                TagFieldSerializer,
                                UpdateQuestionAnswerSerializer,
@@ -54,7 +54,7 @@ class AskQuestionAPIView(GenericAPIView):
         )
 
         if images:
-            add_image(images=images, obj_model=question)
+            add_image(images=images, obj_model=question, attachment_model=QuestionImages)
 
         tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
@@ -94,7 +94,7 @@ class AnswerQuestionAPIView(GenericAPIView):
             user=request.user
         )
         if images:
-            add_image(images=images, obj_model=question_answer)
+            add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
 
