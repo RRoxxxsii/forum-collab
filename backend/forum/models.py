@@ -1,5 +1,6 @@
-from accounts.models import NewUser
 from django.db import models
+
+from accounts.models import NewUser
 
 
 class ThemeTag(models.Model):
@@ -24,6 +25,27 @@ class ThemeTag(models.Model):
     class Meta:
         verbose_name = 'Тема'
         verbose_name_plural = 'Темы'
+
+
+class Attachment(models.Model):
+    """
+    Абстрактный класс для вложений.
+    """
+    image = models.ImageField(verbose_name='Изображение')
+    alt_text = models.CharField(
+        verbose_name="Альтернативный текст",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
+    def __str__(self):
+        return str(self.image)
 
 
 class Question(models.Model):
@@ -54,6 +76,18 @@ class Question(models.Model):
         make_tag_relevant_on_question_save(self)
 
 
+class QuestionImages(Attachment):
+    """
+    Вложения к вопросу.
+    """
+    parent = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_images',
+                               verbose_name='Вопрос')
+
+    class Meta:
+        verbose_name = 'Вложение к вопросу'
+        verbose_name_plural = 'Вложения к вопросу'
+
+
 class QuestionRating(models.Model):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
@@ -74,10 +108,10 @@ class QuestionAnswer(models.Model):
     """
     Ответ на вопрос.
     """
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_answers')
+    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
 
-    answer = models.TextField(verbose_name='Текс ответа', max_length=320)
+    answer = models.TextField(verbose_name='Текс ответа')
 
     is_solving = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -88,6 +122,18 @@ class QuestionAnswer(models.Model):
     class Meta:
         verbose_name = 'Ответ на вопрос'
         verbose_name_plural = 'Ответы на вопросы'
+
+
+class QuestionAnswerImages(Attachment):
+    """
+    Вложения к ответу на вопрос.
+    """
+    parent = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_images',
+                               verbose_name='Ответ')
+
+    class Meta:
+        verbose_name = 'Вложение к ответу на вопрос'
+        verbose_name_plural = 'Вложения к ответу на вопрос'
 
 
 class QuestionAnswerRating(models.Model):
@@ -111,7 +157,10 @@ class AnswerComment(models.Model):
     Комментарий. Ответ на 'ответ'. Под 'ответ' подразумевается ответ на комментарий.
     """
     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='answer_comments', null=True)
-    comment = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments')
+    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments')
+
+    comment = models.TextField(max_length=320, verbose_name='Текст комментария')
+
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -1,13 +1,24 @@
+import io
 import json
+import random
 
-from accounts.models import NewUser
-from django.db.models import QuerySet
 from django.urls import reverse
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from forum.models import Question, QuestionAnswer, ThemeTag
-from forum.serializers import TagFieldSerializer
+from accounts.models import NewUser
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag, AnswerComment)
+
+
+def generate_photo_file():
+    file = io.BytesIO()
+    image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+    image.save(file, 'png')
+    file.name = f'test{random.randint(1, 1000000)}.png'
+    file.seek(0)
+    return file
 
 
 class TestUserAskQuestionPost(APITestCase):
@@ -23,6 +34,12 @@ class TestUserAskQuestionPost(APITestCase):
         ThemeTag.objects.create(tag='nextjs')
         ThemeTag.objects.create(tag='C#')
         ThemeTag.objects.create(tag='Java')
+
+        photo = generate_photo_file()
+        photo2 = generate_photo_file()
+        photo3 = generate_photo_file()
+        photo4 = generate_photo_file()
+
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
@@ -40,6 +57,18 @@ class TestUserAskQuestionPost(APITestCase):
         self.ask_data6 = {"title": "Заголовок6", "content": "Вопрос. Не знаю как решить пробелему..",
                           "tags": []}
         self.ask_data7 = {"title": "Заголовок7", "content": "Вопрос. Не знаю как решить пробелему.."}
+
+        self.ask_data8 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                          'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                          'uploaded_images': [photo]}
+
+        self.ask_data9 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                          'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                          'uploaded_images': [photo, photo2]}
+
+        self.ask_data10 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
+                           'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
+                           'uploaded_images': [photo, photo2, photo3, photo4]}
 
     def test_user_not_authenticated(self):
         response = self.client.post(self.url, data=self.ask_data)
@@ -132,6 +161,47 @@ class TestUserAskQuestionPost(APITestCase):
         """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.ask_data7)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_ask_question_with_image_status_code(self):
+        """
+        Код ответа с одной отправленной фотографией.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data8)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_ask_question_with_two_images_status_code(self):
+        """
+        Код ответа с одной отправленной фотографией.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data9)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_ask_question_with_image_content_created(self):
+        """
+        Существует ли фотография в БД.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data8)
+
+        self.assertEqual(len(QuestionImages.objects.all()), 1)
+
+    def test_ask_question_with_two_images_content_create(self):
+        """
+        Существует ли несколько переданных фотографий в БД.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.ask_data9)
+        self.assertEqual(len(QuestionImages.objects.all()), 2)
+
+    def test_ask_question_with_more_than_three_images(self):
+        """
+        Отправляем запрос с числом вложений больше 3.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data10)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -332,15 +402,31 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.question = Question.objects.create(title='Заголовок', content='Контент')
         self.tag = ThemeTag.objects.create(tag='django')
 
+        photo = generate_photo_file()
+        photo2 = generate_photo_file()
+
         self.question.tags.add(self.tag)
         self.answer_data = {'answer': 'Ответ...', 'question': self.question.id}
+        self.answer_data2 = {'answer': 'Ответ...', 'question': self.question.id,
+                             'uploaded_images': [photo]}
+        self.answer_data3 = {'answer': 'Ответ...', 'question': self.question.id,
+                             'uploaded_images': [photo, photo2]}
 
-    def test_answer_question_user_not_authenticated(self):
+    def test_answer_question_user_not_authenticated_status_code(self):
         """
         Пользователь не аутентифицирован.
         """
         response = self.client.post(self.url, data=self.answer_data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_question_user_not_authenticated_content_created(self):
+        """
+        Пользователь не аутентифицирован. Проверка сохранения в БД.
+        """
+        self.client.post(self.url, data=self.answer_data)
+        answer = QuestionAnswer.objects.first()
+        self.assertIsNotNone(answer)
+        self.assertIsNone(answer.user)
 
     def test_answer_question(self):
         """
@@ -349,6 +435,30 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.answer_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_with_one_question_status_code(self):
+        """
+        Создание ответа с одним вложением. Проверка кода ответа.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.answer_data2)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_with_one_question_content_created(self):
+        """
+        Создание ответа с одним вложением. Проверка сохранения вложений в БД.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.answer_data2)
+        self.assertEqual(len(QuestionAnswerImages.objects.all()), 1)
+
+    def test_answer_with_several_question_status_code(self):
+        """
+        Создание ответа с более чем одним вложением.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.answer_data3)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestUpdateDestroyAnswerAPIView(APITestCase):
@@ -423,3 +533,70 @@ class TestUpdateDestroyAnswerAPIView(APITestCase):
         self.client.force_authenticate(self.user2)
         response = self.client.delete(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class TestCreateCommentAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+        self.url = reverse('create-comment')
+
+        self.data = {'comment': 'Комментарий...', 'question_answer': self.answer.id}
+
+    def test_comment_user_not_authenticated_status_code(self):
+        """
+        Пользователь не аутентифицирован. Код ответа.
+        """
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_comment_user_not_authenticated_content_created(self):
+        """
+        Пользователь не аутентифицирован. Проверка сохранения в БД.
+        """
+        self.client.post(self.url, data=self.data)
+
+        comment = AnswerComment.objects.first()
+        self.assertIsNotNone(comment)
+        self.assertIsNone(comment.user)
+
+    def test_comment_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class TestUpdateCommentAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(comment='Комментарий..', user=self.user,
+                                                    question_answer=self.answer)
+        self.url = reverse('update-comment', kwargs={'pk': self.comment.id})
+        self.data = {'comment': 'Обновленный комментарий...'}
+
+    def test_update_comment_not_owner(self):
+        self.client.force_authenticate(self.user2)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_comment(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
