@@ -82,6 +82,8 @@ export const Header = async ({ children }: { children: React.ReactNode }) => {
 							height: 'auto',
 							bottom: 0,
 						},
+						xs: 'block',
+						md: 'none',
 					}}
 					variant='permanent'
 					anchor='left'>

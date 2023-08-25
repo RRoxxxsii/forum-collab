@@ -20,18 +20,25 @@ export async function middleware(request: NextRequest) {
 	}
 	//the situation when user doesn't have an access token, but has a refresh one.
 	//create new access token
-	const isAuth = await fetch('http://localhost:8000/api/v1/account/refresh/', {
-		method: 'POST',
-		body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	})
-	const data = await isAuth.json()
+	try {
+		const isAuth = await fetch(
+			'http://localhost:8000/api/v1/account/refresh/',
+			{
+				method: 'POST',
+				body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}
+		)
+		const data = await isAuth.json()
 
-	const newAccessToken = data.access
+		const newAccessToken = data.access
 
-	response.cookies.set({ name: 'access_token', value: newAccessToken })
-	console.log('token refreshed!')
-	return response
+		response.cookies.set({ name: 'access_token', value: newAccessToken })
+		console.log('token refreshed!')
+		return response
+	} catch (error) {
+		console.log(error)
+	}
 }

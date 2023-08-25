@@ -2,7 +2,14 @@ import { CategoryTabs } from '@/widgets/CategoryTabs'
 import { QuestionList } from '@/widgets/QuestionList'
 import { AccountCircle } from '@mui/icons-material'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import { Box, Button, InputAdornment, TextField } from '@mui/material'
+import {
+	Box,
+	Button,
+	IconButton,
+	InputAdornment,
+	TextField,
+} from '@mui/material'
+import Link from 'next/link'
 
 export default async function HomePage() {
 	return (
@@ -32,9 +39,11 @@ export default async function HomePage() {
 								),
 								endAdornment: (
 									<InputAdornment position='end'>
-										<Button>
-											<ArrowForwardIosIcon />
-										</Button>
+										<IconButton aria-label='Спросить'>
+											<Link href={'/ask'}>
+												<ArrowForwardIosIcon />
+											</Link>
+										</IconButton>
 									</InputAdornment>
 								),
 							}}
