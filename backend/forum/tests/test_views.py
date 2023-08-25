@@ -412,12 +412,21 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.answer_data3 = {'answer': 'Ответ...', 'question': self.question.id,
                              'uploaded_images': [photo, photo2]}
 
-    def test_answer_question_user_not_authenticated(self):
+    def test_answer_question_user_not_authenticated_status_code(self):
         """
         Пользователь не аутентифицирован.
         """
         response = self.client.post(self.url, data=self.answer_data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_question_user_not_authenticated_content_created(self):
+        """
+        Пользователь не аутентифицирован. Проверка сохранения в БД.
+        """
+        self.client.post(self.url, data=self.answer_data)
+        answer = QuestionAnswer.objects.first()
+        self.assertIsNotNone(answer)
+        self.assertIsNone(answer.user)
 
     def test_answer_question(self):
         """
@@ -541,11 +550,22 @@ class TestCreateCommentAPIView(APITestCase):
 
         self.data = {'comment': 'Комментарий...', 'question_answer': self.answer.id}
 
-    def test_comment_user_not_authenticated(self):
+    def test_comment_user_not_authenticated_status_code(self):
         """
-        Пользователь не аутентифицирован.
+        Пользователь не аутентифицирован. Код ответа.
         """
-        pass
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_comment_user_not_authenticated_content_created(self):
+        """
+        Пользователь не аутентифицирован. Проверка сохранения в БД.
+        """
+        self.client.post(self.url, data=self.data)
+
+        comment = AnswerComment.objects.first()
+        self.assertIsNotNone(comment)
+        self.assertIsNone(comment.user)
 
     def test_comment_status_code(self):
         self.client.force_authenticate(self.user)

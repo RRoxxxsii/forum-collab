@@ -5,6 +5,7 @@ from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
 from forum.models import Question, QuestionAnswer, QuestionAnswerImages, QuestionImages, AnswerComment
@@ -79,7 +80,6 @@ class AnswerQuestionAPIView(GenericAPIView):
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
     serializer_class = AnswerQuestionSerializer
-    permission_classes = [IsAuthenticated, ]
     success_message = 'Ответ на вопрос успешно опубликован.'
 
     def post(self, request, *args, **kwargs):
@@ -88,11 +88,15 @@ class AnswerQuestionAPIView(GenericAPIView):
         images = serializer.data.get('uploaded_images')
         question = serializer.data.get('question')
         answer = serializer.data.get('answer')
+        user = request.user
         question_answer = QuestionAnswer.objects.create(
             question_id=question,
             answer=answer,
-            user=request.user
         )
+        if isinstance(user, NewUser):
+            question_answer.user = request.user
+            question_answer.save()
+
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
