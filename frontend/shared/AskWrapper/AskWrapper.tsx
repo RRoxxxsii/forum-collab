@@ -5,9 +5,6 @@ import React from 'react'
 export const AskWrapper = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<>
-			<Typography sx={{ mb: 2 }} component='h1'>
-				Создать вопрос
-			</Typography>
 			<Paper
 				elevation={2}
 				variant={'elevation'}

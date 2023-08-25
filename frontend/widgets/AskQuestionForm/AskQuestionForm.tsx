@@ -1,21 +1,25 @@
-'use client'
-import { Paper, TextField, Typography } from '@mui/material'
-import { EditorProvider, extensions } from '@tiptap/react'
-import { AskTabs } from '../AskTabs'
-import { MenuBar, editorContent, editorExtensions, editorProps } from './Menu'
+import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
+import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
+import { Box, TextField } from '@mui/material'
+import { TiptapEditor } from '../TiptapEditor'
 
 export const AskQuestionForm = () => {
 	return (
 		<>
-			<TextField fullWidth label='Тема вопроса' id='headline' sx={{ mb: 2 }} />
-			<Typography sx={{ mb: 2 }} component='h1'>
-				Текст вопроса
-			</Typography>
-			<EditorProvider
-				editorProps={editorProps}
-				slotBefore={<MenuBar />}
-				extensions={editorExtensions}
-				content={editorContent}></EditorProvider>
+			<TextField
+				type='text'
+				autoFocus
+				autoComplete='off'
+				fullWidth
+				label='Тема вопроса'
+				id='headline'
+				sx={{ mb: 2 }}
+			/>
+			<TiptapEditor />
+			<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+				<AskQuestionFormTags />
+				<AskQuestionFormSubmit />
+			</Box>
 		</>
 	)
 }
