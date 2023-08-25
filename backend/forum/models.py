@@ -27,6 +27,27 @@ class ThemeTag(models.Model):
         verbose_name_plural = 'Темы'
 
 
+class Attachment(models.Model):
+    """
+    Абстрактный класс для вложений.
+    """
+    image = models.ImageField(verbose_name='Изображение')
+    alt_text = models.CharField(
+        verbose_name="Альтернативный текст",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
+    def __str__(self):
+        return str(self.image)
+
+
 class Question(models.Model):
     """
     Вопрос.
@@ -55,22 +76,16 @@ class Question(models.Model):
         make_tag_relevant_on_question_save(self)
 
 
-class QuestionImages(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_images')
-    image = models.ImageField(verbose_name='Изображение', upload_to='question_img/%Y/%m/%d/')
-    alt_text = models.CharField(
-        verbose_name="Альтернативый текст",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
+class QuestionImages(Attachment):
+    """
+    Вложения к вопросу.
+    """
+    parent = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_images',
+                               verbose_name='Вопрос')
 
     class Meta:
         verbose_name = 'Вложение к вопросу'
         verbose_name_plural = 'Вложения к вопросу'
-
-    def __str__(self):
-        return str(self.image)
 
 
 class QuestionRating(models.Model):
@@ -93,8 +108,8 @@ class QuestionAnswer(models.Model):
     """
     Ответ на вопрос.
     """
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_answers')
+    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
 
     answer = models.TextField(verbose_name='Текс ответа', max_length=320)
 
@@ -109,15 +124,12 @@ class QuestionAnswer(models.Model):
         verbose_name_plural = 'Ответы на вопросы'
 
 
-class QuestionAnswerImages(models.Model):
-    question_answer = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answer_images')
-    image = models.ImageField(verbose_name='Изображение', upload_to='answer_img/%Y/%m/%d/')
-    alt_text = models.CharField(
-        verbose_name="Альтернативый текст",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
+class QuestionAnswerImages(Attachment):
+    """
+    Вложения к ответу на вопрос.
+    """
+    parent = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_images',
+                               verbose_name='Ответ')
 
     class Meta:
         verbose_name = 'Вложение к ответу на вопрос'

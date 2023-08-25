@@ -1,16 +1,20 @@
+from __future__ import annotations
+
 from typing import Iterator
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import NewUser
-from forum.models import Question, QuestionImages, ThemeTag
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag)
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
     """
-    Yields tags. If tag does not exist, create it marking the tag as
-    user's non-relevant tag. Returns tag ID.
+
+    Возвращает ID тегов с помощью yield. Если тега не существует, если тега не существует,
+    создает тег как пользовательский нерелвантный.
     """
     for tag in tags:
 
@@ -49,9 +53,10 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.save(update_fields=['is_relevant'])
 
 
-def add_image(images: list, question: Question):
+def add_image(images: list, obj_model: [Question | QuestionAnswer],
+              attachment_model: [QuestionImages | QuestionAnswerImages]):
     """
     Создание вложений(фотографий) для поста.
     """
     for image in images:
-        QuestionImages.objects.create(question=question, image=image)
+        attachment_model.objects.create(image=image, parent=obj_model)
