@@ -2,13 +2,14 @@ import io
 import json
 import random
 
+from accounts.models import NewUser
 from django.urls import reverse
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
-from forum.models import Question, QuestionAnswer, QuestionImages, ThemeTag
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag)
 
 
 def generate_photo_file():
@@ -182,7 +183,6 @@ class TestUserAskQuestionPost(APITestCase):
         """
         Существует ли фотография в БД.
         """
-
         self.client.force_authenticate(self.user)
         self.client.post(self.url, data=self.ask_data8)
 
@@ -402,8 +402,15 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.question = Question.objects.create(title='Заголовок', content='Контент')
         self.tag = ThemeTag.objects.create(tag='django')
 
+        photo = generate_photo_file()
+        photo2 = generate_photo_file()
+
         self.question.tags.add(self.tag)
         self.answer_data = {'answer': 'Ответ...', 'question': self.question.id}
+        self.answer_data2 = {'answer': 'Ответ...', 'question': self.question.id,
+                             'uploaded_images': [photo]}
+        self.answer_data3 = {'answer': 'Ответ...', 'question': self.question.id,
+                             'uploaded_images': [photo, photo2]}
 
     def test_answer_question_user_not_authenticated(self):
         """
@@ -419,6 +426,30 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.answer_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_with_one_question_status_code(self):
+        """
+        Создание ответа с одним вложением. Проверка кода ответа.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.answer_data2)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_answer_with_one_question_content_created(self):
+        """
+        Создание ответа с одним вложением. Проверка сохранения вложений в БД.
+        """
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.answer_data2)
+        self.assertEqual(len(QuestionAnswerImages.objects.all()), 1)
+
+    def test_answer_with_several_question_status_code(self):
+        """
+        Создание ответа с более чем одним вложением.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.answer_data3)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestUpdateDestroyAnswerAPIView(APITestCase):

@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 from typing import Iterator
 
+from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from accounts.models import NewUser
-from forum.models import Question, QuestionImages, ThemeTag
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag)
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -49,9 +52,13 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.save(update_fields=['is_relevant'])
 
 
-def add_image(images: list, question: Question):
+def add_image(images: list, value: [Question | QuestionAnswer]):
     """
     Создание вложений(фотографий) для поста.
     """
-    for image in images:
-        QuestionImages.objects.create(question=question, image=image)
+    if isinstance(value, Question):
+        for image in images:
+            QuestionImages.objects.create(question=value, image=image)
+    elif isinstance(value, QuestionAnswer):
+        for image in images:
+            QuestionAnswerImages.objects.create(question_answer=value, image=image)

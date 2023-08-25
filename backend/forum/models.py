@@ -1,6 +1,5 @@
-from django.db import models
-
 from accounts.models import NewUser
+from django.db import models
 
 
 class ThemeTag(models.Model):
@@ -110,7 +109,7 @@ class QuestionAnswer(models.Model):
 
 
 class QuestionAnswerImages(models.Model):
-    question_answer = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answer_images')
+    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_images')
     image = models.ImageField(verbose_name='Изображение', upload_to='answer_img/%Y/%m/%d/')
     alt_text = models.CharField(
         verbose_name="Альтернативый текст",

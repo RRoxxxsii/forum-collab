@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from forum.models import Question, QuestionAnswer, ThemeTag
-from forum.validators import validate_related_obj_amount, validate_tags_amount
+from forum.validators import (validate_answer_related_obj_amount,
+                              validate_question_related_obj_amount,
+                              validate_tags_amount)
 
 
 class AskQuestionSerializer(serializers.ModelSerializer):
@@ -9,7 +11,7 @@ class AskQuestionSerializer(serializers.ModelSerializer):
                                  allow_empty=False)
     uploaded_images = serializers.ListField(
         required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
-        validators=[validate_related_obj_amount]
+        validators=[validate_question_related_obj_amount]
     )
 
     class Meta:
@@ -32,10 +34,14 @@ class TagFieldSerializer(serializers.ModelSerializer):
 
 
 class AnswerQuestionSerializer(serializers.ModelSerializer):
+    uploaded_images = serializers.ListField(
+        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
+        validators=[validate_answer_related_obj_amount]
+    )
 
     class Meta:
         model = QuestionAnswer
-        fields = ('question', 'answer')
+        fields = ('question', 'answer', 'uploaded_images')
 
 
 class UpdateQuestionAnswerSerializer(serializers.ModelSerializer):
@@ -49,4 +55,4 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('content',)
+        fields = ('content', )

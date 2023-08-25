@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -54,7 +54,7 @@ class AskQuestionAPIView(GenericAPIView):
         )
 
         if images:
-            add_image(images=images, question=question)
+            add_image(images=images, value=question)
 
         tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
@@ -74,12 +74,28 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     serializer_class = UpdateQuestionSerializer
 
 
-class AnswerQuestionAPIView(CreateAPIView):
+class AnswerQuestionAPIView(GenericAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
     serializer_class = AnswerQuestionSerializer
     permission_classes = [IsAuthenticated, ]
+    success_message = 'Ответ на вопрос успешно опубликован.'
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        images = serializer.data.get('uploaded_images')
+        question = serializer.data.get('question')
+        answer = serializer.data.get('answer')
+        question_answer = QuestionAnswer.objects.create(
+            question_id=question,
+            answer=answer,
+            user=request.user
+        )
+        if images:
+            add_image(images=images, value=question_answer)
+        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
 
 class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
