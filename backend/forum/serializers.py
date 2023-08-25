@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from forum.models import Question, QuestionAnswer, ThemeTag
+from forum.models import Question, QuestionAnswer, ThemeTag, AnswerComment
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
@@ -66,3 +66,21 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ('content', )
+
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания комментария.
+    """
+    class Meta:
+        model = AnswerComment
+        fields = ('question_answer', 'comment',)
+
+
+class UpdateCommentSerializer(serializers.ModelSerializer):
+    """
+    Обновление комментария.
+    """
+    class Meta:
+        model = AnswerComment
+        fields = ('comment',)

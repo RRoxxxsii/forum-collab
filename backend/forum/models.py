@@ -111,7 +111,7 @@ class QuestionAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_answers')
     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
 
-    answer = models.TextField(verbose_name='Текс ответа', max_length=320)
+    answer = models.TextField(verbose_name='Текс ответа')
 
     is_solving = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -157,7 +157,10 @@ class AnswerComment(models.Model):
     Комментарий. Ответ на 'ответ'. Под 'ответ' подразумевается ответ на комментарий.
     """
     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='answer_comments', null=True)
-    comment = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments')
+    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments')
+
+    comment = models.TextField(max_length=320, verbose_name='Текст комментария')
+
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

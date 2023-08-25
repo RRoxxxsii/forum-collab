@@ -1,17 +1,17 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
-from forum.models import Question, QuestionAnswer, QuestionAnswerImages, QuestionImages
+from forum.models import Question, QuestionAnswer, QuestionAnswerImages, QuestionImages, AnswerComment
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                TagFieldSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer)
+                               UpdateQuestionSerializer, CreateCommentSerializer, UpdateCommentSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -104,3 +104,18 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     """
     serializer_class = UpdateQuestionAnswerSerializer
     queryset = QuestionAnswer.objects.all()
+
+
+class CommentAPIView(CreateAPIView):
+    """
+    Комментарий к ответу. Создание.
+    """
+    serializer_class = CreateCommentSerializer
+
+
+class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
+    """
+    Обновление комментария.
+    """
+    queryset = AnswerComment.objects.all()
+    serializer_class = UpdateCommentSerializer

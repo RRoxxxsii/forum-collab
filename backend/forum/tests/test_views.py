@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
-                          QuestionImages, ThemeTag)
+                          QuestionImages, ThemeTag, AnswerComment)
 
 
 def generate_photo_file():
@@ -524,3 +524,59 @@ class TestUpdateDestroyAnswerAPIView(APITestCase):
         self.client.force_authenticate(self.user2)
         response = self.client.delete(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class TestCreateCommentAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+        self.url = reverse('create-comment')
+
+        self.data = {'comment': 'Комментарий...', 'question_answer': self.answer.id}
+
+    def test_comment_user_not_authenticated(self):
+        """
+        Пользователь не аутентифицирован.
+        """
+        pass
+
+    def test_comment_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class TestUpdateCommentAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(comment='Комментарий..', user=self.user,
+                                                    question_answer=self.answer)
+        self.url = reverse('update-comment', kwargs={'pk': self.comment.id})
+        self.data = {'comment': 'Обновленный комментарий...'}
+
+    def test_update_comment_not_owner(self):
+        self.client.force_authenticate(self.user2)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_comment(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
