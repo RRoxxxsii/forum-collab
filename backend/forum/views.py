@@ -54,7 +54,7 @@ class AskQuestionAPIView(GenericAPIView):
         )
 
         if images:
-            add_image(images=images, value=question)
+            add_image(images=images, obj_model=question)
 
         tag_ids = create_return_tags(tags=tags, user=request.user)
         question.tags.add(*tag_ids)
@@ -94,7 +94,7 @@ class AnswerQuestionAPIView(GenericAPIView):
             user=request.user
         )
         if images:
-            add_image(images=images, value=question_answer)
+            add_image(images=images, obj_model=question_answer)
         return Response(data=self.success_message, status=status.HTTP_201_CREATED)
 
 

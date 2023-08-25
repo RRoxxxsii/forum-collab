@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
+from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
 
@@ -52,13 +52,13 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.save(update_fields=['is_relevant'])
 
 
-def add_image(images: list, value: [Question | QuestionAnswer]):
+def add_image(images: list, obj_model: [Question | QuestionAnswer]):
     """
     Создание вложений(фотографий) для поста.
     """
-    if isinstance(value, Question):
+    if isinstance(obj_model, Question):
         for image in images:
-            QuestionImages.objects.create(question=value, image=image)
-    elif isinstance(value, QuestionAnswer):
+            QuestionImages.objects.create(question=obj_model, image=image)
+    elif isinstance(obj_model, QuestionAnswer):
         for image in images:
-            QuestionAnswerImages.objects.create(question_answer=value, image=image)
+            QuestionAnswerImages.objects.create(question_answer=obj_model, image=image)

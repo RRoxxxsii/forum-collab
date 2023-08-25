@@ -2,12 +2,12 @@ import io
 import json
 import random
 
-from accounts.models import NewUser
 from django.urls import reverse
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
 
