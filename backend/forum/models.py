@@ -4,6 +4,43 @@ from django.db import models
 from forum.helpers import LikeDislikeModelMixin
 
 
+class Attachment(models.Model):
+    """
+    Абстрактный класс для вложений.
+    """
+    image = models.ImageField(verbose_name='Изображение')
+    alt_text = models.CharField(
+        verbose_name="Альтернативный текст",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
+    def __str__(self):
+        return str(self.image)
+
+
+class Rating(models.Model):
+    """
+    Абстрактный класс для рейтинга.
+    """
+    like_amount = models.PositiveIntegerField(null=True, default=0)
+    dislike_amount = models.PositiveIntegerField(null=True, default=0)
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинг'
+
+    def __str__(self):
+        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
+
+
 class ThemeTag(models.Model):
     """
     Тег (подтема).
@@ -26,27 +63,6 @@ class ThemeTag(models.Model):
     class Meta:
         verbose_name = 'Тема'
         verbose_name_plural = 'Темы'
-
-
-class Attachment(models.Model):
-    """
-    Абстрактный класс для вложений.
-    """
-    image = models.ImageField(verbose_name='Изображение')
-    alt_text = models.CharField(
-        verbose_name="Альтернативный текст",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
-
-    class Meta:
-        abstract = True
-        verbose_name = 'Вложение'
-        verbose_name_plural = 'Вложения'
-
-    def __str__(self):
-        return str(self.image)
 
 
 class Question(models.Model, LikeDislikeModelMixin):
@@ -90,16 +106,11 @@ class QuestionImages(Attachment):
         verbose_name_plural = 'Вложения к вопросу'
 
 
-class QuestionRating(models.Model):
+class QuestionRating(Rating):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
     """
     question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
-    like_amount = models.PositiveIntegerField(null=True, default=0)
-    dislike_amount = models.PositiveIntegerField(null=True, default=0)
-
-    def __str__(self):
-        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
 
     class Meta:
         verbose_name = 'Рейтинг вопроса'
@@ -142,16 +153,11 @@ class QuestionAnswerImages(Attachment):
         verbose_name_plural = 'Вложения к ответу на вопрос'
 
 
-class QuestionAnswerRating(models.Model):
+class QuestionAnswerRating(Rating):
     """
     Лайки и дизлайки ответа на вопрос. Рейтинг ответа.
     """
     answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
-    like_amount = models.PositiveIntegerField(null=True, default=0)
-    dislike_amount = models.PositiveIntegerField(null=True, default=0)
-
-    def __str__(self):
-        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
 
     class Meta:
         verbose_name = 'Рейтинг ответа'
