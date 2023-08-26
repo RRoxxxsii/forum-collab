@@ -21,3 +21,17 @@ class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelM
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
+
+
+class LikeDislikeModelMixin:
+    """
+    Миксин для создания функционала лайк/дизлайк.
+    """
+    def like(self, *args, **kwargs):
+        self.rating.like_amount += 1
+        self.rating.save()
+
+    def dislike(self, *args, **kwargs):
+        self.rating.dislike_amount += 1
+        self.rating.save()
+

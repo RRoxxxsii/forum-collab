@@ -2,14 +2,15 @@ import io
 import json
 import random
 
+from accounts.models import NewUser
 from django.urls import reverse
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
-from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
-                          QuestionImages, ThemeTag, AnswerComment)
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerImages, QuestionAnswerRating,
+                          QuestionImages, QuestionRating, ThemeTag)
 
 
 def generate_photo_file():
@@ -600,3 +601,88 @@ class TestUpdateCommentAPIView(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.put(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestLikeDislikeAPIView(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+    def test_like_question_status_code(self):
+        """
+        Тестируем код ответа при отправке запроса к вопросу.
+        """
+        url = reverse('like-dislike-like', kwargs={'pk': self.question.pk})
+        response = self.client.get(f'{url}?model=question')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_like_question_created_question(self):
+        """
+        Тестируем создание лайка при отправке запроса к вопросу.
+        """
+        url = reverse('like-dislike-like', kwargs={'pk': self.question.pk})
+        self.client.get(f'{url}?model=question')
+        rating = QuestionRating.objects.first()
+        self.assertEqual(rating.like_amount, 1)
+        self.assertEqual(rating.dislike_amount, 0)
+
+    def test_dislike_question_status_code(self):
+        """
+        Тестируем код ответа при отправке запроса к вопросу.
+        """
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.question.pk})
+        response = self.client.get(f'{url}?model=question')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_dislike_question_created(self):
+        """
+        Тестируем создание дизлайка при отправке запроса к вопросу.
+        """
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.question.pk})
+        self.client.get(f'{url}?model=question')
+        rating = QuestionRating.objects.first()
+        self.assertEqual(rating.like_amount, 0)
+        self.assertEqual(rating.dislike_amount, 1)
+
+    def test_like_answer_status_code(self):
+        """
+        Тестируем код ответа при отправке запроса к ответу.
+        """
+        url = reverse('like-dislike-like', kwargs={'pk': self.answer.pk})
+        response = self.client.get(f'{url}?model=answer')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_like_answer_created(self):
+        """
+        Тестируем создание лайка при отправке запроса к овтету.
+        """
+        url = reverse('like-dislike-like', kwargs={'pk': self.answer.pk})
+        self.client.get(f'{url}?model=answer')
+        rating = QuestionAnswerRating.objects.first()
+        self.assertEqual(rating.like_amount, 1)
+        self.assertEqual(rating.dislike_amount, 0)
+
+    def test_dislike_answer_status_code(self):
+        """
+        Тестируем код ответа при отправке запроса к ответу.
+        """
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.answer.pk})
+        response = self.client.get(f'{url}?model=answer')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_dislike_answer_created(self):
+        """
+        Тестируем создание дизлайка при отправке запроса к ответу.
+        """
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.answer.pk})
+        self.client.get(f'{url}?model=answer')
+        rating = QuestionAnswerRating.objects.first()
+        self.assertEqual(rating.like_amount, 0)
+        self.assertEqual(rating.dislike_amount, 1)

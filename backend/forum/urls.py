@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from forum import views
 
@@ -14,5 +15,10 @@ urlpatterns = [
     # Комментарии
     path('create-comment/', views.CommentAPIView.as_view(), name='create-comment'),
     path('update-comment/<int:pk>/', views.UpdateCommentAPIView.as_view(), name='update-comment'),
+
 ]
 
+router = DefaultRouter()
+router.register(r'likes', views.LikeDislikeViewSet, basename='like-dislike')
+
+urlpatterns += router.urls
