@@ -1,18 +1,22 @@
+from accounts.models import NewUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, CreateAPIView
+from rest_framework.decorators import action
+from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
-from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
-from forum.models import Question, QuestionAnswer, QuestionAnswerImages, QuestionImages, AnswerComment
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerImages, QuestionImages)
 from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
-                               TagFieldSerializer,
+                               CreateCommentSerializer, TagFieldSerializer,
+                               UpdateCommentSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer, CreateCommentSerializer, UpdateCommentSerializer)
+                               UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -123,3 +127,44 @@ class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
     """
     queryset = AnswerComment.objects.all()
     serializer_class = UpdateCommentSerializer
+
+
+class LikeDislikeViewSet(GenericViewSet):
+    """
+    Лайк/Дизлайк экземпляра модели. Требуется query_param, представляющий собой модель.
+    Он представляет собой экземпляр класса модели Вопроса (question) или ответа (answer).
+    Пример:
+
+    example.com/api/v1/forum/likes/{id}/dislike/?model=question
+    ставит дизлайк экземпляру модели Вопроса.
+    """
+    model = openapi.Parameter(name='model', in_=openapi.IN_QUERY,
+                              description="Модель/сущность, e.g. question, answer",
+                              type=openapi.TYPE_STRING, required=True)
+
+    @swagger_auto_schema(manual_parameters=[model])
+    @action(detail=True, methods=['get'])
+    def like(self, request, pk=None):
+        instance = self.get_object(pk)
+
+        instance.like()
+
+        return Response(data='Liked successfully')
+
+    @swagger_auto_schema(manual_parameters=[model])
+    @action(detail=True, methods=['get'])
+    def dislike(self, request, pk=None):
+        instance = self.get_object(pk)
+
+        instance.dislike()
+
+        return Response(data='Дизлайк поставленен успешно')
+
+    def get_object(self, pk):
+        if 'model' in self.request.query_params:
+            model_name = self.request.query_params['model']
+            if model_name == 'question':
+                return Question.objects.get(pk=pk)
+            elif model_name == 'answer':
+                return QuestionAnswer.objects.get(pk=pk)
+        raise ValueError('Параметр запроса несуществует или указан неверно.')

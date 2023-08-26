@@ -1,6 +1,8 @@
+from accounts.models import NewUser
 from rest_framework.test import APITestCase
 
-from forum.models import Question, ThemeTag
+from forum.models import (Question, QuestionAnswer, QuestionAnswerRating,
+                          QuestionRating, ThemeTag)
 
 
 class TestThemeTagMakingTagRelevant(APITestCase):
@@ -31,3 +33,38 @@ class TestThemeTagMakingTagRelevant(APITestCase):
         self.tag1.refresh_from_db()
 
         self.assertTrue(self.tag1.is_relevant)
+
+
+class TestLikeDislike(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+
+        self.tag = ThemeTag.objects.create(tag='django')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.question.tags.add(self.tag)
+
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+    def test_like_question(self):
+        self.question.like()
+        likes = QuestionRating.objects.all().first()
+        self.assertEqual(likes.like_amount, 1)
+
+    def test_dislike_question(self):
+        self.question.dislike()
+        likes = QuestionRating.objects.all().first()
+        self.assertEqual(likes.dislike_amount, 1)
+
+    def test_like_answer(self):
+        self.answer.like()
+        likes = QuestionAnswerRating.objects.all().first()
+        self.assertEqual(likes.like_amount, 1)
+
+    def test_dislike_answer(self):
+        self.answer.dislike()
+        likes = QuestionAnswerRating.objects.all().first()
+        self.assertEqual(likes.dislike_amount, 1)

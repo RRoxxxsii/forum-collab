@@ -1,6 +1,7 @@
+from accounts.models import NewUser
 from django.db import models
 
-from accounts.models import NewUser
+from forum.helpers import LikeDislikeModelMixin
 
 
 class ThemeTag(models.Model):
@@ -48,7 +49,7 @@ class Attachment(models.Model):
         return str(self.image)
 
 
-class Question(models.Model):
+class Question(models.Model, LikeDislikeModelMixin):
     """
     Вопрос.
     """
@@ -73,6 +74,7 @@ class Question(models.Model):
             make_tag_relevant_on_question_save  # Избегаем цикличного импорта
 
         super(Question, self).save(*args, **kwargs)
+        self.rating, _ = QuestionRating.objects.get_or_create(question=self)
         make_tag_relevant_on_question_save(self)
 
 
@@ -92,9 +94,9 @@ class QuestionRating(models.Model):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
     """
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
-    like_amount = models.PositiveIntegerField(null=True)
-    dislike_amount = models.PositiveIntegerField(null=True)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
+    like_amount = models.PositiveIntegerField(null=True, default=0)
+    dislike_amount = models.PositiveIntegerField(null=True, default=0)
 
     def __str__(self):
         return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
@@ -104,7 +106,7 @@ class QuestionRating(models.Model):
         verbose_name_plural = 'Рейтинги вопросов'
 
 
-class QuestionAnswer(models.Model):
+class QuestionAnswer(models.Model, LikeDislikeModelMixin):
     """
     Ответ на вопрос.
     """
@@ -123,6 +125,10 @@ class QuestionAnswer(models.Model):
         verbose_name = 'Ответ на вопрос'
         verbose_name_plural = 'Ответы на вопросы'
 
+    def save(self, *args, **kwargs):
+        super(QuestionAnswer, self).save(*args, **kwargs)
+        self.rating, _ = QuestionAnswerRating.objects.get_or_create(answer=self)
+
 
 class QuestionAnswerImages(Attachment):
     """
@@ -140,9 +146,9 @@ class QuestionAnswerRating(models.Model):
     """
     Лайки и дизлайки ответа на вопрос. Рейтинг ответа.
     """
-    question = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE)
-    like_amount = models.PositiveIntegerField(null=True)
-    dislike_amount = models.PositiveIntegerField(null=True)
+    answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
+    like_amount = models.PositiveIntegerField(null=True, default=0)
+    dislike_amount = models.PositiveIntegerField(null=True, default=0)
 
     def __str__(self):
         return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
