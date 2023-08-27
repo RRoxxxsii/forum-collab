@@ -1,30 +1,7 @@
+from accounts.models import NewUser
 from django.db import models
 
-from accounts.models import NewUser
-
-
-class ThemeTag(models.Model):
-    """
-    Тег (подтема).
-    """
-    tag = models.CharField(max_length=255, verbose_name='Тег', unique=True)
-    descriptions = models.TextField(verbose_name='Описание', null=True, blank=True)
-
-    is_relevant = models.BooleanField(default=True, verbose_name='Релеватный тег')
-    is_user_tag = models.BooleanField(default=False, verbose_name='Авторский тег')
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, null=True,
-                             verbose_name='Автор, если есть', editable=False,
-                             related_name='tags')
-
-    creation_date = models.DateTimeField(auto_now_add=True, null=True, blank=True,
-                                         editable=False)
-
-    def __str__(self):
-        return self.tag
-
-    class Meta:
-        verbose_name = 'Тема'
-        verbose_name_plural = 'Темы'
+from forum.helpers import LikeDislikeModelMixin
 
 
 class Attachment(models.Model):
@@ -48,7 +25,47 @@ class Attachment(models.Model):
         return str(self.image)
 
 
-class Question(models.Model):
+class Rating(models.Model):
+    """
+    Абстрактный класс для рейтинга.
+    """
+    like_amount = models.PositiveIntegerField(null=True, default=0)
+    dislike_amount = models.PositiveIntegerField(null=True, default=0)
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинг'
+
+    def __str__(self):
+        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
+
+
+class ThemeTag(models.Model):
+    """
+    Тег (подтема).
+    """
+    tag_name = models.CharField(max_length=255, verbose_name='Тег', unique=True)
+    descriptions = models.TextField(verbose_name='Описание', null=True, blank=True)
+
+    is_relevant = models.BooleanField(default=True, verbose_name='Релеватный тег')
+    is_user_tag = models.BooleanField(default=False, verbose_name='Авторский тег')
+    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, null=True,
+                             verbose_name='Автор, если есть', editable=False,
+                             related_name='tags')
+
+    creation_date = models.DateTimeField(auto_now_add=True, null=True, blank=True,
+                                         editable=False)
+
+    def __str__(self):
+        return self.tag_name
+
+    class Meta:
+        verbose_name = 'Тема'
+        verbose_name_plural = 'Темы'
+
+
+class Question(models.Model, LikeDislikeModelMixin):
     """
     Вопрос.
     """
@@ -73,6 +90,7 @@ class Question(models.Model):
             make_tag_relevant_on_question_save  # Избегаем цикличного импорта
 
         super(Question, self).save(*args, **kwargs)
+        self.rating, _ = QuestionRating.objects.get_or_create(question=self)
         make_tag_relevant_on_question_save(self)
 
 
@@ -88,23 +106,20 @@ class QuestionImages(Attachment):
         verbose_name_plural = 'Вложения к вопросу'
 
 
-class QuestionRating(models.Model):
+class QuestionRating(Rating):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
     """
-    question = models.OneToOneField(Question, on_delete=models.CASCADE)
-    like_amount = models.PositiveIntegerField(null=True)
-    dislike_amount = models.PositiveIntegerField(null=True)
-
-    def __str__(self):
-        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
+    users_liked = models.ManyToManyField(NewUser, related_name='liked_question_ratings', blank=True)
+    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_question_ratings', blank=True)
 
     class Meta:
         verbose_name = 'Рейтинг вопроса'
         verbose_name_plural = 'Рейтинги вопросов'
 
 
-class QuestionAnswer(models.Model):
+class QuestionAnswer(models.Model, LikeDislikeModelMixin):
     """
     Ответ на вопрос.
     """
@@ -123,6 +138,10 @@ class QuestionAnswer(models.Model):
         verbose_name = 'Ответ на вопрос'
         verbose_name_plural = 'Ответы на вопросы'
 
+    def save(self, *args, **kwargs):
+        super(QuestionAnswer, self).save(*args, **kwargs)
+        self.rating, _ = QuestionAnswerRating.objects.get_or_create(answer=self)
+
 
 class QuestionAnswerImages(Attachment):
     """
@@ -136,16 +155,13 @@ class QuestionAnswerImages(Attachment):
         verbose_name_plural = 'Вложения к ответу на вопрос'
 
 
-class QuestionAnswerRating(models.Model):
+class QuestionAnswerRating(Rating):
     """
     Лайки и дизлайки ответа на вопрос. Рейтинг ответа.
     """
-    question = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE)
-    like_amount = models.PositiveIntegerField(null=True)
-    dislike_amount = models.PositiveIntegerField(null=True)
-
-    def __str__(self):
-        return f'Лайки: {self.like_amount}; Дизлайки: {self.dislike_amount}'
+    answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
+    users_liked = models.ManyToManyField(NewUser, related_name='liked_answer_ratings', blank=True)
+    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_answer_ratings', blank=True)
 
     class Meta:
         verbose_name = 'Рейтинг ответа'

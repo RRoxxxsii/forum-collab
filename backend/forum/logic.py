@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Iterator
 
+from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
 
@@ -18,7 +18,7 @@ def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
     """
     for tag in tags:
 
-        tag, created = ThemeTag.objects.get_or_create(tag=tag, defaults={
+        tag, created = ThemeTag.objects.get_or_create(tag_name=tag, defaults={
             'is_user_tag': True,
             'is_relevant': False,
             'user': user
@@ -34,7 +34,7 @@ def get_tags_or_error(tag: str) -> QuerySet[ThemeTag]:
     if not tag:
         raise ValidationError('Тег не указан.')
 
-    suggested_tags = ThemeTag.objects.filter(tag__icontains=tag).order_by('is_user_tag')
+    suggested_tags = ThemeTag.objects.filter(tag_name__icontains=tag).order_by('is_user_tag')
 
     if not suggested_tags:
         raise ValidationError('Теги не указан.')

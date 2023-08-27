@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from forum.models import Question, QuestionAnswer, ThemeTag, AnswerComment
+from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
@@ -29,7 +29,7 @@ class TagFieldSerializer(serializers.ModelSerializer):
     use_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('tag', 'use_count', 'is_relevant', 'is_user_tag')
+        fields = ('tag_name', 'use_count', 'is_relevant', 'is_user_tag')
         model = ThemeTag
 
     def get_use_count(self, obj: ThemeTag):
