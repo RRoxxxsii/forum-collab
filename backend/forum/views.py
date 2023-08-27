@@ -138,6 +138,7 @@ class LikeDislikeViewSet(GenericViewSet):
     example.com/api/v1/forum/likes/{id}/dislike/?model=question
     ставит дизлайк экземпляру модели Вопроса.
     """
+    permission_classes = [IsAuthenticated]
     model = openapi.Parameter(name='model', in_=openapi.IN_QUERY,
                               description="Модель/сущность, e.g. question, answer",
                               type=openapi.TYPE_STRING, required=True)
@@ -146,17 +147,23 @@ class LikeDislikeViewSet(GenericViewSet):
     @action(detail=True, methods=['get'])
     def like(self, request, pk=None):
         instance = self.get_object(pk)
+        user = request.user
 
-        instance.like()
+        if instance.user == user:
+            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+        instance.like(user=user)
 
-        return Response(data='Liked successfully')
+        return Response(data='Лайк поставлен успешно')
 
     @swagger_auto_schema(manual_parameters=[model])
     @action(detail=True, methods=['get'])
     def dislike(self, request, pk=None):
         instance = self.get_object(pk)
+        user = request.user
 
-        instance.dislike()
+        if instance.user == user:
+            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+        instance.dislike(user=user)
 
         return Response(data='Дизлайк поставленен успешно')
 
