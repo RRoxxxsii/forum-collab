@@ -29,12 +29,12 @@ class TestUserAskQuestionPost(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('ask-question')
 
-        ThemeTag.objects.create(tag='django')
-        ThemeTag.objects.create(tag='react')
-        ThemeTag.objects.create(tag='python')
-        ThemeTag.objects.create(tag='nextjs')
-        ThemeTag.objects.create(tag='C#')
-        ThemeTag.objects.create(tag='Java')
+        ThemeTag.objects.create(tag_name='django')
+        ThemeTag.objects.create(tag_name='react')
+        ThemeTag.objects.create(tag_name='python')
+        ThemeTag.objects.create(tag_name='nextjs')
+        ThemeTag.objects.create(tag_name='C#')
+        ThemeTag.objects.create(tag_name='Java')
 
         photo = generate_photo_file()
         photo2 = generate_photo_file()
@@ -108,9 +108,9 @@ class TestUserAskQuestionPost(APITestCase):
         """
         self.client.force_authenticate(self.user)
         self.client.post(self.url, data=self.ask_data4)
-        new_tag = ThemeTag.objects.get(tag='dj')
+        new_tag = ThemeTag.objects.get(tag_name='dj')
 
-        self.assertEqual(new_tag.tag, 'dj')
+        self.assertEqual(new_tag.tag_name, 'dj')
         self.assertEqual(new_tag.user, self.user)
 
         self.assertFalse(new_tag.is_relevant)
@@ -130,9 +130,9 @@ class TestUserAskQuestionPost(APITestCase):
         """
         self.client.force_authenticate(self.user)
         self.client.post(self.url, data=self.ask_data5)
-        new_tag = ThemeTag.objects.get(tag='r')
+        new_tag = ThemeTag.objects.get(tag_name='r')
 
-        self.assertEqual(new_tag.tag, 'r')
+        self.assertEqual(new_tag.tag_name, 'r')
         self.assertEqual(new_tag.user, self.user)
 
         self.assertFalse(new_tag.is_relevant)
@@ -213,13 +213,13 @@ class TestUserAskQuestionGet(APITestCase):
     def setUp(self) -> None:
         self.url = reverse('ask-question')
 
-        self.tag1 = ThemeTag.objects.create(tag='django')
-        self.tag2 = ThemeTag.objects.create(tag='react')
-        self.tag3 = ThemeTag.objects.create(tag='python')
-        self.tag4 = ThemeTag.objects.create(tag='nextjs')
-        self.tag5 = ThemeTag.objects.create(tag='C#')
-        self.tag6 = ThemeTag.objects.create(tag='Java')
-        self.tag7 = ThemeTag.objects.create(tag='django-rest-framework')
+        self.tag1 = ThemeTag.objects.create(tag_name='django')
+        self.tag2 = ThemeTag.objects.create(tag_name='react')
+        self.tag3 = ThemeTag.objects.create(tag_name='python')
+        self.tag4 = ThemeTag.objects.create(tag_name='nextjs')
+        self.tag5 = ThemeTag.objects.create(tag_name='C#')
+        self.tag6 = ThemeTag.objects.create(tag_name='Java')
+        self.tag7 = ThemeTag.objects.create(tag_name='django-rest-framework')
 
         self.question1 = Question.objects.create(title='Заголовок', content='Контент')
         self.question1.tags.add(self.tag1.id, self.tag7.id)
@@ -255,9 +255,9 @@ class TestUserAskQuestionGet(APITestCase):
         content = json.loads(response.content.decode())
         first_dict, second_dict = content[0], content[1]
 
-        self.assertEqual(first_dict.get('tag'), 'django')
+        self.assertEqual(first_dict.get('tag_name'), 'django')
         self.assertEqual(first_dict.get('use_count'), 2)
-        self.assertEqual(second_dict.get('tag'), 'django-rest-framework')
+        self.assertEqual(second_dict.get('tag_name'), 'django-rest-framework')
         self.assertEqual(second_dict.get('use_count'), 1)
 
     def test_request_with_tag_does_not_exist(self):
@@ -274,7 +274,7 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
     Обновление вопроса.
     """
     def setUp(self) -> None:
-        self.tag1 = ThemeTag.objects.create(tag='django')
+        self.tag1 = ThemeTag.objects.create(tag_name='django')
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
@@ -352,8 +352,8 @@ class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
-        self.tag1 = ThemeTag.objects.create(tag='django', is_user_tag=True, is_relevant=False)
-        self.tag2 = ThemeTag.objects.create(tag='django-rest-framework', is_relevant=False)
+        self.tag1 = ThemeTag.objects.create(tag_name='django', is_user_tag=True, is_relevant=False)
+        self.tag2 = ThemeTag.objects.create(tag_name='django-rest-framework', is_relevant=False)
 
     def test_tag_is_relevant(self):
 
@@ -401,7 +401,7 @@ class TestLeaveAnswerAPIView(APITestCase):
                                                 password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент')
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         photo = generate_photo_file()
         photo2 = generate_photo_file()
@@ -473,7 +473,7 @@ class TestUpdateDestroyAnswerAPIView(APITestCase):
                                                  password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
         self.question.tags.add(self.tag)
         self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
                                                     answer='Изначальный ответ...')
@@ -542,7 +542,7 @@ class TestCreateCommentAPIView(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
         self.question.tags.add(self.tag)
         self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
                                                     answer='Изначальный ответ...')
@@ -583,7 +583,7 @@ class TestUpdateCommentAPIView(APITestCase):
                                                  password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
         self.question.tags.add(self.tag)
         self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
                                                     answer='Изначальный ответ...')
@@ -612,7 +612,7 @@ class TestLikeDislikeAPIView(APITestCase):
                                                  password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
         self.question.tags.add(self.tag)
         self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
                                                     answer='Изначальный ответ...')

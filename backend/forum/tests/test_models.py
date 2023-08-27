@@ -11,13 +11,13 @@ class TestThemeTagMakingTagRelevant(APITestCase):
     """
 
     def setUp(self) -> None:
-        self.tag1 = ThemeTag.objects.create(tag='django', is_relevant=False, is_user_tag=True)
-        self.tag2 = ThemeTag.objects.create(tag='react', is_relevant=False)
-        self.tag3 = ThemeTag.objects.create(tag='python', is_relevant=False)
-        self.tag4 = ThemeTag.objects.create(tag='nextjs', is_relevant=False)
-        self.tag5 = ThemeTag.objects.create(tag='C#', is_relevant=False)
-        self.tag6 = ThemeTag.objects.create(tag='Java', is_relevant=False)
-        self.tag7 = ThemeTag.objects.create(tag='django-rest-framework', is_relevant=False)
+        self.tag1 = ThemeTag.objects.create(tag_name='django', is_relevant=False, is_user_tag=True)
+        self.tag2 = ThemeTag.objects.create(tag_name='react', is_relevant=False)
+        self.tag3 = ThemeTag.objects.create(tag_name='python', is_relevant=False)
+        self.tag4 = ThemeTag.objects.create(tag_name='nextjs', is_relevant=False)
+        self.tag5 = ThemeTag.objects.create(tag_name='C#', is_relevant=False)
+        self.tag6 = ThemeTag.objects.create(tag_name='Java', is_relevant=False)
+        self.tag7 = ThemeTag.objects.create(tag_name='django-rest-framework', is_relevant=False)
 
         for i in range(9):
             question = Question.objects.create(title=f'Заголовок{i}', content=f'Контент{i}')
@@ -41,7 +41,7 @@ class TestLikeDislike(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
-        self.tag = ThemeTag.objects.create(tag='django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.question.tags.add(self.tag)

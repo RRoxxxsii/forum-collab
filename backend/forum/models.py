@@ -45,7 +45,7 @@ class ThemeTag(models.Model):
     """
     Тег (подтема).
     """
-    tag = models.CharField(max_length=255, verbose_name='Тег', unique=True)
+    tag_name = models.CharField(max_length=255, verbose_name='Тег', unique=True)
     descriptions = models.TextField(verbose_name='Описание', null=True, blank=True)
 
     is_relevant = models.BooleanField(default=True, verbose_name='Релеватный тег')
@@ -58,7 +58,7 @@ class ThemeTag(models.Model):
                                          editable=False)
 
     def __str__(self):
-        return self.tag
+        return self.tag_name
 
     class Meta:
         verbose_name = 'Тема'
