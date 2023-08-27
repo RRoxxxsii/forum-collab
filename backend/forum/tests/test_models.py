@@ -50,21 +50,22 @@ class TestLikeDislike(APITestCase):
                                                     answer='Изначальный ответ...')
 
     def test_like_question(self):
-        self.question.like()
+        self.question.like(self.user)
         likes = QuestionRating.objects.all().first()
         self.assertEqual(likes.like_amount, 1)
 
     def test_dislike_question(self):
-        self.question.dislike()
+        likes = QuestionRating.objects.all().first()
+        self.question.dislike(self.user)
         likes = QuestionRating.objects.all().first()
         self.assertEqual(likes.dislike_amount, 1)
 
     def test_like_answer(self):
-        self.answer.like()
+        self.answer.like(self.user)
         likes = QuestionAnswerRating.objects.all().first()
         self.assertEqual(likes.like_amount, 1)
 
     def test_dislike_answer(self):
-        self.answer.dislike()
+        self.answer.dislike(self.user)
         likes = QuestionAnswerRating.objects.all().first()
         self.assertEqual(likes.dislike_amount, 1)

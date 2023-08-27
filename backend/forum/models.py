@@ -111,6 +111,8 @@ class QuestionRating(Rating):
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
     """
     question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
+    users_liked = models.ManyToManyField(NewUser, related_name='liked_question_ratings', blank=True)
+    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_question_ratings', blank=True)
 
     class Meta:
         verbose_name = 'Рейтинг вопроса'
@@ -158,6 +160,8 @@ class QuestionAnswerRating(Rating):
     Лайки и дизлайки ответа на вопрос. Рейтинг ответа.
     """
     answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
+    users_liked = models.ManyToManyField(NewUser, related_name='liked_answer_ratings', blank=True)
+    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_answer_ratings', blank=True)
 
     class Meta:
         verbose_name = 'Рейтинг ответа'
