@@ -29,7 +29,7 @@ class TagFieldSerializer(serializers.ModelSerializer):
     use_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('tag', 'use_count', 'is_relevant', 'is_user_tag')
+        fields = ('tag_name', 'use_count', 'is_relevant', 'is_user_tag')
         model = ThemeTag
 
     def get_use_count(self, obj: ThemeTag):
