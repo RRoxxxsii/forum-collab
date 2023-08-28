@@ -10,7 +10,7 @@ from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer)
-from .utils import (check_email_exists, get_current_site,
+from .utils import (email_exists, get_current_site,
                     send_confirmation_email)
 
 
@@ -86,7 +86,7 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         email = serializer.validated_data['email']
         user = request.user
         # Проверка на то, существует ли такой адрес в БД.
-        if check_email_exists(email):
+        if email_exists(email):
             return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
@@ -150,7 +150,7 @@ class RestoreAccountAPIView(GenericAPIView):
         email = serializer.validated_data['email']
         user = request.user
         # Проверка на то, существует ли такой адрес в БД и активен ли пользователь.
-        if not check_email_exists(email) or user.is_active:
+        if not email_exists(email) or user.is_active:
             return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
         elif user.email == email:
             # Создаем новый токен

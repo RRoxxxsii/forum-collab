@@ -32,17 +32,9 @@ def send_confirmation_email(template_name: str, current_url: str, email: str, to
               fail_silently=True)
 
 
-def check_email_exists(email: str) -> bool:
+def email_exists(email: str) -> bool:
     """
     Проверка на то, существует ли электронный адрес. Если да, возвращает True,
     в противном случае False.
     """
-    email_exists = False
-    try:
-        NewUser.objects.get(email=email)
-    except NewUser.DoesNotExist:
-        pass
-    else:
-        email_exists = True
-
-    return email_exists
+    return NewUser.objects.filter(email=email).exists()
