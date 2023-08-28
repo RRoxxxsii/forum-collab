@@ -1,12 +1,19 @@
 'use client'
-import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react'
+import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
+import { Dispatch, SetStateAction } from 'react'
 import './styles.scss'
-import { EditorExtensions } from './utils/Extensions'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
-import { useCallback } from 'react'
+import { EditorExtensions } from './utils/Extensions'
 
-export const TiptapEditor = () => {
-	const logContent = useCallback((e: Editor) => console.log(e.getJSON()), [])
+const EditorContentValue = ``
+
+export const TiptapEditor = ({
+	questionContent,
+	setQuestionContent,
+}: {
+	questionContent: string
+	setQuestionContent: Dispatch<SetStateAction<string>>
+}) => {
 	const editor = useEditor({
 		extensions: EditorExtensions,
 		editorProps: {
@@ -14,7 +21,11 @@ export const TiptapEditor = () => {
 				class: `border-2 rounded-sm border-gray-400`,
 			},
 		},
+		content: EditorContentValue,
 	})
+	if (editor) {
+		setQuestionContent(editor?.getHTML())
+	}
 
 	return (
 		<>
@@ -30,7 +41,12 @@ export const TiptapEditor = () => {
 					<BubbleMenuContent editor={editor} />
 				</BubbleMenu>
 			)}
-			<EditorContent className='editor' editor={editor} />
+			<EditorContent
+				onChange={(e) => setQuestionContent}
+				value={questionContent}
+				className='editor'
+				editor={editor}
+			/>
 		</>
 	)
 }

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { BASE_URL } from './shared/constants'
 
 export async function middleware(request: NextRequest) {
 	const accessTokenCookie = request.cookies.get('access_token')
@@ -21,16 +22,13 @@ export async function middleware(request: NextRequest) {
 	//the situation when user doesn't have an access token, but has a refresh one.
 	//create new access token
 	try {
-		const isAuth = await fetch(
-			'http://localhost:8000/api/v1/account/refresh/',
-			{
-				method: 'POST',
-				body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}
-		)
+		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
+			method: 'POST',
+			body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
 		const data = await isAuth.json()
 
 		const newAccessToken = data.access

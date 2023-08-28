@@ -25,33 +25,41 @@ export const UserResetForm = () => {
 	})
 
 	async function onSubmit(credentials: UserResetType) {
-		const loginToast = toast.loading('Авторизация...')
-		const response = await fetch('/api/auth/reset', {
-			method: 'POST',
-			body: JSON.stringify({
-				email: credentials.email,
-			}),
-			headers: { 'Content-Type': 'application/json' },
-		})
+		const loginToast = toast.loading('Сброс пароля...')
+		try {
+			const response = await fetch('/api/auth/reset-password', {
+				method: 'POST',
+				body: JSON.stringify({
+					email: credentials.email,
+				}),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-		const result = await response.json()
-		console.log(result)
-		if (!response.ok) {
+			const result = await response.json()
+			if (!response.ok) {
+				toast.update(loginToast, {
+					render: result.detail,
+					type: 'error',
+					isLoading: false,
+					autoClose: 3000,
+				})
+				return null
+			}
 			toast.update(loginToast, {
-				render: result.detail,
+				render: result.message,
+				type: 'success',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			router.push('/login')
+		} catch (error: any | unknown) {
+			toast.update(loginToast, {
+				render: 'Соединение с сервером разорвано, попробуйте попытку позже',
 				type: 'error',
 				isLoading: false,
 				autoClose: 3000,
 			})
-			return null
 		}
-		toast.update(loginToast, {
-			render: result.message,
-			type: 'success',
-			isLoading: false,
-			autoClose: 3000,
-		})
-		router.push('/auth/login')
 	}
 
 	return (

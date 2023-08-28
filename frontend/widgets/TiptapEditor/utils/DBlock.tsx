@@ -15,7 +15,7 @@ declare module '@tiptap/core' {
 		}
 	}
 }
-
+//todo
 export const DBlock = Node.create<DBlockOptions>({
 	name: 'dBlock',
 	priority: 1000,

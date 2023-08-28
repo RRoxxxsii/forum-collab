@@ -6,8 +6,10 @@ export interface IUser {
 }
 
 export interface IChip {
-	key: number
-	label: string
+	tag: string
+	use_count: string
+	is_relevant: boolean
+	is_user_tag: boolean
 }
 
 export interface IReply {
@@ -32,4 +34,10 @@ export interface IQuestionItem {
 	comments?: IComment[]
 	replies?: IReply[]
 	chips: IChip[]
+}
+
+export interface LinkType {
+	text: string
+	href: string
+	icon: any
 }

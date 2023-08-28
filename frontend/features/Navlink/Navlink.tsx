@@ -1,6 +1,6 @@
 'use client'
 
-import { LinkType } from '@/widgets/Header/Header'
+import { LinkType } from '@/types/types'
 import {
 	ListItem,
 	ListItemButton,

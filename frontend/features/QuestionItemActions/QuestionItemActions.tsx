@@ -29,8 +29,8 @@ export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
 				component='ul'>
 				{chips.map((chip) => {
 					return (
-						<ListItem sx={{ p: 0, mr: 1, cursor: 'pointer' }} key={chip.label}>
-							<Chip label={chip.label} />
+						<ListItem sx={{ p: 0, mr: 1, cursor: 'pointer' }} key={chip.tag}>
+							<Chip key={chip.tag} label={chip.tag} />
 						</ListItem>
 					)
 				})}

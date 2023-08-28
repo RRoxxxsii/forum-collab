@@ -28,6 +28,12 @@
 		list-style: disc;
 	}
 
+	code,
+	pre {
+		background-color: rgb(22, 22, 22);
+		@apply text-blue-200;
+	}
+
 	a {
 		@apply text-cyan-300;
 	}

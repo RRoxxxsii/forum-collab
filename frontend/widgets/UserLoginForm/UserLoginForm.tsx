@@ -5,7 +5,7 @@ import {
 } from '@/lib/validation/auth/UserAuthSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
-import { Button, FormControl, TextField, Typography } from '@mui/material'
+import { FormControl, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -28,34 +28,43 @@ export const UserLoginForm = () => {
 
 	async function onSubmit(credentials: UserLoginType) {
 		const loginToast = toast.loading('Авторизация...')
-		const response = await fetch('/api/auth/login', {
-			method: 'POST',
-			body: JSON.stringify({
-				email: credentials.email,
-				password: credentials.password,
-			}),
-			headers: { 'Content-Type': 'application/json' },
-		})
+		try {
+			const response = await fetch('/api/auth/login', {
+				method: 'POST',
+				body: JSON.stringify({
+					email: credentials.email,
+					password: credentials.password,
+				}),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-		const result = await response.json()
-		console.log(result)
-		if (!response.ok) {
+			const result = await response.json()
+
+			if (!response.ok) {
+				toast.update(loginToast, {
+					render: result.detail,
+					type: 'error',
+					isLoading: false,
+					autoClose: 3000,
+				})
+				setResetPassword(true)
+				return null
+			}
 			toast.update(loginToast, {
-				render: result.detail,
+				render: result.message,
+				type: 'success',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			router.push('/')
+		} catch (error: any | unknown) {
+			toast.update(loginToast, {
+				render: 'Разорвана связь с сервером, проверьте подключение',
 				type: 'error',
 				isLoading: false,
 				autoClose: 3000,
 			})
-			setResetPassword(true)
-			return null
 		}
-		toast.update(loginToast, {
-			render: result.message,
-			type: 'success',
-			isLoading: false,
-			autoClose: 3000,
-		})
-		router.push('/')
 	}
 
 	return (
@@ -122,7 +131,7 @@ export const UserLoginForm = () => {
 				</LoadingButton>
 				{resetPassword && (
 					<Typography sx={{ textAlign: 'center', mt: 2, color: 'lightblue' }}>
-						Забыли пароль? <Link href={'/auth/reset'}>Восстановить</Link>
+						Забыли пароль? <Link href={'/reset-password'}>Восстановить</Link>
 					</Typography>
 				)}
 			</FormControl>

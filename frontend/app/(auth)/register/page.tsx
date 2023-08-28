@@ -1,11 +1,12 @@
+import { OauthActions } from '@/features/OauthActions/OauthActions'
+import { UserRegisterForm } from '@/widgets/UserRegisterForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
-import { UserResetForm } from '@/widgets/UserResetForm'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-	title: 'Reset password',
-	description: "Reset account's password",
+	title: 'Register',
+	description: 'Register the account',
 }
 
 export default function RegisterPage() {
@@ -21,14 +22,25 @@ export default function RegisterPage() {
 				<div className='flex flex-col space-y-2 text-center'>
 					<LogoDev className='mx-auto h-6 w-6' />
 					<h1 className='text-2xl font-semibold tracking-tight'>
-						Восстановление аккаунта
+						Создание аккаунта
 					</h1>
 					<p className='text-sm text-muted-foreground'>
-						Введите свое почтовый адрес, чтобы получить на него дальнейшие
-						инструкции
+						Введите свое имя пользователя, почтовый адрес и пароль для создания
+						аккаунта
 					</p>
 				</div>
-				<UserResetForm />
+				<UserRegisterForm />
+				<p className='px-8 text-center text-sm text-muted-foreground'>
+					<Link
+						href='/login'
+						className='hover:text-brand underline underline-offset-4'>
+						Есть аккаунт? Войти
+					</Link>
+				</p>
+				<p className='px-8 text-center text-sm text-muted-foreground text-slate-500'>
+					Или же войти с помощью
+				</p>
+				<OauthActions />
 			</div>
 		</div>
 	)
