@@ -16,7 +16,7 @@ from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                CreateCommentSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer)
+                               UpdateQuestionSerializer, RetrieveQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -65,7 +65,8 @@ class AskQuestionAPIView(GenericAPIView):
         question.tags.add(*tag_ids)
         question.save()
 
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+        serialized_question = RetrieveQuestionSerializer(question)
+        return Response(data=serialized_question.data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.request.method)

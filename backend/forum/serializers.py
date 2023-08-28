@@ -22,6 +22,25 @@ class AskQuestionSerializer(serializers.ModelSerializer):
         fields = ('tags', 'title', 'content', 'uploaded_images')
 
 
+class RetrieveQuestionSerializer(serializers.ModelSerializer):
+    tags = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField(read_only=True)
+    user_id = serializers.IntegerField(read_only=True)
+    user_name = serializers.StringRelatedField(read_only=True, many=False, source='user')
+
+    class Meta:
+        model = Question
+        fields = ('id', 'tags', 'user_id', 'user_name', 'title', 'content', 'images', 'creation_date')
+
+    def get_tags(self, instance):
+        return [tag.tag_name for tag in instance.tags.all()]
+
+
+    def get_images(self, instance):
+        return [image.image.url for image in instance.question_images.all()]
+
+
+
 class TagFieldSerializer(serializers.ModelSerializer):
     """
     Сериализатор тегов для GET-запроса.
