@@ -33,12 +33,12 @@ class RetrieveQuestionSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'user_id', 'user_name', 'title', 'content', 'images', 'creation_date')
 
     def get_tags(self, instance):
-        tags_data = [tag.tag_name for tag in instance.tags.all()]
-        return tags_data
+        return [tag.tag_name for tag in instance.tags.all()]
+
 
     def get_images(self, instance):
-        images_data = [image.image.url for image in instance.question_images.all()]
-        return images_data
+        return [image.image.url for image in instance.question_images.all()]
+
 
 
 class TagFieldSerializer(serializers.ModelSerializer):
