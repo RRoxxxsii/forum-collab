@@ -35,10 +35,8 @@ class RetrieveQuestionSerializer(serializers.ModelSerializer):
     def get_tags(self, instance):
         return [tag.tag_name for tag in instance.tags.all()]
 
-
     def get_images(self, instance):
         return [image.image.url for image in instance.question_images.all()]
-
 
 
 class TagFieldSerializer(serializers.ModelSerializer):
@@ -78,13 +76,14 @@ class UpdateQuestionAnswerSerializer(serializers.ModelSerializer):
         fields = ('answer',)
 
 
-class UpdateQuestionSerializer(serializers.ModelSerializer):
+class UpdateQuestionSerializer(RetrieveQuestionSerializer):
     """
     Серилизатор для обновления вопроса.
     """
     class Meta:
-        model = Question
-        fields = ('content', )
+        model = RetrieveQuestionSerializer.Meta.model
+        fields = RetrieveQuestionSerializer.Meta.fields
+        extra_kwargs = {'title': {'required': False}}
 
 
 class CreateCommentSerializer(serializers.ModelSerializer):
