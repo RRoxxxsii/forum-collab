@@ -2,6 +2,8 @@ import io
 import json
 import random
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from accounts.models import NewUser
 from django.urls import reverse
 from PIL import Image
@@ -14,12 +16,18 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 
 
 def generate_photo_file():
-    file = io.BytesIO()
+    # Create an in-memory image
     image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+
+    # Save the image to a BytesIO buffer
+    file = io.BytesIO()
     image.save(file, 'png')
     file.name = f'test{random.randint(1, 1000000)}.png'
-    file.seek(0)
-    return file
+
+    # Create a SimpleUploadedFile object from the BytesIO buffer
+    uploaded_file = SimpleUploadedFile(file.name, file.getvalue())
+
+    return uploaded_file
 
 
 class TestUserAskQuestionPost(APITestCase):
@@ -66,14 +74,19 @@ class TestUserAskQuestionPost(APITestCase):
         self.ask_data9 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
                           'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
                           'uploaded_images': [photo, photo2]}
-
         self.ask_data10 = {'title': 'Заголовок3', 'content': 'Вопрос. Не знаю как решить пробелему..',
                            'tags': ['django', 'react', 'python', 'nextjs', 'C#'],
                            'uploaded_images': [photo, photo2, photo3, photo4]}
+        self.ask_data11 = {'title': 'Заголовок', 'tags': ['django', 'react', 'python', 'nextjs', 'C#']}
 
     def test_user_not_authenticated(self):
         response = self.client.post(self.url, data=self.ask_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def create_question_without_content(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(self.url, data=self.ask_data11)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_request_with_one_tag(self):
         self.client.force_authenticate(self.user)
@@ -284,7 +297,15 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
         self.question1 = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
         self.question1.tags.add(self.tag1.id)
 
+        self.question2 = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
+        self.question2.tags.add(self.tag1.id)
+        image = generate_photo_file()
+        image2 = generate_photo_file()
+        image_obj = QuestionImages.objects.create(image=image, parent=self.question2)
+        image_obj2 = QuestionImages.objects.create(image=image2, parent=self.question2)
+
         self.url = reverse('update-question', kwargs={'pk': self.question1.id})
+        self.url = reverse('update-question', kwargs={'pk': self.question2.id})
         self.data = {'content': 'Обновленный вопрос'}
 
     def test_update_question_not_owner(self):
@@ -305,6 +326,14 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
     def test_update_question(self):
         """
         Обновление ответа с помощью метода put.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.put(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_question_with_existed_photos(self):
+        """
+        Обновление тега, для которого уже существуют фотографиями.
         """
         self.client.force_authenticate(self.user2)
         response = self.client.put(self.url, data=self.data)
