@@ -173,7 +173,8 @@ class AnswerComment(models.Model):
     Комментарий. Ответ на 'ответ'. Под 'ответ' подразумевается ответ на комментарий.
     """
     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='answer_comments', null=True)
-    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments')
+    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments',
+                                        verbose_name='Ответ на вопрос (ID)')
 
     comment = models.TextField(max_length=320, verbose_name='Текст комментария')
 
