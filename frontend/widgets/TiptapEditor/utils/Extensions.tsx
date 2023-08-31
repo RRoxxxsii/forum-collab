@@ -10,7 +10,6 @@ import TypographyExtension, {
 } from '@tiptap/extension-typography'
 import { Extension, Mark } from '@tiptap/react'
 import StarterKit, { StarterKitOptions } from '@tiptap/starter-kit'
-import DragButtons from './DragButtons'
 
 export const EditorExtensions: (
 	| Extension<StarterKitOptions, any>

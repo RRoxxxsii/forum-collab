@@ -7,9 +7,5 @@ interface QuestionsLayoutProps {
 export default async function QuestionsLayout({
 	children,
 }: QuestionsLayoutProps) {
-	return (
-		<div className=''>
-			<Header>{children}</Header>
-		</div>
-	)
+	return <div className=''>{children}</div>
 }

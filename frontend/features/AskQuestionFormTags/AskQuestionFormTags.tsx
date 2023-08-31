@@ -1,90 +1,53 @@
 'use client'
 
-import { useDebounce } from '@/hooks/useMobile/useDebounce'
-import { Box, TextField } from '@mui/material'
+import { IChip } from '@/types/types'
+import { Box, Chip, TextField } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import React, { useEffect } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
-export const AskQuestionFormTags = () => {
-	const [value, setValue] = React.useState<any | null>(null)
-	const [options, setOptions] = React.useState<any[]>([])
-	const [inputValue, setInputValue] = React.useState<string>('')
-
-	const fetchSuggestions = async (inputValue: string) => {
-		await fetch('', {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
-
-	const debouncedFetchSuggestions = useDebounce(fetchSuggestions, 1000) // Adjust the delay as needed
-
-	useEffect(() => {
-		debouncedFetchSuggestions(inputValue)
-	}, [inputValue, debouncedFetchSuggestions])
+export const AskQuestionFormTags = ({
+	limit,
+	disabled,
+	setTags,
+	tags,
+}: {
+	limit: number
+	disabled: boolean
+	tags: IChip[]
+	setTags: Dispatch<SetStateAction<string[]>>
+}) => {
+	const [value, setValue] = useState<any | null>(null)
+	const [disableInput, setDisableInput] = useState<boolean>(
+		value?.length >= limit
+	)
 
 	return (
 		<Box>
 			<Autocomplete
-				id='tags'
-				sx={{ width: 300 }}
-				getOptionLabel={(option) =>
-					typeof option === 'string' ? option : option.description
+				multiple
+				disabled={disabled || disableInput}
+				id='question-tags'
+				options={tags.map((chip) => chip.tag)}
+				sx={{ width: 600 }}
+				freeSolo
+				renderTags={(option: readonly string[], getTagProps) =>
+					option.map((chip: string, index: number) => (
+						<Chip
+							variant='outlined'
+							label={chip}
+							{...getTagProps({ index })}
+							disabled={disabled}
+							key={chip}
+						/>
+					))
 				}
-				filterOptions={(x) => x}
-				onInputChange={(event, newInputValue) => {
-					setInputValue(newInputValue)
-				}}
-				onChange={(event: any, newValue: any | null) => {
-					setOptions(newValue ? [newValue, ...options] : options)
-					setValue(newValue)
+				onChange={(_event: any, newValue: any) => {
+					setTags(newValue)
+					setDisableInput(newValue.length >= limit)
 				}}
 				renderInput={(params) => (
-					<TextField {...params} label='Выбрать теги' required fullWidth />
+					<TextField {...params} variant='outlined' label='Выбрать теги' />
 				)}
-				autoComplete
-				includeInputInList
-				filterSelectedOptions
-				value={value}
-				options={options}
-				noOptionsText='No tags'
-				// renderOption={(props, option) => {
-				// 	const matches =
-				// 		option.structured_formatting.main_text_matched_substrings || []
-
-				// 	const parts = parse(
-				// 		option.structured_formatting.main_text,
-				// 		matches.map((match: any) => [
-				// 			match.offset,
-				// 			match.offset + match.length,
-				// 		])
-				// 	)
-
-				// 	return (
-				// 		<li {...props}>
-				// 			<Grid container alignItems='center'>
-				// 				<Grid item sx={{ display: 'flex', width: 44 }}>
-				// 					<LocationOnIcon sx={{ color: 'text.secondary' }} />
-				// 				</Grid>
-				// 				<Grid
-				// 					item
-				// 					sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
-				// 					{parts.map((part, index) => (
-				// 						<Box
-				// 							key={index}
-				// 							component='span'
-				// 							sx={{ fontWeight: part.highlight ? 'bold' : 'regular' }}>
-				// 							{part.text}
-				// 						</Box>
-				// 					))}
-				// 					<Typography variant='body2' color='text.secondary'>
-				// 						{option.structured_formatting.secondary_text}
-				// 					</Typography>
-				// 				</Grid>
-				// 			</Grid>
-				// 		</li>
-				// 	)
-				// }}
 			/>
 		</Box>
 	)

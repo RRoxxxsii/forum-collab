@@ -3,6 +3,7 @@ import { UserLoginForm } from '@/widgets/UserLoginForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Logo from '@mui/icons-material/NotListedLocation'
 
 export const metadata: Metadata = {
 	title: 'Login',
@@ -20,7 +21,7 @@ export default function LoginPage() {
 			</Link>
 			<div className='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'>
 				<div className='flex flex-col space-y-2 text-center'>
-					<LogoDev className='mx-auto h-6 w-6' />
+					<Logo sx={{ width: 32, height: 32, margin: '0 auto' }} />
 					<h1 className='text-2xl font-semibold tracking-tight'>
 						И снова здравствуйте
 					</h1>
@@ -32,7 +33,7 @@ export default function LoginPage() {
 				<p className='px-8 text-center text-sm text-muted-foreground'>
 					<Link
 						data-cy='register-link'
-						href='/auth/register'
+						href='/register'
 						className='hover:text-brand underline underline-offset-4'>
 						Нет аккаунта? Зарегистрироваться
 					</Link>

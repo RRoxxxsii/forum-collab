@@ -3,6 +3,7 @@ import {
 	UserRegisterSchema,
 	UserRegisterType,
 } from '@/lib/validation/auth/UserAuthSchema'
+import { BASE_URL } from '@/shared/constants'
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { CircularProgress, FormControl, TextField } from '@mui/material'
@@ -13,11 +14,11 @@ import { toast } from 'react-toastify'
 
 export const registerUser = async (credentials: UserRegisterType) => {
 	const { email, password, username } = credentials
-	const registerToast = toast.loading('Авторизация...')
+	const registerToast = toast.loading('Создание аккаунта...')
 
 	try {
 		const res = await axios.post(
-			'http://localhost:8000/api/v1/account/create-account/',
+			`${BASE_URL}/account/create-account/`,
 			{
 				email,
 				password,
@@ -34,9 +35,9 @@ export const registerUser = async (credentials: UserRegisterType) => {
 			isLoading: false,
 			autoClose: 3000,
 		})
-		redirect('/auth/login')
+		redirect('/login')
 	} catch (error: any) {
-		console.log(error)
+
 		let errorMessage = ''
 		if (error?.response?.data?.email) {
 			error.response.data.email.forEach((error: string) => {
@@ -53,9 +54,11 @@ export const registerUser = async (credentials: UserRegisterType) => {
 				errorMessage += error + ' '
 			})
 		}
-		console.log(errorMessage)
 		toast.update(registerToast, {
-			render: errorMessage,
+			render:
+				errorMessage.length > 0
+					? errorMessage
+					: 'Разорвана связь с сервером, проверьте подключение',
 			type: 'error',
 			isLoading: false,
 			autoClose: 3000,

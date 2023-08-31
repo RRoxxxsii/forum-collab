@@ -5,8 +5,6 @@ import { test } from 'linkifyjs'
 import { useEffect, useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-// import { BubbleMenu } from "../../extensions/bubble-menu";
-
 interface CustomBubbleMenuProps {
 	editor: Editor
 }
