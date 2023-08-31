@@ -7,14 +7,14 @@ export async function middleware(request: NextRequest) {
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()
 	//if user's access token is valid then get a response
-	if (accessTokenCookie) {
+	if (accessTokenCookie?.value) {
 		return response
 	}
 	//if user access token AND refresh token is not valid return null
 	if (!accessTokenCookie && !refreshTokenCookie) {
 		return null
 	}
-	//if user has an acess token but the refresh token is already expired
+	//if user has an acсess token but the refresh token is already expired
 	if (!refreshTokenCookie) {
 		response.cookies.delete('access_token')
 		return response

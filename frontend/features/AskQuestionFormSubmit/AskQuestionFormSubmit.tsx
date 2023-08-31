@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@mui/material'
+import { redirect, useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
 
 export const AskQuestionFormSubmit = ({
@@ -13,60 +14,68 @@ export const AskQuestionFormSubmit = ({
 	tags: string[]
 	images: string[]
 }) => {
-	async function validateQuestion() {
-		if (
-			titleValue.length !== 0 &&
-			questionContent.length !== 0 &&
-			tags.length > 0 &&
-			tags.length < 6
-		) {
-			return true
-		}
-		return false
-	}
+	const router = useRouter()
+
 	async function onSubmit() {
 		const questionToast = toast.loading('Открытие вопроса...')
-		if (!validateQuestion) {
-			toast.update(questionToast, {
-				render: 'Заполните все поля',
-				type: 'error',
-				isLoading: false,
-				autoClose: 3000,
-			})
-			return null
-		}
-
 		try {
-			const response = await fetch('/api/forum/ask-question', {
-				method: 'POST',
-				body: JSON.stringify({
-					tags: tags,
-					title: titleValue,
-					content: questionContent,
-					uploaded_images: images,
-				}),
-				headers: { 'Content-Type': 'application/json' },
-			})
+			const tokenValid = await fetch('/api/auth/refresh', { method: 'GET' })
 
-			const result = await response?.json()
-			if (!response.ok) {
+			if (tokenValid.ok) {
+				const response = await fetch('/api/forum/ask-question', {
+					method: 'POST',
+					body: JSON.stringify({
+						tags: tags,
+						title: titleValue,
+						content: questionContent,
+						uploaded_images: images,
+					}),
+					headers: { 'Content-Type': 'application/json' },
+				})
+
+				const result = await response.json()
+				console.log(result.code)
+				if (!response.ok) {
+					if (result.code === 'token_not_valid') {
+						await fetch('/api/auth/refresh', { method: 'GET' })
+						onSubmit()
+						return null
+					}
+					let errorMessage = ''
+					if (result?.tags) {
+						errorMessage += 'Теги: '
+						result.tags.forEach((error: string) => {
+							errorMessage += error + ' '
+						})
+					}
+					if (result?.title) {
+						errorMessage += '\nЗаголовок: '
+						result.tags.forEach((error: string) => {
+							errorMessage += error + ' '
+						})
+					}
+					toast.update(questionToast, {
+						render:
+							errorMessage.length > 0
+								? errorMessage
+								: 'Разорвана связь с сервером, проверьте подключение',
+						type: 'error',
+						isLoading: false,
+						autoClose: 3000,
+					})
+					return null
+				}
 				toast.update(questionToast, {
-					render: result?.detail ?? 'Произошла ошибка',
-					type: 'error',
+					render: result.message,
+					type: 'success',
 					isLoading: false,
 					autoClose: 3000,
 				})
-				return null
+				router.push(`/question/${result.id}`)
 			}
-			toast.update(questionToast, {
-				render: result.message,
-				type: 'success',
-				isLoading: false,
-				autoClose: 3000,
-			})
 		} catch (error: any | unknown) {
 			toast.update(questionToast, {
-				render: error.message,
+				render: 'Разорвана связь с сервером, проверьте подключение',
 				type: 'error',
 				isLoading: false,
 				autoClose: 3000,

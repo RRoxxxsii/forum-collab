@@ -37,7 +37,7 @@ export const registerUser = async (credentials: UserRegisterType) => {
 		})
 		redirect('/login')
 	} catch (error: any) {
-		console.log(error)
+
 		let errorMessage = ''
 		if (error?.response?.data?.email) {
 			error.response.data.email.forEach((error: string) => {

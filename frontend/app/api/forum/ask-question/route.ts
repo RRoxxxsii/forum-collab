@@ -11,7 +11,10 @@ export async function POST(req: NextRequest) {
 		}
 		const { tags, title, content, uploaded_images } = await req.json()
 
-		console.log(`${BASE_URL}/forum/ask-question`)
+		// const token = await fetch('http://localhost:3000/api/auth/refresh', {
+		// 	method: 'GET',
+		// })
+
 		const res = await fetch(`${BASE_URL}/forum/ask-question/`, {
 			body: JSON.stringify({
 				tags,
@@ -28,6 +31,8 @@ export async function POST(req: NextRequest) {
 
 		const data = await res.json()
 
+		console.log(data)
+
 		if (!res.ok) {
 			return NextResponse.json(
 				{
@@ -36,8 +41,7 @@ export async function POST(req: NextRequest) {
 				{ status: res.status }
 			)
 		}
-
-		return NextResponse.json({ message: res.json() }, { status: 200 })
+		return NextResponse.json({ ...data }, { status: 200 })
 	} catch (error: any | unknown) {
 		return NextResponse.json({ message: error.message }, { status: 500 })
 	}

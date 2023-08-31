@@ -8,26 +8,29 @@ export async function POST(req: NextRequest) {
 		}
 		const { email } = await req.json()
 
-		const res = await fetch(`${BASE_URL}/account/restore-account/`, {
+		const res = await fetch(`${BASE_URL}/account/password_reset/`, {
 			method: 'POST',
 			body: JSON.stringify({
 				email: email,
 			}),
 			headers: { 'Content-Type': 'application/json' },
 		})
-		console.log(res)
+
 		const data = await res.json()
 
 		if (!res.ok) {
 			return NextResponse.json(
 				{
-					message: data,
+					...data,
 				},
 				{ status: res.status }
 			)
 		}
-		return NextResponse.json({ message: res.json() }, { status: 200 })
-	} catch (error) {
-		console.log(error)
+		return NextResponse.json({ ...data }, { status: 200 })
+	} catch (error: any | unknown) {
+		return NextResponse.json(
+			{ message: error?.message },
+			{ status: error?.status }
+		)
 	}
 }

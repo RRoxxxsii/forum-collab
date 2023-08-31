@@ -6,14 +6,59 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { FormControl, TextField } from '@mui/material'
-import { useRouter } from 'next/navigation'
 
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
-export const UserResetForm = () => {
-	const router = useRouter()
+async function onSubmit(credentials: UserResetType) {
+	const resetToast = toast.loading('Сброс пароля...')
+	try {
+		const response = await fetch('/api/auth/reset-password', {
+			method: 'POST',
+			body: JSON.stringify({
+				email: credentials.email,
+			}),
+			headers: { 'Content-Type': 'application/json' },
+		})
 
+		const result = await response.json()
+
+		if (!response.ok) {
+			let errorMessage = ''
+
+			if (result?.email) {
+				result?.email.forEach((error: string) => {
+					errorMessage += error + ' '
+				})
+			}
+			toast.update(resetToast, {
+				render:
+					errorMessage.length > 0
+						? errorMessage
+						: 'Разорвана связь с сервером, проверьте подключение',
+				type: 'error',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			return null
+		}
+		toast.update(resetToast, {
+			render: result,
+			type: 'success',
+			isLoading: false,
+			autoClose: 3000,
+		})
+	} catch (error: any | unknown) {
+		toast.update(resetToast, {
+			render: 'Соединение с сервером разорвано, попробуйте попытку позже',
+			type: 'error',
+			isLoading: false,
+			autoClose: 3000,
+		})
+	}
+}
+
+export const UserResetForm = () => {
 	const {
 		control,
 		handleSubmit,
@@ -23,44 +68,6 @@ export const UserResetForm = () => {
 		resolver: zodResolver(UserResetSchema),
 		defaultValues: { email: '' },
 	})
-
-	async function onSubmit(credentials: UserResetType) {
-		const loginToast = toast.loading('Сброс пароля...')
-		try {
-			const response = await fetch('/api/auth/reset-password', {
-				method: 'POST',
-				body: JSON.stringify({
-					email: credentials.email,
-				}),
-				headers: { 'Content-Type': 'application/json' },
-			})
-
-			const result = await response.json()
-			if (!response.ok) {
-				toast.update(loginToast, {
-					render: result.detail,
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-				return null
-			}
-			toast.update(loginToast, {
-				render: result.message,
-				type: 'success',
-				isLoading: false,
-				autoClose: 3000,
-			})
-			router.push('/login')
-		} catch (error: any | unknown) {
-			toast.update(loginToast, {
-				render: 'Соединение с сервером разорвано, попробуйте попытку позже',
-				type: 'error',
-				isLoading: false,
-				autoClose: 3000,
-			})
-		}
-	}
 
 	return (
 		<>
