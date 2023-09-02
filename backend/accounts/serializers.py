@@ -3,6 +3,8 @@ from django.core.validators import ValidationError
 from rest_framework import serializers
 from rest_framework.serializers import \
     ValidationError as SerializerValidationError
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import NewUser
 
@@ -23,11 +25,45 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
-        password = self.validate_password(password)  # Call the custom validation method
+        password = self.validate_password(password)
         instance = self.Meta.model(**validated_data)
+        instance.set_password(password)
         instance.save()
         return instance
 
 
-class EmailSerializer(serializers.Serializer):
+class UserEmailSerializer(serializers.Serializer):
+    """
+    Сериализатор для почтового адреса пользователя.
+    """
     email = serializers.EmailField()
+
+
+class DummySerializer(serializers.Serializer):
+    """
+    Сериалзиатор-заглушка.
+    """
+    dummy_field = serializers.CharField(required=False, read_only=True, help_text='Поле-заглушка')
+
+
+class EmailTokenObtainSerializer(TokenObtainSerializer):
+    """
+    Переопределенный serializer из библиотеки SIMPLE_JWT.
+    """
+    username_field = NewUser.EMAIL_FIELD
+
+
+class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        refresh = self.get_token(self.user)
+
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+
+        return data

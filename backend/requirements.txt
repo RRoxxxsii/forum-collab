@@ -38,3 +38,11 @@ pytz==2023.3
 PyYAML==6.0.1
 sqlparse==0.4.4
 uritemplate==4.1.1
+rest_framework_simplejwt
+drf_yasg
+celery[redis]==5.2.7
+django_rest_passwordreset
+pytest-django
+django_celery_beat
+django-cors-headers
+Pillow

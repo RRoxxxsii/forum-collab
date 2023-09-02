@@ -39,8 +39,10 @@ class CustomAccountManager(BaseUserManager):
 
 class NewUser(AbstractBaseUser, PermissionsMixin):
 
-    email = models.EmailField(verbose_name='Почтовый адрес', unique=True)
-    user_name = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя')
+    email = models.EmailField(verbose_name='Почтовый адрес', unique=True,
+                              error_messages={'unique': 'Указаный почтовый адрес уже занято.'})
+    user_name = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя',
+                                 error_messages={'unique': 'Указаное имя уже занято.'})
 
     created = models.DateTimeField(default=timezone.now)
     about = models.TextField(verbose_name='Описание', max_length=500, blank=True)
@@ -49,6 +51,8 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     # Если is_active is False, в таком случае аккаунт пользователя удален.
     is_active = models.BooleanField(default=True)
+    # Время, на протяжении какого пользователь считается удаленным.
+    time_deleted = models.DateTimeField(null=True, blank=True)
 
     # Если is_banned is True, то пользователь не имеет доступа к сайту.
     is_banned = models.BooleanField(default=False)
@@ -58,8 +62,8 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomAccountManager()
 
-    USERNAME_FIELD = 'user_name'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['user_name']
 
     class Meta:
         verbose_name = 'Пользователь'

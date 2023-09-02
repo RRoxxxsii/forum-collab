@@ -1,4 +1,5 @@
 services:
+  # PostgreSQL
   db:
     image: postgres:14.1-alpine
     restart: always
@@ -9,6 +10,7 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
+  # Backend Django
   backend:
     build:
       context: ./backend
@@ -24,19 +26,20 @@ services:
       - static_volume:/backend/static
       - media_volume:/backend/media
 
+  # Frontend Next.js
   frontend:
     build:
       context: ./frontend
-    command: npm run dev
     depends_on:
       - backend
     volumes:
-      - .:/app/frontend
-      - /app/node_modules
-      - /app/.next
+      - ./frontend/:/frontend
+      - /frontend/:/node_modules
+      - /frontend/:/.next
     ports:
       - '3000:3000'
 
+  # Nginx
   nginx:
     build:
       dockerfile: ./Dockerfile
@@ -50,6 +53,56 @@ services:
       - backend
       - frontend
       - db
+
+  # Redis
+  redis:
+    image: redis:7.0.5-alpine
+    container_name: redis
+
+  # Celery Worker 1
+  celery-worker:
+    restart: always
+    build:
+      context: ./backend
+    entrypoint: /bin/sh
+    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app worker --loglevel=info"
+    volumes:
+      - .:/backend
+    container_name: celery-worker
+    depends_on:
+      - db
+      - redis
+      - backend
+    links:
+      - redis
+    env_file:
+      - backend/web.env
+
+  celery-beat:
+    restart: always
+    build:
+      context: ./backend
+    entrypoint: /bin/sh
+    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app beat --loglevel=info"
+    volumes:
+      - .:/backend
+    container_name: celery-beat
+    depends_on:
+      - db
+      - redis
+      - backend
+    links:
+      - redis
+    env_file:
+      - backend/web.env
+
+  # Flower
+  flower:
+    image: docker.io/mher/flower
+    command:
+      ['celery', '--broker=redis://redis:6379/0', 'flower', '--port=5555']
+    ports:
+      - 5555:5555
 
 volumes:
   db:
