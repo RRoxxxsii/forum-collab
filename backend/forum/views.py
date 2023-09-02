@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
@@ -16,7 +16,8 @@ from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                CreateCommentSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer, RetrieveQuestionSerializer, RetrieveAnswerSerializer)
+                               UpdateQuestionSerializer, RetrieveQuestionSerializer, RetrieveAnswerSerializer,
+                               ListQuestionSerializer, DetailQuestionSerializer, AnswerSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -177,3 +178,22 @@ class LikeDislikeViewSet(GenericViewSet):
             elif model_name == 'answer':
                 return QuestionAnswer.objects.get(pk=pk)
         raise ValueError('Параметр запроса несуществует или указан неверно.')
+
+
+class QuestionViewSet(ModelViewSet):
+    """
+    Листинг вопросов и вопроса со всеми его ответами и комментариями.
+    """
+    queryset = Question.objects.all()
+    serializer_classes = {'list': ListQuestionSerializer, 'retrieve': DetailQuestionSerializer}
+    http_method_names = ('get', )
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action)
+
+
+class AnswerViewSet(ModelViewSet):
+    queryset = QuestionAnswer.objects.all()
+    serializer_class = AnswerSerializer
+    http_method_names = ('get', )
+
