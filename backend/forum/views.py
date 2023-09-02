@@ -16,7 +16,7 @@ from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
                                CreateCommentSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer, RetrieveQuestionSerializer)
+                               UpdateQuestionSerializer, RetrieveQuestionSerializer, RetrieveAnswerSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -80,14 +80,13 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     serializer_class = UpdateQuestionSerializer
 
 
-class AnswerQuestionAPIView(GenericAPIView):
+class AnswerQuestionAPIView(CreateAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
     serializer_class = AnswerQuestionSerializer
-    success_message = 'Ответ на вопрос успешно опубликован.'
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         images = serializer.data.get('uploaded_images')
@@ -104,7 +103,9 @@ class AnswerQuestionAPIView(GenericAPIView):
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+
+        serializer = RetrieveAnswerSerializer(instance=question_answer)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
