@@ -20,5 +20,7 @@ urlpatterns = [
 
 router = DefaultRouter()
 router.register(r'likes', views.LikeDislikeViewSet, basename='like-dislike')
+router.register(r'questions', views.QuestionViewSet)
+router.register(r'answers', views.AnswerViewSet, basename='answer')
 
 urlpatterns += router.urls

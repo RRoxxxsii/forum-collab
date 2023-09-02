@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
+from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag, QuestionRating, QuestionAnswerRating
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
@@ -121,3 +121,55 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
         model = AnswerComment
         fields = ('id', 'user',  'comment', 'question_answer', 'creation_date')
         read_only_fields = ('id', 'question_answer', 'creation_date', 'user')
+
+
+class QuestionRatingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QuestionRating
+        fields = '__all__'
+
+
+class AnswerRatingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QuestionAnswerRating
+        fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AnswerComment
+        fields = '__all__'
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    rating = AnswerRatingSerializer(read_only=True)
+    images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='answer-detail',
+                                                 source='answer_images')
+    comments = CommentSerializer(read_only=True, many=True, source='answer_comments')
+
+    class Meta:
+        model = QuestionAnswer
+        fields = '__all__'
+
+
+class ListQuestionSerializer(serializers.ModelSerializer):
+    rating = QuestionRatingSerializer(read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating')
+
+
+class DetailQuestionSerializer(serializers.ModelSerializer):
+
+    rating = QuestionRatingSerializer(read_only=True)
+    answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
+    images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='question-detail',
+                                                 source='question_images')
+
+    class Meta:
+        model = Question
+        fields = ('id', 'user', 'title', 'content', 'images', 'creation_date', 'rating', 'answers')
