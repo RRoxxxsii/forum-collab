@@ -58,7 +58,7 @@ class AnswerQuestionSerializer(serializers.ModelSerializer):
     Сериализатор для ответа на вопрос.
     """
     uploaded_images = serializers.ListField(
-        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
+        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False),
         validators=[validate_answer_related_obj_amount]
     )
 
@@ -67,13 +67,30 @@ class AnswerQuestionSerializer(serializers.ModelSerializer):
         fields = ('question', 'answer', 'uploaded_images')
 
 
+class RetrieveAnswerSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = QuestionAnswer
+        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'images', 'creation_date')
+
+    def get_images(self, instance):
+        return [image.image.url for image in instance.answer_images.all()]
+
+
 class UpdateQuestionAnswerSerializer(serializers.ModelSerializer):
     """
     Сериализатор для обновления ответа на вопрос.
     """
+    images = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = QuestionAnswer
-        fields = ('answer',)
+        fields = ('id', 'question', 'user', 'answer', 'creation_date', 'is_solving', 'images')
+        read_only_fields = ('question', 'creation_date', 'is_solving', 'user')
+
+    def get_images(self, instance):
+        return [image.image.url for image in instance.answer_images.all()]
 
 
 class UpdateQuestionSerializer(RetrieveQuestionSerializer):
@@ -92,7 +109,8 @@ class CreateCommentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AnswerComment
-        fields = ('question_answer', 'comment',)
+        fields = ('id', 'user', 'question_answer', 'comment', 'creation_date')
+        read_only_fields = ('id', 'creation_date', 'user')
 
 
 class UpdateCommentSerializer(serializers.ModelSerializer):
@@ -101,4 +119,5 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AnswerComment
-        fields = ('comment',)
+        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date')
+        read_only_fields = ('id', 'question_answer', 'creation_date', 'user')

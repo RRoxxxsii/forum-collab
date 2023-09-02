@@ -598,6 +598,9 @@ class TestCreateCommentAPIView(APITestCase):
         self.assertIsNone(comment.user)
 
     def test_comment_status_code(self):
+        """
+        Пользователь аутентифицирован.
+        """
         self.client.force_authenticate(self.user)
         response = self.client.post(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
