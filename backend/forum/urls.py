@@ -15,6 +15,7 @@ urlpatterns = [
     # Комментарии
     path('create-comment/', views.CommentAPIView.as_view(), name='create-comment'),
     path('update-comment/<int:pk>/', views.UpdateCommentAPIView.as_view(), name='update-comment'),
+    path('retrieve-comment/<int:pk>/', views.RetrieveCommentAPIView.as_view(), name='detail-comment'),
 
 ]
 

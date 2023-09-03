@@ -75,3 +75,24 @@ class TestUpdateCommentAPIView(APITestCase):
         response = self.client.put(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
+class TestRetrieveComment(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(comment='Комментарий..', user=self.user,
+                                                    question_answer=self.answer)
+        self.url = reverse('detail-comment', kwargs={'pk': self.comment.id})
+
+    def test_retrieve_comment(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

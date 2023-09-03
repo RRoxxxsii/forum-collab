@@ -3,7 +3,8 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import (CreateAPIView, GenericAPIView,
+                                     RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -12,13 +13,11 @@ from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
-from forum.serializers import (AnswerSerializer,
-                               AskQuestionSerializer,
-                               DetailQuestionSerializer,
-                               ListQuestionSerializer,
-                               TagFieldSerializer,
+from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
+                               CommentSerializer, DetailQuestionSerializer,
+                               ListQuestionSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionSerializer, CommentSerializer)
+                               UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -201,7 +200,17 @@ class QuestionViewSet(ModelViewSet):
 
 
 class AnswerViewSet(ModelViewSet):
+    """
+    Возвращение списка ответов / ответ по id.
+    """
     queryset = QuestionAnswer.objects.all()
     serializer_class = AnswerSerializer
     http_method_names = ('get', )
 
+
+class RetrieveCommentAPIView(RetrieveAPIView):
+    """
+    Возвращение комментария по id.
+    """
+    queryset = AnswerComment.objects.all()
+    serializer_class = CommentSerializer
