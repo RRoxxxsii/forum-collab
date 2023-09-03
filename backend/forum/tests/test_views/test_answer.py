@@ -94,7 +94,7 @@ class TestUpdateDestroyAnswerAPIView(APITestCase):
                                                     answer='Изначальный ответ...')
 
         self.url = reverse('update-answer', kwargs={'pk': self.answer.id})
-        self.data = {'question': self.question, 'answer': 'Обновленный ответ...'}
+        self.data = {'question': self.question.id, 'answer': 'Обновленный ответ...'}
 
     def test_update_answer_not_owner(self):
         """

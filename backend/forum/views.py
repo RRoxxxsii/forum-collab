@@ -3,7 +3,8 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import (CreateAPIView, GenericAPIView,
+                                     RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -12,14 +13,10 @@ from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
-from forum.serializers import (AnswerQuestionSerializer, AnswerSerializer,
-                               AskQuestionSerializer, CreateCommentSerializer,
-                               DetailQuestionSerializer,
-                               ListQuestionSerializer,
-                               RetrieveAnswerSerializer,
-                               RetrieveQuestionSerializer, TagFieldSerializer,
+from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
+                               CommentSerializer, DetailQuestionSerializer,
+                               ListQuestionSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionAnswerSerializer,
                                UpdateQuestionSerializer)
 
 
@@ -50,7 +47,8 @@ class AskQuestionAPIView(GenericAPIView):
         Создание вопроса. Поле user заполняется автоматически.
         Возвращает сообщение о результатах запроса.
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         title = serializer.data.get('title')
         content = serializer.data.get('content')
@@ -69,8 +67,14 @@ class AskQuestionAPIView(GenericAPIView):
         question.tags.add(*tag_ids)
         question.save()
 
-        serialized_question = RetrieveQuestionSerializer(question)
-        return Response(data=serialized_question.data, status=status.HTTP_201_CREATED)
+        data = {
+            'question': question.id,
+            'title': question.title,
+            'content': question.content,
+            'user': str(question.user)
+        }
+
+        return Response(data=data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.request.method)
@@ -88,7 +92,7 @@ class AnswerQuestionAPIView(CreateAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
-    serializer_class = AnswerQuestionSerializer
+    serializer_class = AnswerSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -108,7 +112,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
 
-        serializer = RetrieveAnswerSerializer(instance=question_answer)
+        serializer = self.serializer_class(instance=question_answer, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -116,7 +120,7 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
-    serializer_class = UpdateQuestionAnswerSerializer
+    serializer_class = AnswerSerializer
     queryset = QuestionAnswer.objects.all()
 
 
@@ -124,7 +128,7 @@ class CommentAPIView(CreateAPIView):
     """
     Комментарий к ответу. Создание.
     """
-    serializer_class = CreateCommentSerializer
+    serializer_class = CommentSerializer
 
 
 class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
@@ -196,7 +200,17 @@ class QuestionViewSet(ModelViewSet):
 
 
 class AnswerViewSet(ModelViewSet):
+    """
+    Возвращение списка ответов / ответ по id.
+    """
     queryset = QuestionAnswer.objects.all()
     serializer_class = AnswerSerializer
     http_method_names = ('get', )
 
+
+class RetrieveCommentAPIView(RetrieveAPIView):
+    """
+    Возвращение комментария по id.
+    """
+    queryset = AnswerComment.objects.all()
+    serializer_class = CommentSerializer
