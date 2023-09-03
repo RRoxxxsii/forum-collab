@@ -137,4 +137,10 @@ class TestQuestionDetailAPITestCase(APITestCase):
         self.expected_data_json = json.dumps(expected_data, indent=4, ensure_ascii=False)
 
     def test_ok(self):
+        """
+        Тест может падать из-за различия в одну секунду.
+        """
+        # print(self.expected_data_json)
+        # print('-' * 100)
+        # print(self.data_json)
         self.assertEqual(self.data_json, self.expected_data_json)
