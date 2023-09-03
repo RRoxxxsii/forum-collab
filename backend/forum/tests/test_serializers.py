@@ -1,13 +1,31 @@
 import datetime
+import io
 import json
+import random
 
+from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
 from forum.models import Question, ThemeTag, QuestionImages, QuestionAnswer, QuestionAnswerImages, AnswerComment
 from forum.serializers import DetailQuestionSerializer
-from forum.tests.test_views import generate_photo_file
+
+
+def generate_photo_file():
+    # Create an in-memory image
+    image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+
+    # Save the image to a BytesIO buffer
+    file = io.BytesIO()
+    image.save(file, 'png')
+    file.name = f'test{random.randint(1, 1000000)}.png'
+
+    # Create a SimpleUploadedFile object from the BytesIO buffer
+    uploaded_file = SimpleUploadedFile(file.name, file.getvalue())
+
+    return uploaded_file
 
 
 class TestQuestionDetailAPITestCase(APITestCase):
