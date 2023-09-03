@@ -10,8 +10,7 @@ from .models import EmailConfirmationToken
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer)
-from .utils import (email_exists, get_current_site,
-                    send_confirmation_email)
+from .utils import email_exists, get_current_site, send_confirmation_email
 
 
 class CustomUserRegisterAPIView(GenericAPIView):

@@ -3,13 +3,14 @@ import io
 import json
 import random
 
-from PIL import Image
+from accounts.models import NewUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
+from PIL import Image
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
-from forum.models import Question, ThemeTag, QuestionImages, QuestionAnswer, QuestionAnswerImages, AnswerComment
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerImages, QuestionImages, ThemeTag)
 from forum.serializers import DetailQuestionSerializer
 
 

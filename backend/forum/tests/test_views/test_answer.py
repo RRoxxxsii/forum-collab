@@ -1,9 +1,10 @@
+from accounts.models import NewUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
-from forum.models import Question, ThemeTag, QuestionAnswer, QuestionAnswerImages
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          ThemeTag)
 from forum.tests.test_serializers import generate_photo_file
 
 

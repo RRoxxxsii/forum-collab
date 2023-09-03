@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag, QuestionRating, QuestionAnswerRating
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
