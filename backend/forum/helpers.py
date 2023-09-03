@@ -1,9 +1,9 @@
+from accounts.models import NewUser
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from accounts.models import NewUser
 from forum.permissions import IsOwner
 
 

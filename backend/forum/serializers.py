@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag, QuestionRating, QuestionAnswerRating
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
@@ -135,6 +136,7 @@ class AnswerRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionAnswerRating
         fields = '__all__'
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -142,6 +144,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerComment
         fields = '__all__'
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -152,7 +155,9 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswer
-        fields = '__all__'
+        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date',
+                  'rating', 'images', 'comments')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class ListQuestionSerializer(serializers.ModelSerializer):
@@ -161,6 +166,7 @@ class ListQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class DetailQuestionSerializer(serializers.ModelSerializer):
@@ -172,4 +178,5 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'images', 'creation_date', 'rating', 'answers')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'images', 'rating', 'answers')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}

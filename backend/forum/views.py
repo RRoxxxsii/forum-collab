@@ -12,12 +12,15 @@ from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import add_image, create_return_tags, get_tags_or_error
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
-from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
-                               CreateCommentSerializer, TagFieldSerializer,
+from forum.serializers import (AnswerQuestionSerializer, AnswerSerializer,
+                               AskQuestionSerializer, CreateCommentSerializer,
+                               DetailQuestionSerializer,
+                               ListQuestionSerializer,
+                               RetrieveAnswerSerializer,
+                               RetrieveQuestionSerializer, TagFieldSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer, RetrieveQuestionSerializer, RetrieveAnswerSerializer,
-                               ListQuestionSerializer, DetailQuestionSerializer, AnswerSerializer)
+                               UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
