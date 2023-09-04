@@ -10,9 +10,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import add_image, create_return_tags, get_tags_or_error
+from forum.logic import (add_image, create_return_tags, get_tags_or_error,
+                         vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
+from forum.permissions import IsOwner, IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                CommentSerializer, DetailQuestionSerializer,
                                ListQuestionSerializer, TagFieldSerializer,
@@ -214,3 +216,20 @@ class RetrieveCommentAPIView(RetrieveAPIView):
     """
     queryset = AnswerComment.objects.all()
     serializer_class = CommentSerializer
+
+
+class MarkAnswerSolving(RetrieveAPIView):
+    """
+    Отмечает ответ на вопрос, как решающий проблему.
+    """
+    queryset = QuestionAnswer.objects.all()
+    permission_classes = [IsAuthenticated, IsQuestionOwner]
+    serializer_class = None
+
+    def get(self, request, *args, **kwargs):
+        answer = self.get_object()
+        related_question = answer.question
+
+        vote_answer_solving(answer=answer, related_question=related_question)
+
+        return Response(status=status.HTTP_200_OK)

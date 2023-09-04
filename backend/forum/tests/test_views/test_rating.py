@@ -197,3 +197,79 @@ class TestLikeDislikeAPIView(APITestCase):
         # Проверяем, поставился ли дизлайк
         rating = QuestionRating.objects.first()
         self.assertEqual(rating.dislike_amount, 1)
+
+
+class TestMarkAnswerAsSolving(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.answer2 = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                     answer='Изначальный ответ2...', is_solving=True)
+
+        self.url = reverse('mark-answer-solving', kwargs={'pk': self.answer.pk})
+
+    def test_vote_not_authenticated(self):
+        """
+        Пользователь не аутентифицирован. Возвращает ошибку.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_vote_not_owner(self):
+        """
+        Пользователь аутентифицирован, но не является владельцем вопроса. Возвращает ошибку.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_vote(self):
+        """
+        Пользователь аутентифицирован. Вопрос становится отмеченным как решающий.
+        """
+        self.client.force_authenticate(self.user)
+        self.assertFalse(self.answer.is_solving)
+        self.client.get(self.url)
+        self.answer.refresh_from_db()
+        self.assertTrue(self.answer.is_solving)
+
+    def test_unvote(self):
+        """
+        Убираем голос с вопроса.
+        """
+        self.client.force_authenticate(self.user)
+
+        # Сначала ставим is_solving=True
+        self.client.get(self.url)
+        self.answer.refresh_from_db()
+        self.assertTrue(self.answer.is_solving)
+
+        # Ставим is_solving=False
+        self.client.get(self.url)
+        self.answer.refresh_from_db()
+        self.assertFalse(self.answer.is_solving)
+
+    def test_vote_for_another_answer(self):
+        """
+        Голос за ответ, хотя на другой ответ уже стоит. Ожидается снятие голоса с ответа
+        и становление голоса на новый ответ.
+        """
+        self.client.force_authenticate(self.user)
+        self.assertFalse(self.answer.is_solving)
+        self.assertTrue(self.answer2.is_solving)
+        self.client.get(self.url)
+
+        self.answer.refresh_from_db()
+        self.answer2.refresh_from_db()
+
+        self.assertTrue(self.answer.is_solving)
+        self.assertFalse(self.answer2.is_solving)

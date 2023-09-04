@@ -11,6 +11,7 @@ urlpatterns = [
     # Ответы
     path('answer-question/', views.AnswerQuestionAPIView.as_view(), name='answer-question'),
     path('update-answer/<int:pk>/', views.UpdateQuestionAnswerAPIView.as_view(), name='update-answer'),
+    path('mark-answer-solving/<int:pk>/', views.MarkAnswerSolving.as_view(), name='mark-answer-solving'),
 
     # Комментарии
     path('create-comment/', views.CommentAPIView.as_view(), name='create-comment'),
