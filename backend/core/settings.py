@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # Кастомный middleware для запрета доступа забененному юзеру на веб-сайт
-    'accounts.middleware.ActiveUserMiddleware',
+    'middleware.ActiveUserMiddleware',
 
 ]
 
