@@ -60,3 +60,22 @@ def add_image(images: list, obj_model: [Question | QuestionAnswer],
     """
     for image in images:
         attachment_model.objects.create(image=image, parent=obj_model)
+
+
+def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
+    """
+    Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
+    запрос, отметка вопроса как решившего проблему снимается. Если ответ не отмечен как решающий
+    и для вопроса нет решающих ответов, тогда ответ отмечается как решающим, если же есть
+    другой решающий ответ, метка решающего ответа с него снимается и ставится на другой ответ.
+    """
+    if answer.is_solving:
+        answer.is_solving = False
+    else:
+        if related_question.question_answers.filter(is_solving=True).exists():
+            is_solving_answer = related_question.question_answers.get(is_solving=True)
+            is_solving_answer.is_solving = False
+            is_solving_answer.save()
+        answer.is_solving = True
+
+    answer.save()
