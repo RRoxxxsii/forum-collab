@@ -14,7 +14,7 @@ from forum.logic import (add_image, create_return_tags, get_tags_or_error,
                          vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
-from forum.permissions import IsOwner, IsQuestionOwner
+from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                CommentSerializer, DetailQuestionSerializer,
                                ListQuestionSerializer, TagFieldSerializer,
@@ -192,13 +192,26 @@ class LikeDislikeViewSet(GenericViewSet):
 class QuestionViewSet(ModelViewSet):
     """
     Листинг вопросов и вопроса со всеми его ответами и комментариями.
+    Параметр запроса - limit, определяющий кол-во возвращаемых записей.
     """
-    queryset = Question.objects.all()
     serializer_classes = {'list': ListQuestionSerializer, 'retrieve': DetailQuestionSerializer}
     http_method_names = ('get', )
 
+    limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
+                              description="кол-во возвращаемых записей",
+                              type=openapi.TYPE_STRING, required=True)
+
+    @swagger_auto_schema(manual_parameters=[limit])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action)
+
+    def get_queryset(self):
+        limit = self.request.query_params.get('limit')
+        queryset = Question.objects.all()[:limit]
+        return queryset
 
 
 class AnswerViewSet(ModelViewSet):
