@@ -35,4 +35,3 @@ class BaseEmailConfirmAPIView(BaseEmailConfirmMixin, GenericAPIView):
     def get_serializer_class(self):
         # Возвращает сериализатор-заглушку, так как представление класса не нуждается в сериализаторе
         return DummySerializer
-
