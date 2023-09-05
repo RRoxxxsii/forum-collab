@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # Кастомный middleware для запрета доступа забененному юзеру на веб-сайт
-    'accounts.middleware.ActiveUserMiddleware',
+    'middleware.ActiveUserMiddleware',
 
 ]
 
@@ -227,4 +227,3 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:3000",
 ]
-
