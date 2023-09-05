@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@mui/material'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
 
 export const AskQuestionFormSubmit = ({
@@ -72,6 +72,13 @@ export const AskQuestionFormSubmit = ({
 					autoClose: 3000,
 				})
 				router.push(`/question/${result.id}`)
+			} else {
+				toast.update(questionToast, {
+					render: 'Разорвана связь с сервером, проверьте подключение',
+					type: 'error',
+					isLoading: false,
+					autoClose: 3000,
+				})
 			}
 		} catch (error: any | unknown) {
 			toast.update(questionToast, {

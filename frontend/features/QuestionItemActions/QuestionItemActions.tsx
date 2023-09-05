@@ -21,10 +21,11 @@ export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
 			<Box
 				sx={{
 					display: 'flex',
-					justifyContent: 'center',
-					flexWrap: 'wrap',
+					justifyContent: 'flex-start',
+					flexWrap: 'nowrap',
 					listStyle: 'none',
 					m: 0,
+					flex: '50%',
 				}}
 				component='ul'>
 				{chips.map((chip) => {
@@ -35,7 +36,7 @@ export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
 					)
 				})}
 			</Box>
-			<Box>
+			<Box sx={{ display: 'flex', flex: '50%', justifyContent: 'flex-end' }}>
 				<IconButton aria-label='comments'>
 					<Typography sx={{ mr: 1 }}>10</Typography>
 					<TextsmsIcon />
