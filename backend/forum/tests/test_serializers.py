@@ -59,12 +59,17 @@ class TestQuestionDetailAPITestCase(APITestCase):
 
         serialized_data = DetailQuestionSerializer(self.question, context={'request': request})
         self.data_json = json.dumps(serialized_data.data, indent=4, ensure_ascii=False)
+
+        # получаем текущее время
+        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         expected_data = {
             "id": 1,
             "user": 1,
             "title": "Заголовок",
             "content": "Контент",
-            "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "is_solved": False,
+            "creation_date": current_datetime,
             "images": [
                 "http://testserver/api/v1/forum/questions/1/",
                 "http://testserver/api/v1/forum/questions/2/"
@@ -84,7 +89,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "user": 1,
                     "answer": "Изначальный ответ...",
                     "is_solving": False,
-                    "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "creation_date": current_datetime,
                     "rating": {
                         "id": 1,
                         "like_amount": 0,
@@ -100,14 +105,14 @@ class TestQuestionDetailAPITestCase(APITestCase):
                         {
                             "id": 1,
                             "comment": "agagag",
-                            "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "creation_date": current_datetime,
                             "user": 1,
                             "question_answer": 1
                         },
                         {
                             "id": 2,
                             "comment": "bfbd",
-                            "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "creation_date": current_datetime,
                             "user": 1,
                             "question_answer": 1
                         }
@@ -119,7 +124,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "user": 1,
                     "answer": "Изначальный ответ2...",
                     "is_solving": False,
-                    "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "creation_date": current_datetime,
                     "rating": {
                         "id": 2,
                         "like_amount": 0,

@@ -119,5 +119,5 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'images', 'rating', 'answers')
+        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'images', 'rating', 'answers')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
