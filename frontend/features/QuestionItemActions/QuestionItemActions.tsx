@@ -1,6 +1,6 @@
 'use client'
 
-import { IChip } from '@/types/types'
+import { IQuestion } from '@/types/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import {
 	Box,
@@ -15,7 +15,11 @@ const ListItem = styled('li')(({ theme }) => ({
 	margin: theme.spacing(0.5),
 }))
 
-export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
+export const QuestionItemActions = ({
+	questionData,
+}: {
+	questionData: IQuestion
+}) => {
 	return (
 		<CardActions sx={{ width: '100%', justifyContent: 'space-between', p: 0 }}>
 			<Box
@@ -28,17 +32,23 @@ export const QuestionItemActions = ({ chips }: { chips: IChip[] }) => {
 					flex: '50%',
 				}}
 				component='ul'>
-				{chips.map((chip) => {
+				{questionData?.tags?.map((tag) => {
 					return (
-						<ListItem sx={{ p: 0, mr: 1, cursor: 'pointer' }} key={chip.tag}>
-							<Chip key={chip.tag} label={chip.tag} />
+						<ListItem
+							sx={{ p: 0, mr: 1, cursor: 'pointer' }}
+							key={tag.tag_name}>
+							<Chip key={tag.tag_name} label={tag.tag_name} />
 						</ListItem>
 					)
 				})}
 			</Box>
 			<Box sx={{ display: 'flex', flex: '50%', justifyContent: 'flex-end' }}>
 				<IconButton aria-label='comments'>
-					<Typography sx={{ mr: 1 }}>10</Typography>
+					<Typography sx={{ mr: 1 }}>
+						{questionData.answers && questionData?.answers?.length !== 0
+							? questionData?.answers?.length
+							: 0}
+					</Typography>
 					<TextsmsIcon />
 				</IconButton>
 			</Box>

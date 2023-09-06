@@ -1,14 +1,27 @@
-import { IQuestionItem } from '@/types/types'
-
+import { IQuestion } from '@/types/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Avatar, Box, CardContent, IconButton, Typography } from '@mui/material'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import ru from 'dayjs/locale/ru'
 export const QuestionItemContent = ({
 	questionData,
 }: {
-	questionData: Omit<IQuestionItem, 'chips'>
+	questionData: IQuestion
 }) => {
-	const { description, id, title, user } = questionData
-
+	const {
+		answers,
+		content,
+		creation_date,
+		id,
+		images,
+		is_solved,
+		rating,
+		title,
+		user,
+	} = questionData
+	dayjs.locale(ru)
+	dayjs.extend(relativeTime)
 	return (
 		<>
 			<Box sx={{ display: 'flex', width: '100%' }}>
@@ -41,14 +54,14 @@ export const QuestionItemContent = ({
 									variant='body2'
 									fontSize={12}
 									color='text.secondary'>
-									Отправлено: {user.username}{' '}
+									Отправлено: {user}
 								</Typography>
 								<Typography
 									variant='body2'
 									sx={{ ml: 1 }}
 									color='gray'
 									fontSize={12}>
-									4 Дня назад
+									{dayjs(creation_date).toNow(true) + ' назад'}
 								</Typography>
 							</Box>
 							<Box>
@@ -62,9 +75,10 @@ export const QuestionItemContent = ({
 						<Typography fontWeight={700} variant='body1' color='text.primary'>
 							{title}
 						</Typography>
-						<Typography variant='body1' color='text.secondary'>
-							{description}
-						</Typography>
+						<Typography
+							dangerouslySetInnerHTML={{ __html: content }}
+							variant='body1'
+							color='text.secondary'></Typography>
 					</CardContent>
 				</Box>
 			</Box>

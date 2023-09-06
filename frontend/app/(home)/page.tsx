@@ -7,10 +7,7 @@ import { Alert, AlertTitle, Box } from '@mui/material'
 export default async function HomePage() {
 	return (
 		<>
-		
-			<Box
-				sx={Home}
-				className='flex min-h-screen items-start max-h-80 relative'>
+			<Box sx={Home} className='flex min-h-screen items-start relative'>
 				<CategoryTabs />
 				<Box sx={HomeContainer}>
 					<Box sx={desktopList}>
