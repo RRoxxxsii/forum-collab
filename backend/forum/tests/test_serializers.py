@@ -136,7 +136,15 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "images": [],
                     "comments": []
                 }
+            ],
+            "tags": [
+                {
+                    "tag_name": "django",
+                    "is_relevant": True,
+                    "is_user_tag": False
+                }
             ]
+
         }
 
         self.expected_data_json = json.dumps(expected_data, indent=4, ensure_ascii=False)

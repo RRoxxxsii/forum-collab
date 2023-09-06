@@ -7,9 +7,16 @@ from forum.validators import (validate_answer_related_obj_amount,
                               validate_tags_amount)
 
 
-class TagFieldSerializer(serializers.ModelSerializer):
+class BaseTagFieldSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('tag_name', 'is_relevant', 'is_user_tag')
+        model = ThemeTag
+
+
+class TagFieldWithCountSerializer(serializers.ModelSerializer):
     """
-    Сериализатор тегов для GET-запроса.
+    Сериализатор тегов для GET-запроса с числом использования тегов.
     """
     use_count = serializers.SerializerMethodField()
 
@@ -103,10 +110,11 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 class ListQuestionSerializer(serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
@@ -116,8 +124,10 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
     images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='question-detail',
                                                  source='question_images')
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'images', 'rating', 'answers')
+        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'images',
+                  'rating', 'answers', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
