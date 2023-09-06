@@ -19,7 +19,6 @@ export const QuestionItemRating = ({ rating }: { rating: IRating }) => {
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'center',
-				mr: 2,
 			}}>
 			<IconButton onClick={setLike}>
 				<ArrowUpwardIcon></ArrowUpwardIcon>
