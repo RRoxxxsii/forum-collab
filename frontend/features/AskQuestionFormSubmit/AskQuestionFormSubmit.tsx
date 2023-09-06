@@ -21,6 +21,20 @@ export const AskQuestionFormSubmit = ({
 		try {
 			const tokenValid = await fetch('/api/auth/refresh', { method: 'GET' })
 
+			const tokenData = await tokenValid.json()
+
+			console.log(tokenData)
+
+			if (!tokenValid.ok) {
+				toast.update(questionToast, {
+					render: tokenData.message || 'Неизвестная ошибка',
+					type: 'error',
+					isLoading: false,
+					autoClose: 3000,
+				})
+				return null
+			}
+
 			if (tokenValid.ok) {
 				const response = await fetch('/api/forum/ask-question', {
 					method: 'POST',
@@ -36,12 +50,11 @@ export const AskQuestionFormSubmit = ({
 				const result = await response.json()
 				console.log(result.code)
 				if (!response.ok) {
-					if (result.code === 'token_not_valid') {
-						await fetch('/api/auth/refresh', { method: 'GET' })
-						onSubmit()
-						return null
-					}
 					let errorMessage = ''
+					if (result?.code) {
+						errorMessage +=
+							'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
+					}
 					if (result?.tags) {
 						errorMessage += 'Теги: '
 						result.tags.forEach((error: string) => {
@@ -71,7 +84,9 @@ export const AskQuestionFormSubmit = ({
 					isLoading: false,
 					autoClose: 3000,
 				})
-				router.push(`/question/${result.id}`)
+				router.push(
+					`/question/${result.question}/${result.title}?tags=${result.tags}`
+				)
 			} else {
 				toast.update(questionToast, {
 					render: 'Разорвана связь с сервером, проверьте подключение',

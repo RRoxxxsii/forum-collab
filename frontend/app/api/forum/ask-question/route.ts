@@ -11,10 +11,6 @@ export async function POST(req: NextRequest) {
 		}
 		const { tags, title, content, uploaded_images } = await req.json()
 
-		// const token = await fetch('http://localhost:3000/api/auth/refresh', {
-		// 	method: 'GET',
-		// })
-
 		const res = await fetch(`${BASE_URL}/forum/ask-question/`, {
 			body: JSON.stringify({
 				tags,
