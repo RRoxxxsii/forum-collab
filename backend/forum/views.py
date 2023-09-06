@@ -17,13 +17,13 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                CommentSerializer, DetailQuestionSerializer,
-                               ListQuestionSerializer, TagFieldSerializer,
+                               ListQuestionSerializer, TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
-    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldSerializer}
+    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer}
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
     success_message = 'Вопрос успешно опубликован.'

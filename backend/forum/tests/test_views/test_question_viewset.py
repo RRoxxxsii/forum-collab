@@ -43,6 +43,12 @@ class TestQuestionViewSet(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_list_question_content(self):
+        response = self.client.get(self.url)
+        content = json.loads(response.content.decode())
+        self.assertIn('rating', *content)
+        self.assertIn('tags', *content)
+
     def test_detail_question_status_code(self):
         response = self.client.get(self.detail_question_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -55,6 +61,7 @@ class TestQuestionViewSet(APITestCase):
         self.assertIn('answers', content)
         self.assertIn('images', content)
         self.assertIn('rating', content)
+        self.assertIn('tags', content)
 
         self.assertIn('comments', *content_answers)
         self.assertIn('images', *content_answers)
