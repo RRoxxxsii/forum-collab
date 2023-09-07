@@ -210,8 +210,9 @@ class QuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         limit = self.request.query_params.get('limit')
-        queryset = Question.objects.all()[:limit]
-        return queryset
+        if not limit or not self.action == 'list':
+            return Question.objects.all()
+        return Question.objects.all()[:int(limit)]
 
 
 class AnswerViewSet(ModelViewSet):
