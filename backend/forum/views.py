@@ -17,7 +17,8 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                CommentSerializer, DetailQuestionSerializer,
-                               ListQuestionSerializer, TagFieldWithCountSerializer,
+                               ListQuestionSerializer,
+                               TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
 
