@@ -50,7 +50,7 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date')
         extra_kwargs = {'title': {'required': False}}
 
 
@@ -60,8 +60,8 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AnswerComment
-        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date')
-        read_only_fields = ('id', 'question_answer', 'creation_date', 'user')
+        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date', 'updated_date')
+        read_only_fields = ('id', 'question_answer', 'creation_date', 'updated_date', 'user')
 
 
 class QuestionRatingSerializer(serializers.ModelSerializer):
@@ -76,7 +76,8 @@ class AnswerRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionAnswerRating
         fields = '__all__'
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -84,8 +85,9 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerComment
         fields = '__all__'
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
-        read_only_fields = ('creation_date', 'user')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('creation_date', 'updated_date', 'user')
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -101,10 +103,11 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswer
-        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date',
+        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date', 'updated_date',
                   'rating', 'images', 'comments', 'uploaded_images')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
-        read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'rating',
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'updated_date', 'rating',
                             'images', 'comments')
 
 
@@ -114,8 +117,9 @@ class ListQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating', 'tags')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'rating', 'tags')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class DetailQuestionSerializer(serializers.ModelSerializer):
@@ -128,6 +132,7 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'images',
-                  'rating', 'answers', 'tags')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'updated_date',
+                  'images', 'rating', 'answers', 'tags')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}

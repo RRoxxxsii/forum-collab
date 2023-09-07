@@ -46,6 +46,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     created = models.DateTimeField(default=timezone.now)
     about = models.TextField(verbose_name='Описание', max_length=500, blank=True)
+    profile_image = models.ImageField(verbose_name='Аватарка', null=True, blank=True)
 
     is_staff = models.BooleanField(default=False)
 

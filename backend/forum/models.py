@@ -78,6 +78,7 @@ class Question(models.Model, LikeDislikeModelMixin):
 
     is_solved = models.BooleanField(default=False, verbose_name='Вопрос решен')
     creation_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return self.title
@@ -131,6 +132,7 @@ class QuestionAnswer(models.Model, LikeDislikeModelMixin):
 
     is_solving = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return self.answer
@@ -180,6 +182,7 @@ class AnswerComment(models.Model):
     comment = models.TextField(max_length=320, verbose_name='Текст комментария')
 
     creation_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return self.comment
