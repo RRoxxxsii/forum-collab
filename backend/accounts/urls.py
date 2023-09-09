@@ -32,3 +32,8 @@ urlpatterns = [
     path("token/", views.EmailTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
+
+router = DefaultRouter()
+router.register('users', views.UserViewSet)
+
+urlpatterns += router.urls

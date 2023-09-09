@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
+from forum.tests.test_serializers import generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):
@@ -344,4 +345,25 @@ class TestEmailTokenObtainPairView(APITestCase):
         """
         response = self.client.post(self.url, data={'email': self.email_to_request,
                                                     'password': 'Ax6!a7OpNvq'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestUserViewSet(APITestCase):
+    """
+    Тестрование ViewSet для пользователя.
+    """
+    def setUp(self) -> None:
+        image = generate_photo_file()
+        self.user = NewUser.objects.create_user(email='email@email.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', profile_image=image)
+
+        self.url = reverse('newuser-list')
+        self.detail_url = reverse('newuser-detail', kwargs={'pk': self.user.pk})
+
+    def test_list_response_status_code(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_detail_response_status_code(self):
+        response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
