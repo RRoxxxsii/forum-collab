@@ -67,3 +67,11 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
         data["access"] = str(refresh.access_token)
 
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NewUser
+        fields = ('id', 'email', 'user_name', 'about', 'profile_image',
+                  'is_active', 'is_banned', 'email_confirmed', 'created')

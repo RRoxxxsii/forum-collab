@@ -3,13 +3,14 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .helpers import BaseEmailConfirmAPIView
-from .models import EmailConfirmationToken
+from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
-                          RegisterUserSerializer, UserEmailSerializer)
+                          RegisterUserSerializer, UserEmailSerializer, UserSerializer)
 from .utils import email_exists, get_current_site, send_confirmation_email
 
 
@@ -182,3 +183,9 @@ class EmailTokenObtainPairView(TokenObtainPairView):
     На вход принимает пароль и почтовый адрес пользователя. Возвращает access и refresh_token.
     """
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class UserViewSet(ModelViewSet):
+    queryset = NewUser.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ('get', )
