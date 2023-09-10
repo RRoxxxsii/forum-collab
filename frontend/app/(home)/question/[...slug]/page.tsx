@@ -2,13 +2,28 @@
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
-import { Bookmark, Edit, MoreHoriz, Share } from '@mui/icons-material'
+import { TiptapEditor } from '@/widgets/TiptapEditor'
+import {
+	Bookmark,
+	BookmarkOutlined,
+	Edit,
+	EditOutlined,
+	MoreHoriz,
+	Report,
+	ReportOutlined,
+	Share,
+	ShareOutlined,
+} from '@mui/icons-material'
 import {
 	Avatar,
 	Box,
 	Button,
+	Checkbox,
 	Divider,
+	FormControlLabel,
 	IconButton,
+	Menu,
+	MenuItem,
 	Paper,
 	Typography,
 } from '@mui/material'
@@ -19,12 +34,13 @@ import { useEffect, useState } from 'react'
 
 export default function QuestionPage() {
 	const pathname = usePathname()
-	console.log(pathname)
+
 	const id =
-		pathname?.match(/\/question\/(\d+)/)[0].replace('/question/', '') ?? ''
-	console.log(id)
+		pathname.match(/\/question\/(\d+)/)[0]?.replace('/question/', '') ?? ''
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
+
+	const [answerContent, setAnswerContent] = useState<string>('')
 
 	useEffect(() => {
 		fetchQuestion()
@@ -36,20 +52,25 @@ export default function QuestionPage() {
 			if (response.ok) {
 				const data = await response.json()
 				setQuestionData(data)
-				console.log(data)
 			} else {
-				console.log(`Failed to fetch data. Status: ${response.status}`)
 			}
-		} catch (error) {
-			console.log(error)
-		}
+		} catch (error) {}
+	}
+
+	const [moreButtonEl, setmoreButtonEl] = useState<HTMLElement | null>(null)
+	const moreDropdownOpen = Boolean(moreButtonEl)
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setmoreButtonEl(event.currentTarget)
+	}
+	const handleClose = () => {
+		setmoreButtonEl(null)
 	}
 
 	return (
 		<Box sx={{ minHeight: '80vh' }}>
 			{questionData && (
-				<Paper sx={{ px: 3, py: 2, maxWidth: 1280 }}>
-					<Box sx={{}}>
+				<Paper sx={{ maxWidth: 1280 }}>
+					<Box sx={{ px: 3, py: 2 }}>
 						<Box sx={{ display: 'flex' }}>
 							<Box sx={{ justifyContent: 'center' }}>
 								<QuestionItemRating rating={questionData?.rating} />
@@ -83,25 +104,77 @@ export default function QuestionPage() {
 										}}
 									/>
 								</Box>
-								<IconButton>
-									<Edit />
-								</IconButton>
-								<IconButton>
-									<Share />
-								</IconButton>
-								<IconButton>
-									<Bookmark />
-								</IconButton>
-								<IconButton>
+								<FormControlLabel
+									control={
+										<Checkbox
+											icon={<ShareOutlined />}
+											checkedIcon={<Share />}
+										/>
+									}
+									label='Поделиться'
+								/>
+								<FormControlLabel
+									control={
+										<Checkbox
+											icon={<BookmarkOutlined />}
+											checkedIcon={<Bookmark />}
+										/>
+									}
+									label='Избранное'
+								/>
+								<IconButton
+									id='more'
+									aria-controls={moreDropdownOpen ? 'more options' : undefined}
+									aria-haspopup='true'
+									aria-expanded={moreDropdownOpen ? 'true' : undefined}
+									onClick={handleClick}>
 									<MoreHoriz />
 								</IconButton>
+								<Menu
+									id='more options'
+									anchorEl={moreButtonEl}
+									open={moreDropdownOpen}
+									onClose={handleClose}
+									MenuListProps={{
+										'aria-labelledby': 'basic-button',
+									}}>
+									<MenuItem onClick={handleClose}>
+										<FormControlLabel
+											control={
+												<Checkbox
+													icon={<EditOutlined />}
+													checkedIcon={<Edit />}
+												/>
+											}
+											label='Редактировать'
+										/>
+									</MenuItem>
+									<MenuItem onClick={handleClose}>
+										<FormControlLabel
+											control={
+												<Checkbox
+													icon={<ReportOutlined />}
+													checkedIcon={<Report />}
+												/>
+											}
+											label='Пожаловаться'
+										/>
+									</MenuItem>
+									<Divider />
+									<MenuItem onClick={handleClose}>
+										<FormControlLabel
+											control={<Checkbox />}
+											label='Включить уведомления'
+										/>
+									</MenuItem>
+								</Menu>
 							</Box>
 						</Box>
 					</Box>
 					<Divider />
 					<Typography
 						variant='h6'
-						sx={{ my: 2, display: 'flex', alignItems: 'center', mx: 1 }}>
+						sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>
 						Ответы:
 						<Typography
 							className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
@@ -109,7 +182,21 @@ export default function QuestionPage() {
 							{questionData.answers.length}
 						</Typography>
 					</Typography>
-					<Box sx={{ display: 'flex', mb: 4 }}>
+					<Box sx={{ px: 3, py: 2, width: '100%' }}>
+						<Typography
+							variant='caption'
+							color={'GrayText'}
+							sx={{ display: 'flex', alignItems: 'center' }}>
+							Ответить на вопрос как,
+							<Typography variant='caption' sx={{ ml: 1 }} color={'lightblue'}>
+								usename
+							</Typography>
+						</Typography>
+						<TiptapEditor
+							height={120}
+							content={answerContent}
+							setContent={setAnswerContent}
+						/>
 						{questionData.answers.map((answer) => (
 							<AnswerItem key={answer.id} answerData={answer} />
 						))}

@@ -23,7 +23,6 @@ export const AskQuestionFormSubmit = ({
 
 			const tokenData = await tokenValid.json()
 
-			console.log(tokenData)
 
 			if (!tokenValid.ok) {
 				toast.update(questionToast, {
@@ -48,7 +47,7 @@ export const AskQuestionFormSubmit = ({
 				})
 
 				const result = await response.json()
-				console.log(result.code)
+
 				if (!response.ok) {
 					let errorMessage = ''
 					if (result?.code) {
