@@ -28,11 +28,23 @@ class Helper:
         fake = Faker(['ru_RU'])
 
         for _ in range(users_amount):
-            NewUser.objects.create(email=fake.unique.email(), password='12345',
-                                   user_name=fake.unique.name(), about=fake.paragraph(),
-                                   profile_image=fake.file_name(category='image', extension='jpeg'),
-                                   is_banned=fake.pybool(), is_active=fake.pybool(),
-                                   email_confirmed=fake.pybool())
+
+            user = NewUser.objects.create(
+                email=fake.unique.email(), password='12345',
+                user_name=fake.unique.name(),
+                is_banned=fake.pybool(), is_active=fake.pybool(),
+                email_confirmed=fake.pybool()
+            )
+            is_profile_img = random.randint(0, 1)
+            is_about = random.randint(0, 1)
+
+            if is_profile_img:
+                user.profile_image = fake.file_name(category='image', extension='jpeg')
+
+            if is_about:
+                user.about = fake.paragraph()
+
+            user.save()
 
         users = NewUser.objects.all()
         self.stdout.write(self.style.SUCCESS(f'Число пользователей: {users.count()}.'))
