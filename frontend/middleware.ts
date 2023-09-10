@@ -34,9 +34,8 @@ export async function middleware(request: NextRequest) {
 		const newAccessToken = data.access
 
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
-		console.log('token refreshed!')
 		return response
 	} catch (error) {
-		console.log(error)
+
 	}
 }

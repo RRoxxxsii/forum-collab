@@ -29,7 +29,9 @@ export const QuestionList = () => {
 	return (
 		<>
 			{questions.reverse().map((question: IQuestion) => (
-				<QuestionItemWrapper href={`question/${question.id}`} key={question.id}>
+				<QuestionItemWrapper
+					href={`/question/${question.id}/${question.title}/?tags=${question.tags}`}
+					key={question.id}>
 					<QuestionItemRating rating={question.rating} />
 					<Box sx={{ width: '100%', ml: 1 }}>
 						<QuestionItemContent questionData={question} />

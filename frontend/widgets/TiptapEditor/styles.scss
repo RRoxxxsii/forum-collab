@@ -5,17 +5,16 @@
 	@apply flex shadow bg-gray-800 rounded-sm overflow-hidden border border-slate-600 box-border w-fit;
 }
 .editor {
-	min-height: 220px;
-	@apply border  border-gray-700 p-3 mb-4;
+	height: 100%;
+	@apply border border-gray-700 p-3;
 }
 .ProseMirror {
-	min-height: 220px;
+	height: 100%;
 }
 
 .ProseMirror {
 	p.is-empty::before {
 		@apply text-slate-400 float-left h-0 pointer-events-none absolute ml-[2px];
-
 		content: attr(data-placeholder);
 	}
 

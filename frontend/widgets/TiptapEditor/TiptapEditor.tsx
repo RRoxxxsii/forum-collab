@@ -8,23 +8,25 @@ import { EditorExtensions } from './utils/Extensions'
 const EditorContentValue = ``
 
 export const TiptapEditor = ({
-	questionContent,
-	setQuestionContent,
+	height,
+	content,
+	setContent,
 }: {
-	questionContent: string
-	setQuestionContent: Dispatch<SetStateAction<string>>
+	height: number | string
+	content: string
+	setContent: Dispatch<SetStateAction<string>>
 }) => {
 	const editor = useEditor({
 		extensions: EditorExtensions,
 		editorProps: {
 			attributes: {
-				class: `border-2 rounded-sm border-gray-400`,
+				class: `border-2 rounded-sm border-gray-400 `,
 			},
 		},
 		content: EditorContentValue,
 	})
 	if (editor) {
-		setQuestionContent(editor?.getHTML())
+		setContent(editor?.getHTML())
 	}
 
 	return (
@@ -42,8 +44,9 @@ export const TiptapEditor = ({
 				</BubbleMenu>
 			)}
 			<EditorContent
-				onChange={(e) => setQuestionContent}
-				value={questionContent}
+				style={{ minHeight: height, height: '100%' }}
+				onChange={(e) => setContent}
+				value={content}
 				className='editor'
 				editor={editor}
 			/>

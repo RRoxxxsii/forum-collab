@@ -1,25 +1,31 @@
 'use client'
 
-import { IChip } from '@/types/types'
+import { ITag } from '@/types/types'
 import { Box, Chip, TextField } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { Dispatch, SetStateAction, useState } from 'react'
 
+interface AskQuestionFormTagsProps {
+	limit: number
+	disabled: boolean
+	setSelectedTags: Dispatch<SetStateAction<string[]>>
+	tagsToDisplay: ITag[]
+	setTagQuery: Dispatch<SetStateAction<string>>
+	tagQuery: string
+}
+
 export const AskQuestionFormTags = ({
 	limit,
 	disabled,
-	setTags,
-	tags,
-}: {
-	limit: number
-	disabled: boolean
-	tags: IChip[]
-	setTags: Dispatch<SetStateAction<string[]>>
-}) => {
-	const [value, setValue] = useState<any | null>(null)
-	const [disableInput, setDisableInput] = useState<boolean>(
-		value?.length >= limit
-	)
+	setSelectedTags,
+	tagsToDisplay,
+	setTagQuery,
+	tagQuery,
+}: AskQuestionFormTagsProps) => {
+	const [value, setValue] = useState<ITag[]>([])
+	const [disableInput, setDisableInput] = useState(value.length >= limit)
+
+	console.log(tagsToDisplay)
 
 	return (
 		<Box>
@@ -27,26 +33,35 @@ export const AskQuestionFormTags = ({
 				multiple
 				disabled={disabled || disableInput}
 				id='question-tags'
-				options={tags.map((chip) => chip.tag)}
+				options={
+					tagsToDisplay?.map((tag) => `${tag.tag_name} (${tag.use_count})`) ||
+					[]
+				}
 				sx={{ width: 600 }}
 				freeSolo
 				renderTags={(option: readonly string[], getTagProps) =>
-					option.map((chip: string, index: number) => (
+					option.map((tag: string) => (
 						<Chip
 							variant='outlined'
-							label={chip}
-							{...getTagProps({ index })}
+							label={tag}
+							{...getTagProps({ index: tag?.indexOf(tag) || 0 })}
 							disabled={disabled}
-							key={chip}
+							key={tag}
 						/>
 					))
 				}
 				onChange={(_event: any, newValue: any) => {
-					setTags(newValue)
+					setSelectedTags(newValue.map((tag: ITag) => tag.tag_name))
 					setDisableInput(newValue.length >= limit)
 				}}
 				renderInput={(params) => (
-					<TextField {...params} variant='outlined' label='Выбрать теги' />
+					<TextField
+						{...params}
+						variant='outlined'
+						label='Выбрать теги'
+						value={tagQuery}
+						onChange={(e) => setTagQuery(e.target.value)}
+					/>
 				)}
 			/>
 		</Box>

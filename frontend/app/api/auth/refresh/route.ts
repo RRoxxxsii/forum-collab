@@ -26,7 +26,7 @@ export async function GET() {
 
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
 
-		console.log(response)
+
 
 		return NextResponse.json({ message: 'token refreshed' })
 	} catch (error) {
