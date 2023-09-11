@@ -3,33 +3,24 @@
 <h2>Запуск проекта:</h2>
 <ul>
 
-<ol>
 
 1 `git clone`
 
-</ol>
 
-<ol>2 создать файл web.env в директории backend
-</ol>
-<ol>3 вставить в него переменные для тестовой БД:
-    <ul>
-        <li>
+2 создать файл web.env в директории backend
 
-`DJANGO_SETTINGS_MODULE=core.settings`
-        </li>
-        <li>`POSTGRES_HOST=db`</li>
-        <li>`POSTGRES_PORT=5432`</li>
-        <li>`POSTGRES_USER=cycle_user`</li>
-        <li>`POSTGRES_PASSWORD=pro191Ji321`</li>
-        <li>`POSTGRES_DB=cycle_db`</li>
-    </ul>
-</ol>
-<ol>
+3 вставить в него переменные для тестовой БД:
 
-4
-`docker compose up --build`
 
-</ol>
++ `DJANGO_SETTINGS_MODULE=core.settings` 
++ `POSTGRES_HOST=db`
++ `POSTGRES_PORT=5432`
++ `POSTGRES_USER=cycle_user`
++ `POSTGRES_PASSWORD=pro191Ji321`
++ `POSTGRES_DB=cycle_db`
+    
+
+4 `docker compose up --build`
 
 </ul>
 <hr>
