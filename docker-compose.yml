@@ -16,7 +16,7 @@ services:
     build:
       context: ./backend
     command:
-      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && ./manage.py loaddata ./fixture.json &&
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && 
       gunicorn -b 0.0.0.0:8000 core.wsgi:application —log-level debug"
     ports:
       - '8000:8000'

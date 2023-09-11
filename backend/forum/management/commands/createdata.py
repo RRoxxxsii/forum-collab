@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import random
+
+from django.db.models import QuerySet
 
 from accounts.models import NewUser
 from django.core.management import BaseCommand
@@ -9,7 +13,24 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 
 
-class QuestionHelper:
+class BaseAnswerQuestionHelperMixin:
+
+    def _create_rating(self, instance: [Question | QuestionAnswer], users_sorted: QuerySet[NewUser]):
+        users_liked = list(users_sorted[:random.randint(0, self.users.count())])
+        users_disliked = []
+        for user in users_sorted[:random.randint(0, self.users.count())]:
+            if user not in users_liked:
+                users_disliked.append(user)
+
+        instance.rating.users_liked.add(*users_liked)
+        instance.rating.users_disliked.add(*users_disliked)
+        instance.rating.like_amount = len(users_liked)
+        instance.rating.dislike_amount = len(users_disliked)
+        instance.rating.save()
+        instance.save()
+
+
+class QuestionHelper(BaseAnswerQuestionHelperMixin):
 
     def __init__(self, questions_amount, users, tags):
         self.questions_amount = questions_amount
@@ -33,14 +54,14 @@ class QuestionHelper:
                 question.tags.add(tag)
             question.save()
 
-            self.__create_question_images(question)
-            self.__create_question_rating(question, users_sorted=users_sorted)
+            self._create_question_images(question)
+            self._create_rating(instance=question, users_sorted=users_sorted)
 
         questions = Question.objects.all()
 
         return questions
 
-    def __create_question_images(self, question):
+    def _create_question_images(self, question):
         for _ in range(random.randint(0, 3)):
             flag = random.randint(0, 1)
             question_image = QuestionImages.objects.create(
@@ -51,22 +72,8 @@ class QuestionHelper:
                 question_image.alt = self.fake.text(max_nb_chars=200)
             question_image.save()
 
-    def __create_question_rating(self, question, users_sorted):
-        users_liked = list(users_sorted[:random.randint(0, self.users.count())])
-        users_disliked = []
-        for user in users_sorted[:random.randint(0, self.users.count())]:
-            if user not in users_liked:
-                users_disliked.append(user)
 
-        question.rating.users_liked.add(*users_liked)
-        question.rating.users_disliked.add(*users_disliked)
-        question.rating.like_amount = len(users_liked)
-        question.rating.dislike_amount = len(users_disliked)
-        question.rating.save()
-        question.save()
-
-
-class AnswerHelper:
+class AnswerHelper(BaseAnswerQuestionHelperMixin):
 
     def __init__(self, users, questions):
         self.users = users
@@ -88,34 +95,20 @@ class AnswerHelper:
                     answer.user = users_sorted.first()
                     answer.save()
 
-                self.__create_answer_images(answer=answer)
-                self.__create_answer_rating(answer=answer, users_sorted=users_sorted)
+                self._create_answer_images(answer=answer)
+                self._create_rating(instance=answer, users_sorted=users_sorted)
 
         answers = QuestionAnswer.objects.all()
 
         return answers
 
-    def __create_answer_images(self, answer):
+    def _create_answer_images(self, answer):
         generate_image = random.randint(0, 1)
         if generate_image:
             QuestionAnswerImages.objects.create(
                 parent=answer,
                 image=self.fake.file_name(category='image', extension='jpeg')
             )
-
-    def __create_answer_rating(self, answer, users_sorted):
-        users_liked = list(users_sorted[:random.randint(0, self.users.count())])
-        users_disliked = []
-        for user in users_sorted[:random.randint(0, self.users.count())]:
-            if user not in users_liked:
-                users_disliked.append(user)
-
-        answer.rating.users_liked.add(*users_liked)
-        answer.rating.users_disliked.add(*users_disliked)
-        answer.rating.like_amount = len(users_liked)
-        answer.rating.dislike_amount = len(users_disliked)
-        answer.rating.save()
-        answer.save()
 
 
 class Helper(AnswerHelper, QuestionHelper):
@@ -124,7 +117,6 @@ class Helper(AnswerHelper, QuestionHelper):
         fake = Faker(['ru_RU'])
 
         for _ in range(tags_amount):
-
             ThemeTag.objects.create(tag_name=fake.unique.word(), is_relevant=fake.pybool(),
                                     is_user_tag=fake.pybool(), descriptions=fake.paragraph())
 
