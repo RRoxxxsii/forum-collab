@@ -47,3 +47,4 @@ django_celery_beat
 django-cors-headers
 Pillow
 faker
+django-notifications-hq

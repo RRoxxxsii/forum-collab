@@ -1,3 +1,5 @@
+from notifications.signals import notify
+
 from accounts.models import NewUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -11,7 +13,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         vote_answer_solving)
+                         vote_answer_solving, parse_comment)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -132,6 +134,24 @@ class CommentAPIView(CreateAPIView):
     Комментарий к ответу. Создание.
     """
     serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Парсим только аутентифицированного пользователя
+        if request.user.is_authenticated:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            comment = serializer.data.get('comment')
+            answer_id = serializer.data.get('question_answer')
+            answer = QuestionAnswer.objects.get(id=answer_id)
+            current_user = request.user
+            parsed_user_list = parse_comment(comment=comment)
+
+            for parsed_user in parsed_user_list:
+                notify.send(sender=current_user, recipient=parsed_user,
+                            verb=f'ответил на ваш комментарий ',
+                            action_object=answer)
+
+        return super().create(request, *args, **kwargs)
 
 
 class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
