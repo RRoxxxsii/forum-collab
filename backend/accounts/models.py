@@ -42,6 +42,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='Почтовый адрес', unique=True,
                               error_messages={'unique': 'Указаный почтовый адрес уже занято.'})
     user_name = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя',
+                                 db_index=True,
                                  error_messages={'unique': 'Указаное имя уже занято.'})
 
     created = models.DateTimeField(default=timezone.now)

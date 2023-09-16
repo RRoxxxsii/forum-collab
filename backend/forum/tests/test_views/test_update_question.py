@@ -94,4 +94,3 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
         self.client.force_authenticate(self.user2)
         response = self.client.delete(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-

@@ -14,6 +14,10 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 
 
 class BaseAnswerQuestionHelperMixin:
+    """
+    Миксин реализующий метод создания рейтинга. Наследуется в классах, где
+    необходимо создавать рейтинг.
+    """
 
     def _create_rating(self, instance: [Question | QuestionAnswer], users_sorted: QuerySet[NewUser]):
         users_liked = list(users_sorted[:random.randint(0, self.users.count())])
@@ -31,6 +35,9 @@ class BaseAnswerQuestionHelperMixin:
 
 
 class QuestionHelper(BaseAnswerQuestionHelperMixin):
+    """
+    Класс-помощник для создания вопросов.
+    """
 
     def __init__(self, questions_amount, users, tags):
         self.questions_amount = questions_amount
@@ -74,6 +81,9 @@ class QuestionHelper(BaseAnswerQuestionHelperMixin):
 
 
 class AnswerHelper(BaseAnswerQuestionHelperMixin):
+    """
+    Класс-помощник для создания ответов.
+    """
 
     def __init__(self, users, questions):
         self.users = users
@@ -112,6 +122,9 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
 
 
 class Helper(AnswerHelper, QuestionHelper):
+    """
+    Класс помощник для создания тегов, пользователей и комментариев.
+    """
 
     def create_tags(self, tags_amount):
         fake = Faker(['ru_RU'])

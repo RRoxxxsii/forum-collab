@@ -96,3 +96,79 @@ class TestRetrieveComment(APITestCase):
     def test_retrieve_comment(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestCommentParseUser(APITestCase):
+
+    def setUp(self) -> None:
+
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
+                                                    comment='Какой-то комментарий...')
+
+        self.url = reverse('create-comment')
+
+        self.data = {'comment': '@testuser, Комментарий...',
+                     'question_answer': self.answer.id}
+        self.data2 = {'comment': '@testuser, @testuser3, Комментарий...',
+                      'question_answer': self.answer.id}
+        self.data3 = {'comment': 'Комментарий..., @testuser',
+                      'question_answer': self.answer.id}
+
+    def test_comment_parsed(self):
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.data)
+
+    def test_comment_parsed_two_users_mentioned(self):
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.data2)
+
+    def test_comment_parsed_mention_not_in_the_beginning(self):
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.data3)
+
+
+class TestCommentParseUserNotifications(APITestCase):
+
+    def setUp(self) -> None:
+
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
+                                                    comment='Какой-то комментарий...')
+
+        self.url = reverse('create-comment')
+        self.data = {'comment': '@testuser, Комментарий...',
+                     'question_answer': self.answer.id}
+
+        self.data2 = {'comment': '@testuser, @testuser3, Комментарий...',
+                      'question_answer': self.answer.id}
+
+    def test_comment_parsed_two_users_mentioned(self):
+        self.client.force_authenticate(self.user)
+        self.client.post(self.url, data=self.data2)
+        unread_user1 = self.user.notifications.unread()
+        unread_user3 = self.user3.notifications.unread()
+        self.assertEqual(len(unread_user1), 1)
+        self.assertEqual(len(unread_user3), 1)

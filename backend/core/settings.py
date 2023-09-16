@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_celery_beat',
     'corsheaders',
+    'notifications',
 
     # Custom applications
     'accounts',
@@ -227,3 +228,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:3000",
 ]
+
+DJANGO_NOTIFICATIONS_CONFIG = {'USE_JSONFIELD': True}
