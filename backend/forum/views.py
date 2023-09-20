@@ -1,8 +1,8 @@
-from notifications.signals import notify
-
 from accounts.models import NewUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from notifications.models import Notification
+from notifications.signals import notify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
@@ -13,7 +13,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         vote_answer_solving, parse_comment)
+                         parse_comment, vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -22,7 +22,8 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                ListQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionSerializer)
+                               UpdateQuestionSerializer,
+                               UserNotificationListSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -272,3 +273,13 @@ class MarkAnswerSolving(RetrieveAPIView):
         vote_answer_solving(answer=answer, related_question=related_question)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class UserNotificationViewSet(ModelViewSet):
+    serializer_class = UserNotificationListSerializer
+    http_method_names = ['get', ]
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.notifications.all()
