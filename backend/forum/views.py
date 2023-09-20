@@ -104,6 +104,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         images = serializer.data.get('uploaded_images')
         question = serializer.data.get('question')
+        question_user = Question.objects.get(id=question).user    # автор вопроса
         answer = serializer.data.get('answer')
         user = request.user
         question_answer = QuestionAnswer.objects.create(
@@ -113,6 +114,9 @@ class AnswerQuestionAPIView(CreateAPIView):
         if isinstance(user, NewUser):
             question_answer.user = request.user
             question_answer.save()
+
+        notify.send(sender=user, recipient=question_user,
+                    verb=f'ответил на ваш вопрос', action_object=question_answer)
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
@@ -148,7 +152,7 @@ class CommentAPIView(CreateAPIView):
 
             for parsed_user in parsed_user_list:
                 notify.send(sender=current_user, recipient=parsed_user,
-                            verb=f'ответил на ваш комментарий ',
+                            verb='ответил на ваш комментарий под вопросом',
                             action_object=answer)
 
         return super().create(request, *args, **kwargs)
