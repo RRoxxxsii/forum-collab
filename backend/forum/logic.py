@@ -7,8 +7,8 @@ from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
-                          QuestionImages, ThemeTag, AnswerComment)
+from forum.models import (AnswerComment, Question, QuestionAnswer,
+                          QuestionAnswerImages, QuestionImages, ThemeTag)
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:

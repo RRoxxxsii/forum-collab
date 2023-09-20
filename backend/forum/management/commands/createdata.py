@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import random
 
-from django.db.models import QuerySet
-
 from accounts.models import NewUser
 from django.core.management import BaseCommand
 from django.db import transaction
+from django.db.models import QuerySet
 from faker import Faker
 
 from forum.models import (AnswerComment, Question, QuestionAnswer,
