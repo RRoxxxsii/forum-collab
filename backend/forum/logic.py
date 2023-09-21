@@ -7,7 +7,7 @@ from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import (AnswerComment, Question, QuestionAnswer,
+from forum.models import (Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 
 

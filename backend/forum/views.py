@@ -151,6 +151,10 @@ class CommentAPIView(CreateAPIView):
             current_user = request.user
             parsed_user_list = parse_comment(comment=comment)
 
+            notify.send(sender=current_user, recipient=answer.user,
+                        verb='прокомментировал ваш ответ на вопрос',
+                        action_object=answer)
+
             for parsed_user in parsed_user_list:
                 notify.send(sender=current_user, recipient=parsed_user,
                             verb='ответил на ваш комментарий под вопросом',
