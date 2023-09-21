@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import random
 
+from notifications.signals import notify
+
 from accounts.models import NewUser
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -102,6 +104,10 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
 
                 if user_identified:
                     answer.user = users_sorted.first()
+
+                    notify.send(sender=answer.user, recipient=question.user,
+                                verb='ответил на ваш вопрос',
+                                action_object=question)
                     answer.save()
 
                 self._create_answer_images(answer=answer)
@@ -139,6 +145,11 @@ class Helper(AnswerHelper, QuestionHelper):
 
     def create_users(self, users_amount):
         fake = Faker(['ru_RU'])
+
+        superuser = NewUser.objects.create_superuser(
+                email='testadmin@example.com', password='1234',
+                user_name='root'
+            )
 
         for _ in range(users_amount):
 
@@ -180,6 +191,12 @@ class Helper(AnswerHelper, QuestionHelper):
 
                 if user_identified:
                     comment.user = users_.first()
+
+                    if answer.user:
+                        notify.send(sender=comment.user, recipient=answer.user,
+                                    verb='прокомментировал ваш ответ',
+                                    action_object=answer)
+
                     comment.save()
 
         comments = AnswerComment.objects.all()
@@ -204,4 +221,5 @@ class Command(BaseCommand, Helper):
         answers = a.create_answers()
         self.stdout.write(self.style.SUCCESS(f'Число ответов: {answers.count()}.'))
 
-        self.create_comments(answers=answers, users=users)
+        comments = self.create_comments(answers=answers, users=users)
+        self.stdout.write(self.style.SUCCESS(f'Число комментариев: {comments.count()}.'))
