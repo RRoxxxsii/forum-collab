@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from accounts.serializers import UserSerializer
+from notifications.models import Notification
 from rest_framework import serializers
 
 from forum.models import (AnswerComment, Question, QuestionAnswer,
@@ -7,9 +11,16 @@ from forum.validators import (validate_answer_related_obj_amount,
                               validate_tags_amount)
 
 
-class TagFieldSerializer(serializers.ModelSerializer):
+class BaseTagFieldSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('tag_name', 'is_relevant', 'is_user_tag')
+        model = ThemeTag
+
+
+class TagFieldWithCountSerializer(serializers.ModelSerializer):
     """
-    Сериализатор тегов для GET-запроса.
+    Сериализатор тегов для GET-запроса с числом использования тегов.
     """
     use_count = serializers.SerializerMethodField()
 
@@ -43,7 +54,7 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date')
         extra_kwargs = {'title': {'required': False}}
 
 
@@ -53,8 +64,8 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AnswerComment
-        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date')
-        read_only_fields = ('id', 'question_answer', 'creation_date', 'user')
+        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date', 'updated_date')
+        read_only_fields = ('id', 'question_answer', 'creation_date', 'updated_date', 'user')
 
 
 class QuestionRatingSerializer(serializers.ModelSerializer):
@@ -69,7 +80,8 @@ class AnswerRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionAnswerRating
         fields = '__all__'
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -77,8 +89,9 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerComment
         fields = '__all__'
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
-        read_only_fields = ('creation_date', 'user')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('creation_date', 'updated_date', 'user')
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -94,20 +107,23 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswer
-        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date',
+        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date', 'updated_date',
                   'rating', 'images', 'comments', 'uploaded_images')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
-        read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'rating',
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'updated_date', 'rating',
                             'images', 'comments')
 
 
 class ListQuestionSerializer(serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'rating')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'rating', 'tags')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
 class DetailQuestionSerializer(serializers.ModelSerializer):
@@ -116,8 +132,46 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
     images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='question-detail',
                                                  source='question_images')
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'images', 'rating', 'answers')
-        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'updated_date',
+                  'images', 'rating', 'answers', 'tags')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+
+
+class GenericObjNotificationRelatedField(serializers.RelatedField):
+    """
+    Возвращает сериализованные данные объекта в зависимости от типа.
+    """
+    def to_representation(self, value: [Question | AnswerComment | QuestionAnswer]):
+        if isinstance(value, Question):
+            serializer = ListQuestionSerializer(value)
+        if isinstance(value, AnswerComment):
+            serializer = CommentSerializer(value)
+        if isinstance(value, QuestionAnswer):
+            serializer = AnswerSerializer(value)
+        return serializer.data
+
+
+class UserNotificationListSerializer(serializers.ModelSerializer):
+    recipient = UserSerializer(read_only=True)
+    actor = UserSerializer(read_only=True)
+    target = GenericObjNotificationRelatedField(read_only=True)
+    action_object = GenericObjNotificationRelatedField(read_only=True)
+    type = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ('type', 'id', 'recipient', 'actor', 'verb', 'unread',
+                  'target', 'action_object', 'timestamp')
+
+    def get_type(self, value):
+        if isinstance(value.target, Question):
+            return 'Question'
+        elif isinstance(value.target, AnswerComment):
+            return 'Comment'
+        elif isinstance(value.target, QuestionAnswer):
+            return 'Answer'

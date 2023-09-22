@@ -70,6 +70,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
             "content": "Контент",
             "is_solved": False,
             "creation_date": current_datetime,
+            "updated_date": current_datetime,
             "images": [
                 "http://testserver/api/v1/forum/questions/1/",
                 "http://testserver/api/v1/forum/questions/2/"
@@ -90,6 +91,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "answer": "Изначальный ответ...",
                     "is_solving": False,
                     "creation_date": current_datetime,
+                    "updated_date": current_datetime,
                     "rating": {
                         "id": 1,
                         "like_amount": 0,
@@ -106,6 +108,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                             "id": 1,
                             "comment": "agagag",
                             "creation_date": current_datetime,
+                            "updated_date": current_datetime,
                             "user": 1,
                             "question_answer": 1
                         },
@@ -113,6 +116,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                             "id": 2,
                             "comment": "bfbd",
                             "creation_date": current_datetime,
+                            "updated_date": current_datetime,
                             "user": 1,
                             "question_answer": 1
                         }
@@ -125,6 +129,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "answer": "Изначальный ответ2...",
                     "is_solving": False,
                     "creation_date": current_datetime,
+                    "updated_date": current_datetime,
                     "rating": {
                         "id": 2,
                         "like_amount": 0,
@@ -136,7 +141,15 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "images": [],
                     "comments": []
                 }
+            ],
+            "tags": [
+                {
+                    "tag_name": "django",
+                    "is_relevant": True,
+                    "is_user_tag": False
+                }
             ]
+
         }
 
         self.expected_data_json = json.dumps(expected_data, indent=4, ensure_ascii=False)

@@ -1,6 +1,8 @@
 from accounts.models import NewUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from notifications.models import Notification
+from notifications.signals import notify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
@@ -11,19 +13,21 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         vote_answer_solving)
+                         parse_comment, vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                CommentSerializer, DetailQuestionSerializer,
-                               ListQuestionSerializer, TagFieldSerializer,
+                               ListQuestionSerializer,
+                               TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionSerializer)
+                               UpdateQuestionSerializer,
+                               UserNotificationListSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
-    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldSerializer}
+    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer}
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
     success_message = 'Вопрос успешно опубликован.'
@@ -101,6 +105,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         images = serializer.data.get('uploaded_images')
         question = serializer.data.get('question')
+        question_user = Question.objects.get(id=question).user    # автор вопроса
         answer = serializer.data.get('answer')
         user = request.user
         question_answer = QuestionAnswer.objects.create(
@@ -110,6 +115,9 @@ class AnswerQuestionAPIView(CreateAPIView):
         if isinstance(user, NewUser):
             question_answer.user = request.user
             question_answer.save()
+
+        notify.send(sender=user, recipient=question_user,
+                    verb=f'ответил на ваш вопрос', action_object=question_answer)
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
@@ -131,6 +139,28 @@ class CommentAPIView(CreateAPIView):
     Комментарий к ответу. Создание.
     """
     serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Парсим только аутентифицированного пользователя
+        if request.user.is_authenticated:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            comment = serializer.data.get('comment')
+            answer_id = serializer.data.get('question_answer')
+            answer = QuestionAnswer.objects.get(id=answer_id)
+            current_user = request.user
+            parsed_user_list = parse_comment(comment=comment)
+
+            notify.send(sender=current_user, recipient=answer.user,
+                        verb='прокомментировал ваш ответ на вопрос',
+                        action_object=answer)
+
+            for parsed_user in parsed_user_list:
+                notify.send(sender=current_user, recipient=parsed_user,
+                            verb='ответил на ваш комментарий под вопросом',
+                            action_object=answer)
+
+        return super().create(request, *args, **kwargs)
 
 
 class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
@@ -202,16 +232,17 @@ class QuestionViewSet(ModelViewSet):
                               type=openapi.TYPE_STRING, required=True)
 
     @swagger_auto_schema(manual_parameters=[limit])
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action)
 
     def get_queryset(self):
         limit = self.request.query_params.get('limit')
-        queryset = Question.objects.all()[:limit]
-        return queryset
+        if not limit or not self.action == 'list':
+            return Question.objects.all()
+        return Question.objects.all()[:int(limit)]
 
 
 class AnswerViewSet(ModelViewSet):
@@ -246,3 +277,13 @@ class MarkAnswerSolving(RetrieveAPIView):
         vote_answer_solving(answer=answer, related_question=related_question)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class UserNotificationViewSet(ModelViewSet):
+    serializer_class = UserNotificationListSerializer
+    http_method_names = ['get', ]
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.notifications.all()

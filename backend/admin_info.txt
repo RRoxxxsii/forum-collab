@@ -1,0 +1,5 @@
+Реквизиты для доступа в админ-панель в режиме РАЗРАБОТКИ с тестовой БД.
+
+username: root
+email: testadmin@example.com
+password: 1234

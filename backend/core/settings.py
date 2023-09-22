@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-0=+c(yz10ia4nk5!y_u+@$timuz#_6azhoywi@!6#qf05@#fv(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_celery_beat',
     'corsheaders',
+    'notifications',
 
     # Custom applications
     'accounts',
@@ -227,3 +228,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:3000",
 ]
+
+DJANGO_NOTIFICATIONS_CONFIG = {'USE_JSONFIELD': True}
