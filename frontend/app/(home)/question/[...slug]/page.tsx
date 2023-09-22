@@ -35,8 +35,8 @@ import { useEffect, useState } from 'react'
 export default function QuestionPage() {
 	const pathname = usePathname()
 
-	const id =
-		pathname.match(/\/question\/(\d+)/)[0]?.replace('/question/', '') ?? ''
+
+		const id = (pathname?.match(/\/question\/(\d+)/)?.[0] || '').replace('/question/', '');
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 

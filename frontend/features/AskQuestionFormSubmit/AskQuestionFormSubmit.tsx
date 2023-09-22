@@ -19,23 +19,7 @@ export const AskQuestionFormSubmit = ({
 	async function onSubmit() {
 		const questionToast = toast.loading('Открытие вопроса...')
 		try {
-			const tokenValid = await fetch('/api/auth/refresh', { method: 'GET' })
-
-			const tokenData = await tokenValid.json()
-
-
-			if (!tokenValid.ok) {
-				toast.update(questionToast, {
-					render: tokenData.message || 'Неизвестная ошибка',
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-				return null
-			}
-
-			if (tokenValid.ok) {
-				const response = await fetch('/api/forum/ask-question', {
+			const response = await fetch('/api/forum/ask-question', {
 					method: 'POST',
 					body: JSON.stringify({
 						tags: tags,
@@ -44,7 +28,7 @@ export const AskQuestionFormSubmit = ({
 						uploaded_images: images,
 					}),
 					headers: { 'Content-Type': 'application/json' },
-				})
+			})
 
 				const result = await response.json()
 
@@ -86,14 +70,7 @@ export const AskQuestionFormSubmit = ({
 				router.push(
 					`/question/${result.question}/${result.title}?tags=${result.tags}`
 				)
-			} else {
-				toast.update(questionToast, {
-					render: 'Разорвана связь с сервером, проверьте подключение',
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-			}
+
 		} catch (error: any | unknown) {
 			toast.update(questionToast, {
 				render: 'Разорвана связь с сервером, проверьте подключение',

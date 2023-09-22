@@ -53,6 +53,8 @@
 	},
 	"devDependencies": {
 		"@types/js-cookie": "^3.0.3",
-		"cypress": "^12.17.3"
+		"cypress": "^12.17.3",
+		"eslint-config-prettier": "^9.0.0",
+		"prettier": "3.0.3"
 	}
 }

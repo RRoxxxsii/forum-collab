@@ -34,7 +34,7 @@ export const AskQuestionFormTags = ({
 				disabled={disabled || disableInput}
 				id='question-tags'
 				options={
-					tagsToDisplay?.map((tag) => `${tag.tag_name} (${tag.use_count})`) ||
+					tagsToDisplay?.map((tag) => `${tag.tag_name}`) ||
 					[]
 				}
 				sx={{ width: 600 }}
@@ -51,7 +51,7 @@ export const AskQuestionFormTags = ({
 					))
 				}
 				onChange={(_event: any, newValue: any) => {
-					setSelectedTags(newValue.map((tag: ITag) => tag.tag_name))
+					setSelectedTags((prevstate) => prevstate = newValue.map((tag: string) => tag))
 					setDisableInput(newValue.length >= limit)
 				}}
 				renderInput={(params) => (
