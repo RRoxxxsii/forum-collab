@@ -3,12 +3,12 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import (Question, QuestionAnswer,
-                          QuestionAnswerImages, QuestionImages, ThemeTag)
+from accounts.models import NewUser
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag)
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:

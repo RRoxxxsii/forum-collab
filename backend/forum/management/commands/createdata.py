@@ -2,14 +2,12 @@ from __future__ import annotations
 
 import random
 
-from notifications.signals import notify
-
-from accounts.models import NewUser
 from django.core.management import BaseCommand
 from django.db import transaction
 from django.db.models import QuerySet
 from faker import Faker
 
+from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 
@@ -105,9 +103,9 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
                 if user_identified:
                     answer.user = users_sorted.first()
 
-                    notify.send(sender=answer.user, recipient=question.user,
-                                verb='ответил на ваш вопрос',
-                                action_object=question)
+                    # notify.send(sender=answer.user, recipient=question.user,
+                    #             verb='ответил на ваш вопрос',
+                    #             action_object=question)
                     answer.save()
 
                 self._create_answer_images(answer=answer)
@@ -192,10 +190,10 @@ class Helper(AnswerHelper, QuestionHelper):
                 if user_identified:
                     comment.user = users_.first()
 
-                    if answer.user:
-                        notify.send(sender=comment.user, recipient=answer.user,
-                                    verb='прокомментировал ваш ответ',
-                                    action_object=answer)
+                    # if answer.user:
+                        # notify.send(sender=comment.user, recipient=answer.user,
+                        #             verb='прокомментировал ваш ответ',
+                        #             action_object=answer)
 
                     comment.save()
 

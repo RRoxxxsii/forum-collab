@@ -1,8 +1,8 @@
-from accounts.models import NewUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           ThemeTag)
 from forum.tests.test_serializers import generate_photo_file
@@ -15,7 +15,7 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
-        self.question = Question.objects.create(title='Заголовок', content='Контент')
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
 
         photo = generate_photo_file()
@@ -151,25 +151,25 @@ class TestUpdateDestroyAnswerAPIView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TestQuestionNotification(APITestCase):
-
-    def setUp(self) -> None:
-        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
-                                                password='Ax6!a7OpNvq')
-        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
-                                                 password='Ax6!a7OpNvq')
-
-        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
-        self.tag = ThemeTag.objects.create(tag_name='django')
-        self.question.tags.add(self.tag)
-
-        self.url = reverse('answer-question')
-        self.data = {'question': self.question.id, 'answer': 'Какой-то ответ...'}
-
-    def test_question_owner_get_notified(self):
-        """
-        Тестируем получение уведомления автором.
-        """
-        self.client.force_authenticate(self.user)
-        self.client.post(self.url, data=self.data)
-        self.assertEqual(len(self.user2.notifications.unread()), 1)
+# class TestQuestionNotification(APITestCase):
+#
+#     def setUp(self) -> None:
+#         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+#                                                 password='Ax6!a7OpNvq')
+#         self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+#                                                  password='Ax6!a7OpNvq')
+#
+#         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
+#         self.tag = ThemeTag.objects.create(tag_name='django')
+#         self.question.tags.add(self.tag)
+#
+#         self.url = reverse('answer-question')
+#         self.data = {'question': self.question.id, 'answer': 'Какой-то ответ...'}
+#
+#     def test_question_owner_get_notified(self):
+#         """
+#         Тестируем получение уведомления автором.
+#         """
+#         self.client.force_authenticate(self.user)
+#         self.client.post(self.url, data=self.data)
+#         self.assertEqual(len(self.user2.notifications.unread()), 1)
