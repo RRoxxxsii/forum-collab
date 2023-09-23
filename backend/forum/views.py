@@ -1,8 +1,5 @@
-from accounts.models import NewUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from notifications.models import Notification
-from notifications.signals import notify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
@@ -11,9 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         parse_comment, vote_answer_solving)
+                         vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -22,8 +20,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                ListQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionSerializer,
-                               UserNotificationListSerializer)
+                               UpdateQuestionSerializer)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -116,8 +113,9 @@ class AnswerQuestionAPIView(CreateAPIView):
             question_answer.user = request.user
             question_answer.save()
 
-        notify.send(sender=user, recipient=question_user,
-                    verb=f'ответил на ваш вопрос', action_object=question_answer)
+        # if not isinstance(user, AnonymousUser):
+        #     notify.send(sender=user, recipient=question_user,
+        #                 verb=f'ответил на ваш вопрос', action_object=question_answer)
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
@@ -147,18 +145,19 @@ class CommentAPIView(CreateAPIView):
             serializer.is_valid(raise_exception=True)
             comment = serializer.data.get('comment')
             answer_id = serializer.data.get('question_answer')
-            answer = QuestionAnswer.objects.get(id=answer_id)
-            current_user = request.user
-            parsed_user_list = parse_comment(comment=comment)
+            # answer = QuestionAnswer.objects.get(id=answer_id)
+            # current_user = request.user
+            # parsed_user_list = parse_comment(comment=comment)
 
-            notify.send(sender=current_user, recipient=answer.user,
-                        verb='прокомментировал ваш ответ на вопрос',
-                        action_object=answer)
-
-            for parsed_user in parsed_user_list:
-                notify.send(sender=current_user, recipient=parsed_user,
-                            verb='ответил на ваш комментарий под вопросом',
-                            action_object=answer)
+            # if answer.user:
+            #     notify.send(sender=current_user, recipient=answer.user,
+            #                 verb='прокомментировал ваш ответ на вопрос',
+            #                 action_object=answer)
+            #
+            # for parsed_user in parsed_user_list:
+            #     notify.send(sender=current_user, recipient=parsed_user,
+            #                 verb='ответил на ваш комментарий под вопросом',
+            #                 action_object=answer)
 
         return super().create(request, *args, **kwargs)
 
@@ -279,11 +278,11 @@ class MarkAnswerSolving(RetrieveAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserNotificationViewSet(ModelViewSet):
-    serializer_class = UserNotificationListSerializer
-    http_method_names = ['get', ]
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        user = self.request.user
-        return user.notifications.all()
+# class UserNotificationViewSet(ModelViewSet):
+#     serializer_class = UserNotificationListSerializer
+#     http_method_names = ['get', ]
+#     permission_classes = (IsAuthenticated, )
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         return user.notifications.all()

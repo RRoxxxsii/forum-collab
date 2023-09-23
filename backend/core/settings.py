@@ -13,8 +13,6 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from celery.schedules import crontab
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,11 +46,11 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_celery_beat',
     'corsheaders',
-    'notifications',
 
     # Custom applications
     'accounts',
     'forum',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -221,6 +219,19 @@ SIMPLE_JWT = {
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+
+# Redis
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+        "OPTIONS": {
+            "db": "1",
+        },
+
+    }
+}
 
 # Cors
 CORS_ALLOWED_ORIGINS = [

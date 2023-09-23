@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from accounts.serializers import UserSerializer
-from notifications.models import Notification
 from rest_framework import serializers
 
+from accounts.serializers import UserSerializer
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
@@ -156,22 +155,22 @@ class GenericObjNotificationRelatedField(serializers.RelatedField):
         return serializer.data
 
 
-class UserNotificationListSerializer(serializers.ModelSerializer):
-    recipient = UserSerializer(read_only=True)
-    actor = UserSerializer(read_only=True)
-    target = GenericObjNotificationRelatedField(read_only=True)
-    action_object = GenericObjNotificationRelatedField(read_only=True)
-    type = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Notification
-        fields = ('type', 'id', 'recipient', 'actor', 'verb', 'unread',
-                  'target', 'action_object', 'timestamp')
-
-    def get_type(self, value):
-        if isinstance(value.target, Question):
-            return 'Question'
-        elif isinstance(value.target, AnswerComment):
-            return 'Comment'
-        elif isinstance(value.target, QuestionAnswer):
-            return 'Answer'
+# class UserNotificationListSerializer(serializers.ModelSerializer):
+#     recipient = UserSerializer(read_only=True)
+#     actor = UserSerializer(read_only=True)
+#     target = GenericObjNotificationRelatedField(read_only=True)
+#     action_object = GenericObjNotificationRelatedField(read_only=True)
+#     type = serializers.SerializerMethodField(read_only=True)
+#
+#     class Meta:
+#         model = Notification
+#         fields = ('type', 'id', 'recipient', 'actor', 'verb', 'unread',
+#                   'target', 'action_object', 'timestamp')
+#
+#     def get_type(self, value):
+#         if isinstance(value.target, Question):
+#             return 'Question'
+#         elif isinstance(value.target, AnswerComment):
+#             return 'Comment'
+#         elif isinstance(value.target, QuestionAnswer):
+#             return 'Answer'

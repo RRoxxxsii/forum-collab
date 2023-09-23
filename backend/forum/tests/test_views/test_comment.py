@@ -1,8 +1,8 @@
-from accounts.models import NewUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 
 
@@ -139,69 +139,69 @@ class TestCommentParseUser(APITestCase):
         self.client.post(self.url, data=self.data3)
 
 
-class TestCommentParseUserNotifications(APITestCase):
-
-    def setUp(self) -> None:
-
-        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
-                                                password='Ax6!a7OpNvq')
-        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
-                                                 password='Ax6!a7OpNvq')
-        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
-                                                 password='Ax6!a7OpNvq')
-
-        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
-        self.tag = ThemeTag.objects.create(tag_name='django')
-        self.question.tags.add(self.tag)
-        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
-                                                    answer='Изначальный ответ...')
-        self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
-                                                    comment='Какой-то комментарий...')
-
-        self.url = reverse('create-comment')
-        self.data = {'comment': '@testuser, Комментарий...',
-                     'question_answer': self.answer.id}
-
-        self.data2 = {'comment': '@testuser, @testuser3, Комментарий...',
-                      'question_answer': self.answer.id}
-
-    def test_comment_parsed_two_users_mentioned(self):
-        self.client.force_authenticate(self.user)
-        self.client.post(self.url, data=self.data2)
-        unread_user1 = self.user.notifications.unread()
-        unread_user3 = self.user3.notifications.unread()
-        self.assertEqual(len(unread_user1), 2)    # Уведомления об ответе и упоминании
-        self.assertEqual(len(unread_user3), 1)    # Уведомление только об упоминании
-
-
-class TestCommentNotification(APITestCase):
-    """
-    Тестируем рассылку уведомлений автору ответа, который
-    был прокомментирован другим пользователем.
-    """
-
-    def setUp(self) -> None:
-        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
-                                                password='Ax6!a7OpNvq')
-        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
-                                                 password='Ax6!a7OpNvq')
-        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
-                                                 password='Ax6!a7OpNvq')
-
-        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
-        self.tag = ThemeTag.objects.create(tag_name='django')
-        self.question.tags.add(self.tag)
-        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
-                                                    answer='Изначальный ответ...')
-        self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
-                                                    comment='Какой-то комментарий...')
-
-        self.url = reverse('create-comment')
-        self.data = {'comment': 'Комментарий...',
-                     'question_answer': self.answer.id}
-
-    def test_user_notified(self):
-        self.client.force_authenticate(self.user)
-        self.client.post(self.url, data=self.data)
-        unread_user1 = self.user.notifications.unread()
-        self.assertEqual(len(unread_user1), 1)
+# class TestCommentParseUserNotifications(APITestCase):
+#
+#     def setUp(self) -> None:
+#
+#         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+#                                                 password='Ax6!a7OpNvq')
+#         self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+#                                                  password='Ax6!a7OpNvq')
+#         self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+#                                                  password='Ax6!a7OpNvq')
+#
+#         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+#         self.tag = ThemeTag.objects.create(tag_name='django')
+#         self.question.tags.add(self.tag)
+#         self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+#                                                     answer='Изначальный ответ...')
+#         self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
+#                                                     comment='Какой-то комментарий...')
+#
+#         self.url = reverse('create-comment')
+#         self.data = {'comment': '@testuser, Комментарий...',
+#                      'question_answer': self.answer.id}
+#
+#         self.data2 = {'comment': '@testuser, @testuser3, Комментарий...',
+#                       'question_answer': self.answer.id}
+#
+#     def test_comment_parsed_two_users_mentioned(self):
+#         self.client.force_authenticate(self.user)
+#         self.client.post(self.url, data=self.data2)
+#         unread_user1 = self.user.notifications.unread()
+#         unread_user3 = self.user3.notifications.unread()
+#         self.assertEqual(len(unread_user1), 2)    # Уведомления об ответе и упоминании
+#         self.assertEqual(len(unread_user3), 1)    # Уведомление только об упоминании
+#
+#
+# class TestCommentNotification(APITestCase):
+#     """
+#     Тестируем рассылку уведомлений автору ответа, который
+#     был прокомментирован другим пользователем.
+#     """
+#
+#     def setUp(self) -> None:
+#         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+#                                                 password='Ax6!a7OpNvq')
+#         self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+#                                                  password='Ax6!a7OpNvq')
+#         self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+#                                                  password='Ax6!a7OpNvq')
+#
+#         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+#         self.tag = ThemeTag.objects.create(tag_name='django')
+#         self.question.tags.add(self.tag)
+#         self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+#                                                     answer='Изначальный ответ...')
+#         self.comment = AnswerComment.objects.create(user=self.user2, question_answer=self.answer,
+#                                                     comment='Какой-то комментарий...')
+#
+#         self.url = reverse('create-comment')
+#         self.data = {'comment': 'Комментарий...',
+#                      'question_answer': self.answer.id}
+#
+#     def test_user_notified(self):
+#         self.client.force_authenticate(self.user)
+#         self.client.post(self.url, data=self.data)
+#         unread_user1 = self.user.notifications.unread()
+#         self.assertEqual(len(unread_user1), 1)
