@@ -157,6 +157,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
     def test_ok(self):
         """
         Тест может падать из-за различия в одну секунду.
+        В таком случае тест необходимо перезапустить отдельно.
         """
         # print(self.expected_data_json)
         # print('-' * 100)
