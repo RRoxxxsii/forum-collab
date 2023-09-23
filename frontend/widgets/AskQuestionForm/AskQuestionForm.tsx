@@ -73,7 +73,7 @@ console.log(selectedTags)
 					mb: 2,
 				}}>
 				<TiptapEditor
-					height={220}
+					type='question'
 					content={questionContent}
 					setContent={setQuestionContent}
 				/>
@@ -84,6 +84,7 @@ console.log(selectedTags)
 					setTagQuery={setTagQuery}
 					tagsToDisplay={tagsToDisplay}
 					setSelectedTags={setSelectedTags}
+					selectedTags={selectedTags}
 					disabled={false}
 					limit={5}
 				/>
