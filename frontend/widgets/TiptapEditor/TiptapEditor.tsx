@@ -7,7 +7,7 @@ import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
 import { EditorExtensions } from './utils/Extensions'
 
-const EditorContentValue = ``
+const EditorContentValue = `<img src="https://source.unsplash.com/8xznAGy4HcY/800x400" />`
 
 export const TiptapEditor = ({
 	content,
@@ -27,9 +27,53 @@ export const TiptapEditor = ({
 					(type === 'answer' && 'prose-text-field--answer') ||
 					(type === 'reply' && 'prose-text-field--reply')
 				}`,
-				content: EditorContentValue,
+			},
+			handleDrop: function (view, event, slice, moved) {
+				if (
+					!moved &&
+					event.dataTransfer &&
+					event.dataTransfer.files &&
+					event.dataTransfer.files[0]
+				) {
+					// if dropping external files
+					let file = event.dataTransfer.files[0] // the dropped file
+					let filesize = (file.size / 1024 / 1024).toFixed(4) // get the filesize in MB
+					if (
+						(file.type === 'image/jpeg' || file.type === 'image/png') &&
+						Number(filesize) < 10
+					) {
+						// check valid image type under 10MB
+						// check the dimensions
+						let image = new Image() // Create a new Image object
+						image.src = URL.createObjectURL(file) // Set the image source to the dropped file
+
+						image.onload = function () {
+							// Wait for the image to load
+							const { schema } = view.state
+							const coordinates = view.posAtCoords({
+								left: event.clientX,
+								top: event.clientY,
+							})
+							const node = schema.nodes.image.create({
+								src: image.src, // Use the image source as the image URL
+							})
+							const transaction = view.state.tr.insert(
+								coordinates?.pos || 0,
+								node
+							)
+							view.dispatch(transaction)
+						}
+					} else {
+						window.alert(
+							'Images need to be in jpg or png format and less than 10mb in size.'
+						)
+					}
+					return true // handled
+				}
+				return false // not handled, use default behavior
 			},
 		},
+		content: EditorContentValue,
 	})
 
 	if (editor) {

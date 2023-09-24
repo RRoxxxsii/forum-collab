@@ -15,10 +15,15 @@
 	display: block;
 	height: inherit;
 }
-// .tiptap,
-// .ProseMirror {
-// 	min-height: 180px;
-// }
+.tiptap,
+.ProseMirror {
+	p {
+		margin: 2px 0;
+	}
+	img {
+		margin: 20px 0;
+	}
+}
 .prose-text-field--question {
 	min-height: 220px;
 }
