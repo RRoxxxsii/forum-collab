@@ -5,6 +5,19 @@ from django.db import models
 from accounts.models import NewUser
 
 
+class NotificationQuerySet(models.query.QuerySet):
+    """
+    Реализует QuerySet для уведомлений.
+    """
+    def mark_all_as_read(self, receiver):
+        queryset = receiver.receiver_notifications
+        queryset.update(unread=False)
+
+    def mark_all_as_unread(self, receiver):
+        queryset = receiver.receiver_notifications
+        queryset.update(unread=True)
+
+
 class Notification(models.Model):
 
     """
@@ -74,14 +87,13 @@ class Notification(models.Model):
     unread = models.BooleanField(default=True, verbose_name='Не прочитано')
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
+    objects = NotificationQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
         ordering = ('-creation_date',)
         abstract = False
-
-    def __str__(self):
-        return self.text
 
     def mark_as_unread(self):
         if not self.unread:
