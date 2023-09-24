@@ -1,5 +1,4 @@
 import { BASE_URL } from '@/shared/constants'
-import { closeSingleQuote } from '@tiptap/extension-typography'
 import { NextApiRequest } from 'next'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
 	}
 }
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest) {
 	try {
 		const session = cookies().get('access_token')?.value
 

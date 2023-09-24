@@ -54,7 +54,7 @@ export const QuestionItemContent = ({
 									variant='body2'
 									fontSize={12}
 									color='text.secondary'>
-									Отправлено: {user}
+									Отправлено: {user.username || 'Гость'}
 								</Typography>
 								<Typography
 									variant='body2'

@@ -38,7 +38,7 @@ export const AskQuestionForm = ({}: {}) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
-
+console.log(selectedTags)
 	useEffect(() => {
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
@@ -73,7 +73,7 @@ export const AskQuestionForm = ({}: {}) => {
 					mb: 2,
 				}}>
 				<TiptapEditor
-					height={220}
+					type='question'
 					content={questionContent}
 					setContent={setQuestionContent}
 				/>
@@ -84,6 +84,7 @@ export const AskQuestionForm = ({}: {}) => {
 					setTagQuery={setTagQuery}
 					tagsToDisplay={tagsToDisplay}
 					setSelectedTags={setSelectedTags}
+					selectedTags={selectedTags}
 					disabled={false}
 					limit={5}
 				/>

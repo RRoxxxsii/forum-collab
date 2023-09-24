@@ -11,7 +11,28 @@
 .ProseMirror {
 	height: 100%;
 }
-
+.prose-text-field {
+	display: block;
+	height: inherit;
+}
+.tiptap,
+.ProseMirror {
+	p {
+		margin: 2px 0;
+	}
+	img {
+		margin: 20px 0;
+	}
+}
+.prose-text-field--question {
+	min-height: 220px;
+}
+.prose-text-field--answer {
+	min-height: 120px;
+}
+.prose-text-field--reply {
+	min-height: 120px;
+}
 .ProseMirror {
 	p.is-empty::before {
 		@apply text-slate-400 float-left h-0 pointer-events-none absolute ml-[2px];

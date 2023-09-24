@@ -8,7 +8,7 @@ export interface LinkType {
 
 export interface IQuestion {
 	id: number
-	user: number
+	user: IUser
 	title: string
 	content: string
 	is_solved: boolean
@@ -29,7 +29,7 @@ export interface ITag {
 export interface IAnswer {
 	id: number
 	question: number
-	user: number
+	user: IUser
 	answer: string
 	is_solving: boolean
 	creation_date: string
@@ -41,10 +41,15 @@ export interface IAnswer {
 
 export interface IComment {
 	id: number
-	user: number
+	user: IUser
 	comment: string
 	creation_date: string
 	question_answer: number
+}
+
+export interface IUser {
+	id: number
+	username: string
 }
 
 export interface IRating {

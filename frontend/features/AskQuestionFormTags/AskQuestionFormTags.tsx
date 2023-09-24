@@ -9,6 +9,7 @@ interface AskQuestionFormTagsProps {
 	limit: number
 	disabled: boolean
 	setSelectedTags: Dispatch<SetStateAction<string[]>>
+	selectedTags: string[]
 	tagsToDisplay: ITag[]
 	setTagQuery: Dispatch<SetStateAction<string>>
 	tagQuery: string
@@ -18,14 +19,12 @@ export const AskQuestionFormTags = ({
 	limit,
 	disabled,
 	setSelectedTags,
+	selectedTags,
 	tagsToDisplay,
 	setTagQuery,
 	tagQuery,
 }: AskQuestionFormTagsProps) => {
-	const [value, setValue] = useState<ITag[]>([])
-	const [disableInput, setDisableInput] = useState(value.length >= limit)
-
-	console.log(tagsToDisplay)
+	const [disableInput, setDisableInput] = useState(selectedTags.length >= limit)
 
 	return (
 		<Box>
@@ -33,25 +32,33 @@ export const AskQuestionFormTags = ({
 				multiple
 				disabled={disabled || disableInput}
 				id='question-tags'
-				options={
-					tagsToDisplay?.map((tag) => `${tag.tag_name} (${tag.use_count})`) ||
-					[]
-				}
+				options={tagsToDisplay}
+				//@ts-ignore tag could only be an ITag, so we turnoff ts here
+				getOptionLabel={(tag: ITag) => `${tag.tag_name} (${tag.use_count})`}
 				sx={{ width: 600 }}
 				freeSolo
-				renderTags={(option: readonly string[], getTagProps) =>
-					option.map((tag: string) => (
+				renderTags={(option: readonly ITag[] | string[], getTagProps) =>
+					option.map((tag: ITag | string, index: number) => (
 						<Chip
 							variant='outlined'
-							label={tag}
-							{...getTagProps({ index: tag?.indexOf(tag) || 0 })}
+							label={typeof tag === 'string' ? tag : tag.tag_name}
+							{...getTagProps({
+								index: index,
+							})}
 							disabled={disabled}
-							key={tag}
+							key={typeof tag === 'string' ? tag : tag.tag_name}
 						/>
 					))
 				}
-				onChange={(_event: any, newValue: any) => {
-					setSelectedTags(newValue.map((tag: ITag) => tag.tag_name))
+				onChange={(
+					_event: React.SyntheticEvent,
+					newValue: (string | ITag)[]
+				) => {
+					const selectedValues = newValue.map((value) =>
+						typeof value === 'string' ? value : value.tag_name
+					)
+					setSelectedTags(selectedValues)
+					setDisableInput(selectedValues.length >= limit)
 					setDisableInput(newValue.length >= limit)
 				}}
 				renderInput={(params) => (

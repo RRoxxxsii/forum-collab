@@ -1,6 +1,7 @@
 'use client'
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import CheckIcon from '@mui/icons-material/Check'
 import CodeIcon from '@mui/icons-material/Code'
 import FormatBoldIcon from '@mui/icons-material/FormatBold'
 import FormatClearIcon from '@mui/icons-material/FormatClear'
@@ -8,7 +9,6 @@ import FormatItalicIcon from '@mui/icons-material/FormatItalic'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered'
 import FormatStrikethroughIcon from '@mui/icons-material/FormatStrikethrough'
-import CheckIcon from '@mui/icons-material/Check'
 import {
 	Box,
 	Button,

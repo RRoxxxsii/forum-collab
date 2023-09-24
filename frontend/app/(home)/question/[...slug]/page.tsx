@@ -1,4 +1,5 @@
 'use client'
+import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
@@ -19,6 +20,7 @@ import {
 	Box,
 	Button,
 	Checkbox,
+	Chip,
 	Divider,
 	FormControlLabel,
 	IconButton,
@@ -35,8 +37,10 @@ import { useEffect, useState } from 'react'
 export default function QuestionPage() {
 	const pathname = usePathname()
 
-	const id =
-		pathname.match(/\/question\/(\d+)/)[0]?.replace('/question/', '') ?? ''
+	const id = (pathname?.match(/\/question\/(\d+)/)?.[0] || '').replace(
+		'/question/',
+		''
+	)
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 
@@ -90,7 +94,7 @@ export default function QuestionPage() {
 											R
 										</Avatar>
 										<Typography sx={{ marginRight: 1 }} variant='caption'>
-											{questionData?.user}
+											{questionData?.user.username || 'Гость'}
 										</Typography>
 										<Typography sx={{ color: 'GrayText' }} variant='caption'>
 											{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}
@@ -98,11 +102,17 @@ export default function QuestionPage() {
 									</Box>
 									<Typography variant='h6'>{questionData?.title}</Typography>
 									<Typography
+										sx={{ mb: 2 }}
 										variant='body1'
 										dangerouslySetInnerHTML={{
 											__html: questionData?.content ?? 'error',
 										}}
 									/>
+									<Box>
+										{questionData.tags.map((tag) => (
+											<Chip label={tag.tag_name} />
+										))}
+									</Box>
 								</Box>
 								<FormControlLabel
 									control={
@@ -189,11 +199,11 @@ export default function QuestionPage() {
 							sx={{ display: 'flex', alignItems: 'center' }}>
 							Ответить на вопрос как,
 							<Typography variant='caption' sx={{ ml: 1 }} color={'lightblue'}>
-								usename
+								Гость
 							</Typography>
 						</Typography>
 						<TiptapEditor
-							height={120}
+							type='answer'
 							content={answerContent}
 							setContent={setAnswerContent}
 						/>
@@ -231,7 +241,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 								R
 							</Avatar>
 							<Typography sx={{ marginRight: 1 }} variant='caption'>
-								{answerData?.user}
+								{answerData?.user.username || 'Гость'}
 							</Typography>
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
 								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
