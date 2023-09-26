@@ -9,12 +9,19 @@ class NotificationQuerySet(models.query.QuerySet):
     """
     Реализует QuerySet для уведомлений.
     """
-    def mark_all_as_read(self, receiver):
-        queryset = receiver.receiver_notifications
+
+    def unread(self):
+        return self.filter(unread=True)
+
+    def read(self):
+        return self.filter(unread=False)
+
+    def mark_all_as_read(self):
+        queryset = self.unread()
         queryset.update(unread=False)
 
-    def mark_all_as_unread(self, receiver):
-        queryset = receiver.receiver_notifications
+    def mark_all_as_unread(self):
+        queryset = self.read()
         queryset.update(unread=True)
 
 
@@ -50,12 +57,11 @@ class Notification(models.Model):
                                null=True,
                                blank=True,
                                on_delete=models.CASCADE,
-                               verbose_name='Отправитель',
-                               related_name='sender_notifications')
+                               verbose_name='Отправитель')
     receiver = models.ForeignKey(NewUser,
                                  on_delete=models.CASCADE,
                                  verbose_name='Получатель',
-                                 related_name='receiver_notifications')
+                                 related_name='notifications')
 
     level = models.CharField(verbose_name='Цель уведомления', choices=LEVEL_CHOICES, default=INFO)
 

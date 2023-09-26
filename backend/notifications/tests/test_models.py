@@ -149,11 +149,11 @@ class TestNotificationQuerySet(APITestCase):
         self.assertEqual(len(notifications_unread), len(Notification.objects.all()))
 
         # Проверяем, прочитаны ли получателем его уведомлений
-        notifications_unread.mark_all_as_read(receiver=self.user)
+        notifications_unread.mark_all_as_read()
         notifications_read = Notification.objects.filter(unread=False)
         self.assertEqual(len(notifications_read), len(Notification.objects.all()))
         self.assertEqual(
-            len(self.user.receiver_notifications.filter(unread=False)),
+            len(self.user.notifications.filter(unread=False)),
             len(Notification.objects.all())
         )
 
@@ -163,9 +163,55 @@ class TestNotificationQuerySet(APITestCase):
         notifications_read = Notification.objects.filter(unread=False)
         self.assertEqual(len(notifications_read), len(Notification.objects.all()))
 
-        notifications_read.mark_all_as_unread(receiver=self.user)
+        notifications_read.mark_all_as_unread()
         self.assertEqual(len(notifications_read), len(Notification.objects.filter(unread=True)))
         self.assertEqual(
-            len(self.user.receiver_notifications.filter(unread=True)),
+            len(self.user.notifications.filter(unread=True)),
             len(Notification.objects.all())
         )
+
+
+class TestNotificationQuerySetUniqueness(APITestCase):
+    """
+    Проверем уникальность возвращаемого queryset для пользователей.
+    """
+    def setUp(self) -> None:
+
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок вопроса', content='Контент вопроса',
+                                                user=self.user)
+
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.comment = AnswerComment.objects.create(user=self.user3, question_answer=self.answer,
+                                                    comment='Какой-то комментарий...')
+        for i in range(5):
+            Notification.objects.create(receiver=self.user,
+                                        sender=self.user2,
+                                        target=self.question,
+                                        action_obj=self.answer)
+
+            Notification.objects.create(receiver=self.user2,
+                                        sender=self.user3,
+                                        target=self.question,
+                                        action_obj=self.answer)
+
+    def test_unread_queryset(self):
+        """
+        Проверяем, индвидуален ли для пользователей набор непрочитанных уведомлений.
+        """
+        self.assertNotEqual(self.user.notifications.unread(),
+                            self.user2.notifications.unread())
+
+    def test_notifications(self):
+        self.assertNotEqual(self.user.notifications.all(),
+                            self.user2.notifications.all())
+

@@ -41,10 +41,10 @@ class TestNotificationsListAPIView(APITestCase):
         content = json.loads(response.content.decode())
         notification_1 = content[0]
 
-        self.assertIn('level', content)
-        self.assertIn('target_object_id', content)
-        self.assertIn('action_object_id', content)
-        self.assertIn('sender', content)
-        self.assertIn('receiver', content)
-        self.assertIn('target_content_type', content)
-        self.assertIn('action_obj_content_type', content)
+        self.assertIn('level', notification_1)
+        self.assertIn('target_object_id', notification_1)
+        self.assertIn('action_obj_object_id', notification_1)
+        self.assertIn('sender', notification_1)
+        self.assertIn('receiver', notification_1)
+        self.assertIn('target_content_type', notification_1)
+        self.assertIn('action_obj_content_type', notification_1)

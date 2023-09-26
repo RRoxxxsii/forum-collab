@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
-from accounts.serializers import UserSerializer
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
