@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
+from notifications.utils import notify
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -68,7 +69,7 @@ def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
     Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
     запрос, отметка вопроса как решившего проблему снимается, как и отметка вопроса как решенного.
     Если ответ не отмечен как решающий и для вопроса нет решающих ответов, тогда ответ
-    отмечается как решающим а вопрос как решенным, если же есть другой решающий ответ,
+    отмечается как решающим, а вопрос как решенным, если же есть другой решающий ответ,
     метка решающего ответа с него снимается и ставится на другой ответ.
     """
     if answer.is_solving:
@@ -81,6 +82,9 @@ def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
             is_solving_answer.save()
         answer.is_solving = True
         related_question.is_solved = True
+
+        notify(target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
+               sender=related_question.user)
 
     related_question.save()
     answer.save()

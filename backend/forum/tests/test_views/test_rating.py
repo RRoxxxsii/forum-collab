@@ -344,3 +344,30 @@ class TestQuestionMarkedAsSolved(APITestCase):
 
         self.assertFalse(self.answer.is_solving)
         self.assertTrue(self.answer2.is_solving)
+
+
+class TestMarkAnswerAsSolvingNotification(APITestCase):
+    """
+    Тестируем мприход уведомления после создания вопроса.
+    """
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                    answer='Изначальный ответ...')
+        self.answer2 = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                     answer='Изначальный ответ2...', is_solving=True)
+
+        self.url = reverse('mark-answer-solving', kwargs={'pk': self.answer.pk})
+
+    def test_get_notified(self):
+        self.client.force_authenticate(self.user)
+        self.assertFalse(self.answer.is_solving)
+        self.client.get(self.url)
+        self.assertEqual(len(self.user2.notifications.all()), 1)
