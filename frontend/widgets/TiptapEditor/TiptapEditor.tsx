@@ -7,7 +7,7 @@ import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
 import { EditorExtensions } from './utils/Extensions'
 
-const EditorContentValue = `<img src="https://source.unsplash.com/8xznAGy4HcY/800x400" />`
+const EditorContentValue = ``
 
 export const TiptapEditor = ({
 	content,

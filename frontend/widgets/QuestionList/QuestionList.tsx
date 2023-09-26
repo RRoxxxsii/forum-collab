@@ -4,7 +4,7 @@ import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { QuestionItemWrapper } from '@/shared/QuestionItemWrapper'
 import { BASE_URL } from '@/shared/constants'
-import { IQuestion } from '@/types/types'
+import { IQuestion, ITag } from '@/types/types'
 import { Box } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -30,7 +30,9 @@ export const QuestionList = () => {
 		<>
 			{questions.reverse().map((question: IQuestion) => (
 				<QuestionItemWrapper
-					href={`/question/${question.id}/${question.title}/?tags=${question.tags}`}
+					href={`/question/${question.id}/${
+						question.title
+					}/?tags=${question.tags.map((tag: ITag) => tag.tag_name)}`}
 					key={question.id}>
 					<QuestionItemRating rating={question.rating} />
 					<Box sx={{ width: '100%', ml: 1 }}>

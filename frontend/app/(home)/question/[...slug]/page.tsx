@@ -1,5 +1,4 @@
 'use client'
-import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
@@ -14,6 +13,8 @@ import {
 	ReportOutlined,
 	Share,
 	ShareOutlined,
+	ThumbDown,
+	ThumbUp,
 } from '@mui/icons-material'
 import {
 	Avatar,
@@ -60,6 +61,20 @@ export default function QuestionPage() {
 			}
 		} catch (error) {}
 	}
+	async function addAnswer() {
+		try {
+			const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ question: id, answer: answerContent }),
+			})
+			if (response.ok) {
+				const data = await response.json()
+				fetchQuestion()
+			} else {
+			}
+		} catch (error) {}
+	}
 
 	const [moreButtonEl, setmoreButtonEl] = useState<HTMLElement | null>(null)
 	const moreDropdownOpen = Boolean(moreButtonEl)
@@ -94,7 +109,7 @@ export default function QuestionPage() {
 											R
 										</Avatar>
 										<Typography sx={{ marginRight: 1 }} variant='caption'>
-											{questionData?.user.username || 'Гость'}
+											{questionData?.user?.username || 'Гость'}
 										</Typography>
 										<Typography sx={{ color: 'GrayText' }} variant='caption'>
 											{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}
@@ -148,7 +163,9 @@ export default function QuestionPage() {
 									MenuListProps={{
 										'aria-labelledby': 'basic-button',
 									}}>
-									<MenuItem onClick={handleClose}>
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
 										<FormControlLabel
 											control={
 												<Checkbox
@@ -159,7 +176,9 @@ export default function QuestionPage() {
 											label='Редактировать'
 										/>
 									</MenuItem>
-									<MenuItem onClick={handleClose}>
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
 										<FormControlLabel
 											control={
 												<Checkbox
@@ -171,7 +190,9 @@ export default function QuestionPage() {
 										/>
 									</MenuItem>
 									<Divider />
-									<MenuItem onClick={handleClose}>
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
 										<FormControlLabel
 											control={<Checkbox />}
 											label='Включить уведомления'
@@ -192,7 +213,7 @@ export default function QuestionPage() {
 							{questionData.answers.length}
 						</Typography>
 					</Typography>
-					<Box sx={{ px: 3, py: 2, width: '100%' }}>
+					<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
 						<Typography
 							variant='caption'
 							color={'GrayText'}
@@ -207,6 +228,12 @@ export default function QuestionPage() {
 							content={answerContent}
 							setContent={setAnswerContent}
 						/>
+						<Button
+							sx={{ mt: 1, mb: 3, width: 220, height: 50 }}
+							variant='outlined'
+							onClick={addAnswer}>
+							Ответить
+						</Button>
 						{questionData.answers.map((answer) => (
 							<AnswerItem key={answer.id} answerData={answer} />
 						))}
@@ -222,32 +249,45 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 		<>
 			<Box
 				className='bg-zinc-800 p-2 rounded-md'
-				sx={{ px: 3, py: 1, width: '100%' }}>
-				<Box sx={{ display: 'flex', alignItems: 'center' }}>
-					<Box sx={{ justifyContent: 'center' }}>
-						<QuestionItemRating rating={answerData?.rating} />
-					</Box>
+				sx={{ px: 3, py: 2, width: '100%', mb: 2 }}>
+				<Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+					<Avatar
+						sx={{
+							width: 32,
+							height: 32,
+							fontSize: 12,
+							bgcolor: red[500],
+							marginRight: 1,
+						}}
+						aria-label='recipe'>
+						R
+					</Avatar>
 					<Box sx={{ width: '100%' }}>
-						<Box sx={{ display: 'flex' }}>
-							<Avatar
-								sx={{
-									width: 18,
-									height: 18,
-									fontSize: 12,
-									bgcolor: red[500],
-									marginRight: 1,
-								}}
-								aria-label='recipe'>
-								R
-							</Avatar>
+						<Box sx={{ display: 'flex', ml: 1 }}>
 							<Typography sx={{ marginRight: 1 }} variant='caption'>
-								{answerData?.user.username || 'Гость'}
+								{answerData?.user?.username || 'Гость'}
 							</Typography>
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
 								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
 							</Typography>
 						</Box>
-						<Typography variant='h6'>{answerData?.answer}</Typography>
+						<Typography
+							sx={{ ml: 1 }}
+							dangerouslySetInnerHTML={{ __html: answerData?.answer }}
+							variant='body1'
+						/>
+						<Box sx={{ display: 'flex', alignItems: 'center' }}>
+							<IconButton>
+								<ThumbUp sx={{ width: 16 }} />
+							</IconButton>
+							{answerData.rating.like_amount - answerData.rating.dislike_amount}
+							<IconButton>
+								<ThumbDown sx={{ width: 16 }} />
+							</IconButton>
+							<IconButton>
+								<MoreHoriz sx={{ width: 16 }} />
+							</IconButton>
+						</Box>
 					</Box>
 					<Button variant='outlined'>Отметить ответ решающим</Button>
 				</Box>

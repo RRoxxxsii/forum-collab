@@ -27,7 +27,7 @@ export const AskQuestionFormTags = ({
 	const [disableInput, setDisableInput] = useState(selectedTags.length >= limit)
 
 	return (
-		<Box>
+		<Box sx={{ maxWidth: 600, width: '100%', mr: 2, mb: 2 }}>
 			<Autocomplete
 				multiple
 				disabled={disabled || disableInput}
@@ -35,7 +35,7 @@ export const AskQuestionFormTags = ({
 				options={tagsToDisplay}
 				//@ts-ignore tag could only be an ITag, so we turnoff ts here
 				getOptionLabel={(tag: ITag) => `${tag.tag_name} (${tag.use_count})`}
-				sx={{ width: 600 }}
+				sx={{ width: '100%' }}
 				freeSolo
 				renderTags={(option: readonly ITag[] | string[], getTagProps) =>
 					option.map((tag: ITag | string, index: number) => (
