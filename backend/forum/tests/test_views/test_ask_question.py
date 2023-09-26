@@ -310,4 +310,3 @@ class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
 
         self.tag1.refresh_from_db()
         self.assertFalse(self.tag1.is_relevant)
-
