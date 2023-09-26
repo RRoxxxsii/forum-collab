@@ -169,7 +169,7 @@ class CommentAPIView(CreateAPIView):
                 for parsed_user in parsed_user_list:
                     notify(
                         sender=current_user, receiver=parsed_user,
-                        verb='ответил на ваш комментарий',
+                        text='ответил на ваш комментарий',
                         action_obj=comment,
                         target=parent
                     )
@@ -177,7 +177,7 @@ class CommentAPIView(CreateAPIView):
             if answer.user:
                 notify(
                     sender=current_user, receiver=answer.user,
-                    verb='прокомментировал ваш ответ на вопрос',
+                    text='прокомментировал ваш ответ на вопрос',
                     target=answer, action_obj=comment
                 )
 
