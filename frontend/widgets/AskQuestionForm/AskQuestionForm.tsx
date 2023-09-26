@@ -6,6 +6,7 @@ import { ITag } from '@/types/types'
 import { Box, TextField } from '@mui/material'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { TiptapEditor } from '../TiptapEditor'
+import theme from '@/shared/theme/theme'
 const fetchTagsOnQuery = async ({
 	setTagsToDisplay,
 	tagQuery,
@@ -38,7 +39,7 @@ export const AskQuestionForm = ({}: {}) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
-console.log(selectedTags)
+	console.log(selectedTags)
 	useEffect(() => {
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
@@ -103,4 +104,8 @@ const questionFormBottom = {
 	display: 'flex',
 	alignItems: 'center',
 	justifyContent: 'space-between',
+	[theme.breakpoints.down('md')]: {
+		alignItems: 'flex-start',
+		flexDirection: 'column ',
+	},
 }

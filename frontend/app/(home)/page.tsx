@@ -19,6 +19,10 @@ export default async function HomePage() {
 						<QuestionList />
 					</Box>
 					<Box sx={mobileList}>
+						<Alert variant='outlined' severity='warning' sx={{ mb: 2 }}>
+							<AlertTitle>Подтвердите почту</AlertTitle>
+							Эта надпись исчезнет, когда вы подтведите свою почту
+						</Alert>
 						<QuestionListAskFast />
 						<QuestionList />
 					</Box>
@@ -43,6 +47,6 @@ const Home = {
 }
 const HomeContainer = {
 	width: '100%',
-	mt: { md: 0, xs: 0 },
-	ml: { md: 4, xs: 0 },
+	mt: { md: 3, xs: 4 },
+	ml: { md: 2, xs: 0 },
 }

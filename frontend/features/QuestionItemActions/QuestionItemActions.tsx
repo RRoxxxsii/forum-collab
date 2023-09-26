@@ -1,5 +1,6 @@
 'use client'
 
+import theme from '@/shared/theme/theme'
 import { IQuestion } from '@/types/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import {
@@ -32,10 +33,10 @@ export const QuestionItemActions = ({
 					flex: '50%',
 				}}
 				component='ul'>
-				{questionData?.tags?.map((tag) => {
+				{questionData?.tags.map((tag) => {
 					return (
 						<ListItem
-							sx={{ p: 0, mr: 1, cursor: 'pointer' }}
+							sx={{ p: 0, mr: 1, cursor: 'pointer', flexWrap: 'nowrap' }}
 							key={tag.tag_name}>
 							<Chip key={tag.tag_name} label={tag.tag_name} />
 						</ListItem>
