@@ -1,7 +1,6 @@
-import { AskWrapper } from '@/shared/AskWrapper'
 import { AskQuestionForm } from '@/widgets/AskQuestionForm'
-import { Box } from '@mui/material'
-import { cookies } from 'next/headers'
+import { AskTabs } from '@/widgets/AskTabs'
+import { Box, Paper } from '@mui/material'
 
 const askPageWrapper = {
 	width: '100%',
@@ -12,11 +11,20 @@ export default async function AskPage() {
 	return (
 		<Box className='flex min-h-screen items-start max-h-80 relative'>
 			<Box sx={askPageWrapper}>
-				<Box>
-					<AskWrapper>
-						<AskQuestionForm />
-					</AskWrapper>
-				</Box>
+				<Paper
+					elevation={2}
+					variant={'elevation'}
+					sx={{
+						p: 2,
+						position: 'relative',
+						width: 'clamp(300px, 100%, 1200px)',
+						height: '100%',
+						minHeight: '400px',
+						alignItems: 'center',
+					}}>
+					<AskTabs />
+					<AskQuestionForm />
+				</Paper>
 			</Box>
 		</Box>
 	)

@@ -94,8 +94,8 @@ export const TiptapEditor = ({
 					<BubbleMenuContent editor={editor} />
 				</BubbleMenu>
 			)}
-			<Box border={'1px solid grey'}>
-				<IconButton color='default'>
+			<Box border={'1px solid #343947'}>
+				<IconButton sx={{ color: '#b7b8c4' }}>
 					<AddPhotoAlternate />
 				</IconButton>
 			</Box>
