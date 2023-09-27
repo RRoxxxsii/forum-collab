@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -197,6 +199,97 @@ class TestLikeDislikeAPIView(APITestCase):
         # Проверяем, поставился ли дизлайк
         rating = QuestionRating.objects.first()
         self.assertEqual(rating.dislike_amount, 1)
+
+
+class TestObjRatedByUser(APITestCase):
+
+    def setUp(self) -> None:
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
+        self.tag = ThemeTag.objects.create(tag_name='django')
+        self.question.tags.add(self.tag)
+        self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+    def test_question_liked_by_a_user(self):
+        """
+        Тестируем, считается ли вопрос лайкнутым пользователем.
+        """
+        self.client.force_authenticate(self.user)
+        url = reverse('like-dislike-like', kwargs={'pk': self.question.pk})
+        self.client.get(f'{url}?model=question')
+
+        # fetch вопроса
+        response = self.client.get(reverse('question-detail', kwargs={'pk': self.question.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, True)
+        self.assertEqual(user_disliked, False)
+
+    def test_question_disliked_by_a_user(self):
+        """
+        Тестируем, считается ли вопрос дизлайкнутым пользователем.
+        """
+        self.client.force_authenticate(self.user)
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.question.pk})
+        self.client.get(f'{url}?model=question')
+
+        # fetch вопроса
+        response = self.client.get(reverse('question-detail', kwargs={'pk': self.question.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, False)
+        self.assertEqual(user_disliked, True)
+
+    def test_answer_liked_by_a_user(self):
+        """
+        Тестируем, считается ли ответ лайкнутым пользователем.
+        """
+        self.client.force_authenticate(self.user)
+        url = reverse('like-dislike-like', kwargs={'pk': self.answer.pk})
+        self.client.get(f'{url}?model=answer')
+
+        # fetch вопроса
+        response = self.client.get(reverse('answer-detail', kwargs={'pk': self.answer.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, True)
+        self.assertEqual(user_disliked, False)
+
+    def test_answer_disliked_by_a_user(self):
+        """
+        Тестируем, считается ли ответ дизлайкнутым пользователем.
+        """
+        self.client.force_authenticate(self.user)
+        url = reverse('like-dislike-dislike', kwargs={'pk': self.answer.pk})
+        self.client.get(f'{url}?model=answer')
+
+        # fetch вопроса
+        response = self.client.get(reverse('answer-detail', kwargs={'pk': self.answer.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, False)
+        self.assertEqual(user_disliked, True)
+
+    def test_anonymous_user_request(self):
+        """
+        Запрос от анонимного пользователя.
+        """
+        # fetch вопроса
+        response = self.client.get(reverse('question-detail', kwargs={'pk': self.question.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, False)
+        self.assertEqual(user_disliked, False)
 
 
 class TestMarkAnswerAsSolving(APITestCase):
