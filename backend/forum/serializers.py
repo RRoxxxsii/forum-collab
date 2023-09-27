@@ -66,14 +66,30 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'question_answer', 'creation_date', 'updated_date', 'user')
 
 
-class QuestionRatingSerializer(serializers.ModelSerializer):
+class BaseRatingIsLikedOrDislikedSerializer(serializers.Serializer):
+    is_liked = serializers.SerializerMethodField()
+    is_disliked = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = '__all__'
+
+    def get_is_liked(self, instance: [Question | QuestionAnswer]) -> bool:
+        user = self.context.get('request').user
+        return instance.users_liked.filter(id=user.id).exists()
+
+    def get_is_disliked(self, instance:  [Question | QuestionAnswer]) -> bool:
+        user = self.context.get('request').user
+        return instance.users_disliked.filter(id=user.id).exists()
+
+
+class QuestionRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionRating
         fields = '__all__'
 
 
-class AnswerRatingSerializer(serializers.ModelSerializer):
+class AnswerRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswerRating
