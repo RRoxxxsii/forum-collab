@@ -2,19 +2,22 @@
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
+import { Reply } from '@/widgets/Reply/Reply'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import {
+	ArrowDownward,
+	ArrowDownwardOutlined,
+	ArrowUpward,
+	ArrowUpwardOutlined,
 	Bookmark,
 	BookmarkOutlined,
+	Comment,
 	Edit,
-	EditOutlined,
 	MoreHoriz,
 	Report,
 	ReportOutlined,
 	Share,
 	ShareOutlined,
-	ThumbDown,
-	ThumbUp,
 } from '@mui/icons-material'
 import {
 	Avatar,
@@ -32,6 +35,7 @@ import {
 } from '@mui/material'
 import { red } from '@mui/material/colors'
 import dayjs from 'dayjs'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -42,6 +46,49 @@ export default function QuestionPage() {
 		'/question/',
 		''
 	)
+
+	const dislikeQuestion = async ({ id }: { id: number }) => {
+		try {
+			const response = await fetch(`/api/forum/dislike`, {
+				body: JSON.stringify({ id: id, model: 'question' }),
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			const data = await response.json()
+
+			if (!response.ok) {
+				throw new Error(data)
+			}
+
+			return data
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const likeQuestion = async ({ id }: { id: number }) => {
+		try {
+			const response = await fetch(`/api/forum/like`, {
+				body: JSON.stringify({ id: id, model: 'question' }),
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+
+			const data = await response.json()
+
+			if (!response.ok) {
+				throw new Error(data)
+			}
+
+			return data
+		} catch (error) {
+			console.log(error)
+		}
+	}
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 
@@ -92,29 +139,15 @@ export default function QuestionPage() {
 					<Box sx={{ px: 3, py: 2 }}>
 						<Box sx={{ display: 'flex' }}>
 							<Box sx={{ justifyContent: 'center' }}>
-								<QuestionItemRating rating={questionData?.rating} />
+								<QuestionItemRating
+									questionData={questionData}
+									setDislike={dislikeQuestion}
+									setLike={likeQuestion}
+								/>
 							</Box>
 							<Box sx={{ padding: 1.5 }}>
 								<Box sx={{ mb: 2, ml: 1 }}>
-									<Box sx={{ display: 'flex' }}>
-										<Avatar
-											sx={{
-												width: 18,
-												height: 18,
-												fontSize: 12,
-												bgcolor: red[500],
-												marginRight: 1,
-											}}
-											aria-label='recipe'>
-											R
-										</Avatar>
-										<Typography sx={{ marginRight: 1 }} variant='caption'>
-											{questionData?.user?.username || 'Гость'}
-										</Typography>
-										<Typography sx={{ color: 'GrayText' }} variant='caption'>
-											{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}
-										</Typography>
-									</Box>
+									<UserInformation questionData={questionData} />
 									<Typography variant='h6'>{questionData?.title}</Typography>
 									<Typography
 										sx={{ mb: 2 }}
@@ -159,35 +192,22 @@ export default function QuestionPage() {
 									id='more options'
 									anchorEl={moreButtonEl}
 									open={moreDropdownOpen}
-									onClose={handleClose}
-									MenuListProps={{
-										'aria-labelledby': 'basic-button',
-									}}>
+									onClose={handleClose}>
 									<MenuItem
 										onClick={handleClose}
 										sx={{ width: '100%', height: 36 }}>
-										<FormControlLabel
-											control={
-												<Checkbox
-													icon={<EditOutlined />}
-													checkedIcon={<Edit />}
-												/>
-											}
-											label='Редактировать'
-										/>
+										<Link href={`edit`} className='flex'>
+											<Edit sx={{ mr: 1 }} />
+											<Typography>Редактировать</Typography>
+										</Link>
 									</MenuItem>
 									<MenuItem
 										onClick={handleClose}
 										sx={{ width: '100%', height: 36 }}>
-										<FormControlLabel
-											control={
-												<Checkbox
-													icon={<ReportOutlined />}
-													checkedIcon={<Report />}
-												/>
-											}
-											label='Пожаловаться'
-										/>
+										<Link href={`edit`} className='flex'>
+											<Report sx={{ mr: 1 }} />
+											<Typography>Пожаловаться</Typography>
+										</Link>
 									</MenuItem>
 									<Divider />
 									<MenuItem
@@ -244,7 +264,72 @@ export default function QuestionPage() {
 	)
 }
 
+const UserInformation = ({ questionData }: { questionData: IQuestion }) => {
+	return (
+		<Box sx={{ display: 'flex' }}>
+			<Avatar
+				sx={{
+					width: 18,
+					height: 18,
+					fontSize: 12,
+					bgcolor: red[500],
+					marginRight: 1,
+				}}
+				aria-label='recipe'>
+				R
+			</Avatar>
+			<Typography sx={{ marginRight: 1 }} variant='caption'>
+				{questionData?.user?.username || 'Гость'}
+			</Typography>
+			<Typography sx={{ color: 'GrayText' }} variant='caption'>
+				{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}
+			</Typography>
+		</Box>
+	)
+}
+
 function AnswerItem({ answerData }: { answerData: IAnswer }) {
+	const likeComment = async ({ id }: { id: number }) => {
+		try {
+			const response = await fetch(`/api/forum/like`, {
+				body: JSON.stringify({ id: id, model: 'answer' }),
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			if (response.ok) {
+				const data = await response.json()
+				console.log(data)
+				return
+			}
+			return null
+		} catch (error) {
+			console.log(error)
+		}
+	}
+	const dislikeComment = async ({ id }: { id: number }) => {
+		try {
+			const response = await fetch(`/api/forum/dislike`, {
+				body: JSON.stringify({ id: id, model: 'answer' }),
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			if (response.ok) {
+				const data = await response.json()
+				console.log(data)
+				return
+			}
+			return null
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const [isReplying, setIsReplying] = useState<boolean>(false)
+
 	return (
 		<>
 			<Box
@@ -272,26 +357,46 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 							</Typography>
 						</Box>
 						<Typography
+							className='comment'
 							sx={{ ml: 1 }}
 							dangerouslySetInnerHTML={{ __html: answerData?.answer }}
 							variant='body1'
 						/>
-						<Box sx={{ display: 'flex', alignItems: 'center' }}>
-							<IconButton>
-								<ThumbUp sx={{ width: 16 }} />
-							</IconButton>
+						<Box
+							sx={{
+								display: 'flex',
+								alignItems: 'center',
+							}}>
+							<Checkbox
+								icon={<ArrowUpwardOutlined />}
+								checkedIcon={<ArrowUpward />}
+								onClick={() => likeComment({ id: answerData.id })}
+							/>
 							{answerData.rating.like_amount - answerData.rating.dislike_amount}
+							<Checkbox
+								icon={<ArrowDownwardOutlined />}
+								checkedIcon={<ArrowDownward />}
+								onClick={() => dislikeComment({ id: answerData.id })}
+							/>
+							<FormControlLabel
+								control={
+									<IconButton
+										onClick={() => setIsReplying((state) => (state = !state))}
+										sx={{ ml: 1, mr: 0.5 }}>
+										<Comment />
+									</IconButton>
+								}
+								label='Ответить'
+							/>
 							<IconButton>
-								<ThumbDown sx={{ width: 16 }} />
-							</IconButton>
-							<IconButton>
-								<MoreHoriz sx={{ width: 16 }} />
+								<MoreHoriz sx={{ width: 16, height: 16 }} />
 							</IconButton>
 						</Box>
 					</Box>
 					<Button variant='outlined'>Отметить ответ решающим</Button>
 				</Box>
 			</Box>
+			{isReplying && <Reply />}
 		</>
 	)
 }

@@ -1,32 +1,35 @@
 'use client'
-import { IRating } from '@/types/types'
+import { IQuestion } from '@/types/types'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import { Box, IconButton, Typography } from '@mui/material'
-import React, { EventHandler } from 'react'
 
-export const QuestionItemRating = ({ rating }: { rating: IRating }) => {
-	const setLike = (event: React.SyntheticEvent) => {
-		event.preventDefault()
-	}
-	const setDislike = (event: React.SyntheticEvent) => {
-		event.preventDefault()
-	}
+interface QuestionItemRatingProps {
+	questionData: IQuestion
+	setLike: ({ id }: { id: number }) => Promise<null | undefined>
+	setDislike: ({ id }: { id: number }) => Promise<null | undefined>
+}
 
+export const QuestionItemRating = ({
+	questionData,
+	setLike,
+	setDislike,
+}: QuestionItemRatingProps) => {
 	return (
 		<Box
 			sx={{
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'center',
+				color: 'white',
 			}}>
-			<IconButton onClick={setLike}>
+			<IconButton onClick={() => setLike({ id: questionData.id })}>
 				<ArrowUpwardIcon></ArrowUpwardIcon>
 			</IconButton>
 			<Typography fontWeight={700}>
-				{rating?.like_amount - rating?.dislike_amount}
+				{questionData.rating?.like_amount - questionData.rating?.dislike_amount}
 			</Typography>
-			<IconButton onClick={setDislike}>
+			<IconButton onClick={() => setDislike({ id: questionData.id })}>
 				<ArrowDownwardIcon></ArrowDownwardIcon>
 			</IconButton>
 		</Box>

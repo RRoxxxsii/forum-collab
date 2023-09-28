@@ -1,7 +1,9 @@
 'use client'
+import '@/shared/styles/EditorTextStyles.scss'
 import { AddPhotoAlternate } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
+import Link from 'next/link'
 import { Dispatch, SetStateAction } from 'react'
 import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
@@ -94,11 +96,17 @@ export const TiptapEditor = ({
 					<BubbleMenuContent editor={editor} />
 				</BubbleMenu>
 			)}
-			<Box border={'1px solid grey'}>
-				<IconButton color='default'>
-					<AddPhotoAlternate />
-				</IconButton>
-			</Box>
+			{type === 'question' ||
+				(type === 'answer' && (
+					<Box border={'1px solid #343947'}>
+						<IconButton sx={{ color: '#b7b8c4' }}>
+							<Link href={'addimage'}>
+								<AddPhotoAlternate />
+							</Link>
+						</IconButton>
+					</Box>
+				))}
+
 			<EditorContent
 				style={{ height: '100%' }}
 				onChange={(e) => setContent}
