@@ -2,6 +2,7 @@
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
+import { Reply } from '@/widgets/Reply/Reply'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import {
 	ArrowDownward,
@@ -327,6 +328,8 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 		}
 	}
 
+	const [isReplying, setIsReplying] = useState<boolean>(false)
+
 	return (
 		<>
 			<Box
@@ -354,6 +357,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 							</Typography>
 						</Box>
 						<Typography
+							className='comment'
 							sx={{ ml: 1 }}
 							dangerouslySetInnerHTML={{ __html: answerData?.answer }}
 							variant='body1'
@@ -376,7 +380,11 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 							/>
 							<FormControlLabel
 								control={
-									<Checkbox icon={<Comment />} checkedIcon={<Comment />} />
+									<IconButton
+										onClick={() => setIsReplying((state) => (state = !state))}
+										sx={{ ml: 1, mr: 0.5 }}>
+										<Comment />
+									</IconButton>
 								}
 								label='Ответить'
 							/>
@@ -388,6 +396,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 					<Button variant='outlined'>Отметить ответ решающим</Button>
 				</Box>
 			</Box>
+			{isReplying && <Reply />}
 		</>
 	)
 }

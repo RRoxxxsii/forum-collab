@@ -21,6 +21,7 @@ export const QuestionItemRating = ({
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'center',
+				color: 'white',
 			}}>
 			<IconButton onClick={() => setLike({ id: questionData.id })}>
 				<ArrowUpwardIcon></ArrowUpwardIcon>

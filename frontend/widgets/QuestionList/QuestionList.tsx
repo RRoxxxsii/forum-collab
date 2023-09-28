@@ -4,7 +4,8 @@ import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IQuestion, ITag } from '@/types/types'
-import { Box, Card, Link } from '@mui/material'
+import { Box, Card } from '@mui/material'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export const QuestionList = () => {
@@ -85,16 +86,17 @@ const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 				width: 'clamp(300px, 100%, 1200px)',
 				transition: 'border-color 0.3s ease-in-out',
 				border: '1px solid transparent',
-				'&:hover': { border: 1, transition: 0.3, borderColor: 'teal' },
+				'&:hover': { border: 1, transition: 0.3, borderColor: 'Highlight' },
 				cursor: 'pointer',
 				mb: 2,
+				textDecoration: 'none',
 				p: 0.8,
 			}}>
 			<Link
 				href={`/question/${questionData.id}/${
 					questionData.title
 				}/?tags=${questionData.tags.map((tag: ITag) => tag.tag_name)}`}
-				className='flex'>
+				className='flex hover:no-underline'>
 				<QuestionItemRating
 					questionData={questionData}
 					setDislike={dislikeQuestion}
