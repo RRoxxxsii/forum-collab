@@ -3,6 +3,7 @@ import io
 import json
 import random
 
+from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from PIL import Image
@@ -33,6 +34,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
 
     def setUp(self) -> None:
         request = RequestFactory().get('/')
+        request.user = AnonymousUser()
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
@@ -68,6 +70,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
             "user": 1,
             "title": "Заголовок",
             "content": "Контент",
+            "answers_amount": 2,
             "is_solved": False,
             "creation_date": current_datetime,
             "updated_date": current_datetime,
@@ -77,6 +80,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
             ],
             "rating": {
                 "id": 1,
+                "is_liked": False,
+                "is_disliked": False,
                 "like_amount": 0,
                 "dislike_amount": 0,
                 "question": 1,
@@ -94,6 +99,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "updated_date": current_datetime,
                     "rating": {
                         "id": 1,
+                        "is_liked": False,
+                        "is_disliked": False,
                         "like_amount": 0,
                         "dislike_amount": 0,
                         "answer": 1,
@@ -110,7 +117,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
                             "creation_date": current_datetime,
                             "updated_date": current_datetime,
                             "user": 1,
-                            "question_answer": 1
+                            "question_answer": 1,
+                            "parent": None
                         },
                         {
                             "id": 2,
@@ -118,7 +126,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
                             "creation_date": current_datetime,
                             "updated_date": current_datetime,
                             "user": 1,
-                            "question_answer": 1
+                            "question_answer": 1,
+                            "parent": None
                         }
                     ]
                 },
@@ -132,6 +141,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "updated_date": current_datetime,
                     "rating": {
                         "id": 2,
+                        "is_liked": False,
+                        "is_disliked": False,
                         "like_amount": 0,
                         "dislike_amount": 0,
                         "answer": 2,
@@ -158,6 +169,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
         """
         Тест может падать из-за различия в одну секунду.
         В таком случае тест необходимо перезапустить отдельно.
+        Или сравнить вручную.
         """
         # print(self.expected_data_json)
         # print('-' * 100)

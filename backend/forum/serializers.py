@@ -129,18 +129,26 @@ class AnswerSerializer(serializers.ModelSerializer):
                             'images', 'comments')
 
 
-class ListQuestionSerializer(serializers.ModelSerializer):
+class QuestionRelatedAnswersAmountSerializer(serializers.Serializer):
+    answers_amount = serializers.SerializerMethodField()
+
+    def get_answers_amount(self, instance: Question):
+        return instance.question_answers.all().count()
+
+
+class ListQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
     tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'rating', 'tags')
+        fields = ('id', 'user', 'title', 'content', 'answers_amount', 'is_solved',
+                  'creation_date', 'updated_date', 'rating', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
-class DetailQuestionSerializer(serializers.ModelSerializer):
+class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
 
     rating = QuestionRatingSerializer(read_only=True)
     answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
@@ -150,7 +158,7 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'updated_date',
+        fields = ('id', 'user', 'title', 'content', 'answers_amount', 'is_solved', 'creation_date', 'updated_date',
                   'images', 'rating', 'answers', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
