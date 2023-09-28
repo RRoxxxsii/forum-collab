@@ -10,6 +10,7 @@ from faker import Faker
 from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
+from notifications.utils import notify
 
 
 class BaseAnswerQuestionHelperMixin:
@@ -103,9 +104,9 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
                 if user_identified:
                     answer.user = users_sorted.first()
 
-                    # notify.send(sender=answer.user, recipient=question.user,
-                    #             verb='ответил на ваш вопрос',
-                    #             action_object=question)
+                    notify(sender=answer.user, receiver=question.user,
+                           text='ответил на ваш вопрос',
+                           action_object=answer, target=question)
                     answer.save()
 
                 self._create_answer_images(answer=answer)
@@ -190,16 +191,14 @@ class Helper(AnswerHelper, QuestionHelper):
                 if user_identified:
                     comment.user = users_.first()
 
-                    # if answer.user:
-                        # notify.send(sender=comment.user, recipient=answer.user,
-                        #             verb='прокомментировал ваш ответ',
-                        #             action_object=answer)
+                    if answer.user:
+                        notify(sender=comment.user, receiver=answer.user,
+                               text='прокомментировал ваш ответ',
+                               action_object=comment, target=answer)
 
                     comment.save()
 
         comments = AnswerComment.objects.all()
-        self.stdout.write(self.style.SUCCESS(f'Число комментариев: {comments.count()}.'))
-
         return comments
 
 
