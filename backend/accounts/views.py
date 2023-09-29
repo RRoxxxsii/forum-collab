@@ -30,8 +30,8 @@ class CustomUserRegisterAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         if user:
-            return Response(data=self.success_message, status=status.HTTP_201_CREATED)
-        return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
+        return Response(data={"message": self.error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestEmailToConfirmAPIView(GenericAPIView):
@@ -55,7 +55,7 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
         send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url,
                                 email=user.email, token_id=token.id, user_id=user.id)
 
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+        return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
 class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
@@ -88,7 +88,8 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         user = request.user
         # Проверка на то, существует ли такой адрес в БД.
         if email_exists(email):
-            return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.error_message},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
         current_url = get_current_site(request, path='new-email-confirmation-result')   # Часть url для подтверждения
@@ -99,7 +100,7 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url, email=email,
                                 token_id=token.id, user_id=user.id)
 
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+        return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
 class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
@@ -132,7 +133,7 @@ class DeleteAccountAPIView(GenericAPIView):
         user.time_deleted = timezone.now()
         user.save()
 
-        return Response(data=self.success_message, status=status.HTTP_200_OK)
+        return Response(data={"message": self.success_message}, status=status.HTTP_200_OK)
 
 
 class RestoreAccountAPIView(GenericAPIView):
@@ -152,7 +153,8 @@ class RestoreAccountAPIView(GenericAPIView):
         user = request.user
         # Проверка на то, существует ли такой адрес в БД и активен ли пользователь.
         if not email_exists(email) or user.is_active:
-            return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.error_message},
+                            status=status.HTTP_400_BAD_REQUEST)
         elif user.email == email:
             # Создаем новый токен
             token = EmailConfirmationToken.objects.create(user=user)
@@ -160,7 +162,7 @@ class RestoreAccountAPIView(GenericAPIView):
             send_confirmation_email(template_name='email/restore_account.txt', email=email, user_id=user.id,
                                     current_url=current_url, token_id=token.id)
 
-            return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+            return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         # В случае, если что-то пошло не так
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
