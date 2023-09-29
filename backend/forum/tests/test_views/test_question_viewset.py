@@ -72,13 +72,13 @@ class TestQuestionViewSet(APITestCase):
         self.assertIn('rating', *content_answers)
 
 
-class TestQuestionListLimit(APITestCase):
+class TestQuestionQueryParams(APITestCase):
 
     def setUp(self) -> None:
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
-        self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user)
+        self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user, is_solved=True)
         self.tag = ThemeTag.objects.create(tag_name='django')
         question_image = generate_photo_file()
         question_image2 = generate_photo_file()
@@ -104,3 +104,24 @@ class TestQuestionListLimit(APITestCase):
         response = self.client.get(self.url)
         content = json.loads(response.content.decode())
         self.assertEqual(len(content), 2)
+
+    def test_sort_closed_query_param(self):
+        """
+        Параметр запроса sort = closed.
+        """
+        response = self.client.get(f'{self.url}?sort=closed&limit=10')
+        content = json.loads(response.content.decode())
+        for question in content:
+            self.assertTrue(question.get('is_solved'))
+
+    def test_sort_opened_query_param(self):
+        """
+        Параметр запроса sort = closed.
+        """
+        response = self.client.get(f'{self.url}?sort=opened&limit=10')
+        content = json.loads(response.content.decode())
+        for question in content:
+            self.assertFalse(question.get('is_solved'))
+
+    def test_sort_best_query_param(self):
+        response = self.client.get(f'{self.url}?sort=best&limit=10')

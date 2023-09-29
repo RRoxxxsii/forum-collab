@@ -263,10 +263,23 @@ class QuestionViewSet(ModelViewSet):
         return self.serializer_classes.get(self.action)
 
     def get_queryset(self):
-        limit = self.request.query_params.get('limit')
-        if not limit or not self.action == 'list':
+        query_params = self.request.query_params
+        limit = query_params.get('limit')
+        if limit:
+            limit = int(limit)
+
+        sort = query_params.get('sort')
+        if not sort and (not limit or not self.action == 'list'):
             return Question.objects.all()
-        return Question.objects.all()[:int(limit)]
+        elif sort == 'closed' and limit:
+            return Question.objects.filter(is_solved=True)[:limit]
+        elif sort == 'opened' and limit:
+            return Question.objects.filter(is_solved=False)[:limit]
+        elif sort == 'latest' and limit:
+            return Question.objects.order_by('-creation_date')[:limit]
+        elif sort == 'best' and limit:
+            raise NotImplementedError
+        return Question.objects.all()[:limit]
 
 
 class AnswerViewSet(ModelViewSet):
