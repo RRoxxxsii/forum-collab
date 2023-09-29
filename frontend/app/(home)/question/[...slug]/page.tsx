@@ -2,7 +2,6 @@
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion } from '@/types/types'
-import { Reply } from '@/widgets/Reply/Reply'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import {
 	ArrowDownward,
@@ -15,7 +14,6 @@ import {
 	Edit,
 	MoreHoriz,
 	Report,
-	ReportOutlined,
 	Share,
 	ShareOutlined,
 } from '@mui/icons-material'
@@ -38,7 +36,7 @@ import dayjs from 'dayjs'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
+import { Comment as CommentComponent } from '@/widgets/Comment'
 export default function QuestionPage() {
 	const pathname = usePathname()
 
@@ -328,7 +326,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 		}
 	}
 
-	const [isReplying, setIsReplying] = useState<boolean>(false)
+	const [isCommenting, setIsCommenting] = useState<boolean>(false)
 
 	return (
 		<>
@@ -381,7 +379,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 							<FormControlLabel
 								control={
 									<IconButton
-										onClick={() => setIsReplying((state) => (state = !state))}
+										onClick={() => setIsCommenting((state) => (state = !state))}
 										sx={{ ml: 1, mr: 0.5 }}>
 										<Comment />
 									</IconButton>
@@ -396,7 +394,7 @@ function AnswerItem({ answerData }: { answerData: IAnswer }) {
 					<Button variant='outlined'>Отметить ответ решающим</Button>
 				</Box>
 			</Box>
-			{isReplying && <Reply />}
+			{isCommenting && <CommentComponent answerData={answerData} />}
 		</>
 	)
 }

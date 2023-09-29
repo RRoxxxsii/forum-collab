@@ -24,3 +24,13 @@ body {
 a {
 	text-decoration: none;
 }
+
+textarea {
+	background-color: rgba(0, 0, 0, 0);
+	border: 1px solid #506e80;
+	border-radius: 4px;
+	padding: 4px;
+	&:focus {
+		outline: 1px solid #9cc4dd;
+	}
+}
