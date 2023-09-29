@@ -1,10 +1,10 @@
 import json
 
-from accounts.models import NewUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import Question, QuestionImages, ThemeTag
 from forum.tests.test_serializers import generate_photo_file
 
@@ -310,4 +310,3 @@ class TestThemeTagMakingTagRelevantAskQuestion(APITestCase):
 
         self.tag1.refresh_from_db()
         self.assertFalse(self.tag1.is_relevant)
-

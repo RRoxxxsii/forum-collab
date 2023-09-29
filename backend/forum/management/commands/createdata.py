@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import random
 
-from accounts.models import NewUser
 from django.core.management import BaseCommand
 from django.db import transaction
 from django.db.models import QuerySet
 from faker import Faker
 
+from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
+from notifications.utils import notify
 
 
 class BaseAnswerQuestionHelperMixin:
@@ -102,6 +103,10 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
 
                 if user_identified:
                     answer.user = users_sorted.first()
+
+                    notify(sender=answer.user, receiver=question.user,
+                           text='ответил на ваш вопрос',
+                           action_object=answer, target=question)
                     answer.save()
 
                 self._create_answer_images(answer=answer)
@@ -139,6 +144,11 @@ class Helper(AnswerHelper, QuestionHelper):
 
     def create_users(self, users_amount):
         fake = Faker(['ru_RU'])
+
+        superuser = NewUser.objects.create_superuser(
+                email='testadmin@example.com', password='1234',
+                user_name='root'
+            )
 
         for _ in range(users_amount):
 
@@ -180,11 +190,15 @@ class Helper(AnswerHelper, QuestionHelper):
 
                 if user_identified:
                     comment.user = users_.first()
+
+                    if answer.user:
+                        notify(sender=comment.user, receiver=answer.user,
+                               text='прокомментировал ваш ответ',
+                               action_object=comment, target=answer)
+
                     comment.save()
 
         comments = AnswerComment.objects.all()
-        self.stdout.write(self.style.SUCCESS(f'Число комментариев: {comments.count()}.'))
-
         return comments
 
 
@@ -204,4 +218,5 @@ class Command(BaseCommand, Helper):
         answers = a.create_answers()
         self.stdout.write(self.style.SUCCESS(f'Число ответов: {answers.count()}.'))
 
-        self.create_comments(answers=answers, users=users)
+        comments = self.create_comments(answers=answers, users=users)
+        self.stdout.write(self.style.SUCCESS(f'Число комментариев: {comments.count()}.'))

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from accounts.serializers import UserSerializer
-from notifications.models import Notification
 from rest_framework import serializers
 
 from forum.models import (AnswerComment, Question, QuestionAnswer,
@@ -68,14 +66,30 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'question_answer', 'creation_date', 'updated_date', 'user')
 
 
-class QuestionRatingSerializer(serializers.ModelSerializer):
+class BaseRatingIsLikedOrDislikedSerializer(serializers.Serializer):
+    is_liked = serializers.SerializerMethodField()
+    is_disliked = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = '__all__'
+
+    def get_is_liked(self, instance: [Question | QuestionAnswer]) -> bool:
+        user = self.context.get('request').user
+        return instance.users_liked.filter(id=user.id).exists()
+
+    def get_is_disliked(self, instance:  [Question | QuestionAnswer]) -> bool:
+        user = self.context.get('request').user
+        return instance.users_disliked.filter(id=user.id).exists()
+
+
+class QuestionRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionRating
         fields = '__all__'
 
 
-class AnswerRatingSerializer(serializers.ModelSerializer):
+class AnswerRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswerRating
@@ -115,18 +129,26 @@ class AnswerSerializer(serializers.ModelSerializer):
                             'images', 'comments')
 
 
-class ListQuestionSerializer(serializers.ModelSerializer):
+class QuestionRelatedAnswersAmountSerializer(serializers.Serializer):
+    answers_amount = serializers.SerializerMethodField()
+
+    def get_answers_amount(self, instance: Question):
+        return instance.question_answers.all().count()
+
+
+class ListQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
     tags = BaseTagFieldSerializer(read_only=True, many=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'rating', 'tags')
+        fields = ('id', 'user', 'title', 'content', 'answers_amount', 'is_solved',
+                  'creation_date', 'updated_date', 'rating', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 
 
-class DetailQuestionSerializer(serializers.ModelSerializer):
+class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
 
     rating = QuestionRatingSerializer(read_only=True)
     answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
@@ -136,7 +158,7 @@ class DetailQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'is_solved', 'creation_date', 'updated_date',
+        fields = ('id', 'user', 'title', 'content', 'answers_amount', 'is_solved', 'creation_date', 'updated_date',
                   'images', 'rating', 'answers', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
@@ -156,22 +178,22 @@ class GenericObjNotificationRelatedField(serializers.RelatedField):
         return serializer.data
 
 
-class UserNotificationListSerializer(serializers.ModelSerializer):
-    recipient = UserSerializer(read_only=True)
-    actor = UserSerializer(read_only=True)
-    target = GenericObjNotificationRelatedField(read_only=True)
-    action_object = GenericObjNotificationRelatedField(read_only=True)
-    type = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Notification
-        fields = ('type', 'id', 'recipient', 'actor', 'verb', 'unread',
-                  'target', 'action_object', 'timestamp')
-
-    def get_type(self, value):
-        if isinstance(value.target, Question):
-            return 'Question'
-        elif isinstance(value.target, AnswerComment):
-            return 'Comment'
-        elif isinstance(value.target, QuestionAnswer):
-            return 'Answer'
+# class UserNotificationListSerializer(serializers.ModelSerializer):
+#     recipient = UserSerializer(read_only=True)
+#     actor = UserSerializer(read_only=True)
+#     target = GenericObjNotificationRelatedField(read_only=True)
+#     action_object = GenericObjNotificationRelatedField(read_only=True)
+#     type = serializers.SerializerMethodField(read_only=True)
+#
+#     class Meta:
+#         model = Notification
+#         fields = ('type', 'id', 'recipient', 'actor', 'verb', 'unread',
+#                   'target', 'action_object', 'timestamp')
+#
+#     def get_type(self, value):
+#         if isinstance(value.target, Question):
+#             return 'Question'
+#         elif isinstance(value.target, AnswerComment):
+#             return 'Comment'
+#         elif isinstance(value.target, QuestionAnswer):
+#             return 'Answer'

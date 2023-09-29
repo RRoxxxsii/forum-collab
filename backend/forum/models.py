@@ -1,6 +1,6 @@
-from accounts.models import NewUser
 from django.db import models
 
+from accounts.models import NewUser
 from forum.helpers import LikeDislikeModelMixin
 
 
@@ -178,6 +178,7 @@ class AnswerComment(models.Model):
     user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='answer_comments', null=True)
     question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments',
                                         verbose_name='Ответ на вопрос (ID)')
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
     comment = models.TextField(max_length=320, verbose_name='Текст комментария')
 

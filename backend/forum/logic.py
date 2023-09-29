@@ -3,12 +3,13 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from accounts.models import NewUser
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
-from forum.models import (Question, QuestionAnswer,
-                          QuestionAnswerImages, QuestionImages, ThemeTag)
+from accounts.models import NewUser
+from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
+                          QuestionImages, ThemeTag)
+from notifications.utils import notify
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -46,12 +47,14 @@ def get_tags_or_error(tag: str) -> QuerySet[ThemeTag]:
 def make_tag_relevant_on_question_save(question: Question):
     """
     Делает релеватными тег, количество вопросов по которому >= 10.
+    Уведомляет пользователя, что тег релевантен.
     """
     tags = question.tags.filter(is_user_tag=True, is_relevant=False)
     for tag in tags:
         if tag.questions.count() >= 10:
             tag.is_relevant = True
             tag.save(update_fields=['is_relevant'])
+            notify(receiver=tag.user, target=tag, text='тег становится релевантным')
 
 
 def add_image(images: list, obj_model: [Question | QuestionAnswer],
@@ -68,7 +71,7 @@ def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
     Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
     запрос, отметка вопроса как решившего проблему снимается, как и отметка вопроса как решенного.
     Если ответ не отмечен как решающий и для вопроса нет решающих ответов, тогда ответ
-    отмечается как решающим а вопрос как решенным, если же есть другой решающий ответ,
+    отмечается как решающим, а вопрос как решенным, если же есть другой решающий ответ,
     метка решающего ответа с него снимается и ставится на другой ответ.
     """
     if answer.is_solving:
@@ -81,6 +84,9 @@ def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
             is_solving_answer.save()
         answer.is_solving = True
         related_question.is_solved = True
+
+        notify(target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
+               sender=related_question.user)
 
     related_question.save()
     answer.save()

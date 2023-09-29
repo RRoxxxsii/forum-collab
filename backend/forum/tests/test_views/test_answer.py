@@ -1,8 +1,8 @@
-from accounts.models import NewUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           ThemeTag)
 from forum.tests.test_serializers import generate_photo_file
@@ -15,7 +15,7 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
 
-        self.question = Question.objects.create(title='Заголовок', content='Контент')
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
 
         photo = generate_photo_file()

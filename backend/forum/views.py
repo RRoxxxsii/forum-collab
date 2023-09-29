@@ -1,8 +1,6 @@
-from accounts.models import NewUser
+from django.contrib.auth.models import AnonymousUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from notifications.models import Notification
-from notifications.signals import notify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
@@ -11,9 +9,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         parse_comment, vote_answer_solving)
+                         vote_answer_solving, parse_comment)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -22,15 +21,16 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                ListQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionSerializer,
-                               UserNotificationListSerializer)
+                               UpdateQuestionSerializer)
+from notifications.utils import notify
 
 
 class AskQuestionAPIView(GenericAPIView):
-    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer}
+    serializer_classes = {
+        'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer
+    }
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
-    success_message = 'Вопрос успешно опубликован.'
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -104,20 +104,25 @@ class AnswerQuestionAPIView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         images = serializer.data.get('uploaded_images')
-        question = serializer.data.get('question')
-        question_user = Question.objects.get(id=question).user    # автор вопроса
-        answer = serializer.data.get('answer')
+        question_id = serializer.data.get('question')
+        question = Question.objects.get(id=question_id)
+        question_user = question.user    # автор вопроса
         user = request.user
+        answer = serializer.data.get('answer')
         question_answer = QuestionAnswer.objects.create(
-            question_id=question,
+            question_id=question_id,
             answer=answer,
         )
+
         if isinstance(user, NewUser):
             question_answer.user = request.user
             question_answer.save()
 
-        notify.send(sender=user, recipient=question_user,
-                    verb=f'ответил на ваш вопрос', action_object=question_answer)
+        notify(
+            sender=user, receiver=question_user,
+            text='ответил на ваш вопрос', action_obj=question_answer,
+            target=question
+        )
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
@@ -141,26 +146,43 @@ class CommentAPIView(CreateAPIView):
     serializer_class = CommentSerializer
 
     def create(self, request, *args, **kwargs):
-        # Парсим только аутентифицированного пользователя
-        if request.user.is_authenticated:
-            serializer = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
             comment = serializer.data.get('comment')
             answer_id = serializer.data.get('question_answer')
             answer = QuestionAnswer.objects.get(id=answer_id)
-            current_user = request.user
             parsed_user_list = parse_comment(comment=comment)
+            current_user = request.user
+            parent_id = serializer.data.get('parent')
 
-            notify.send(sender=current_user, recipient=answer.user,
-                        verb='прокомментировал ваш ответ на вопрос',
-                        action_object=answer)
+            if isinstance(current_user, AnonymousUser):
+                current_user = None
 
-            for parsed_user in parsed_user_list:
-                notify.send(sender=current_user, recipient=parsed_user,
-                            verb='ответил на ваш комментарий под вопросом',
-                            action_object=answer)
+            comment = AnswerComment.objects.create(
+                comment=comment, question_answer=answer,
+                user=current_user, parent_id=parent_id
+            )
 
-        return super().create(request, *args, **kwargs)
+            if parent_id:
+                parent = AnswerComment.objects.get(id=parent_id)
+
+                for parsed_user in parsed_user_list:
+                    notify(
+                        sender=current_user, receiver=parsed_user,
+                        text='ответил на ваш комментарий',
+                        action_obj=comment,
+                        target=parent
+                    )
+
+            if answer.user:
+                notify(
+                    sender=current_user, receiver=answer.user,
+                    text='прокомментировал ваш ответ на вопрос',
+                    target=answer, action_obj=comment
+                )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
@@ -192,7 +214,8 @@ class LikeDislikeViewSet(GenericViewSet):
         user = request.user
 
         if instance.user == user:
-            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+            return Response(data='Вы не можете голосовать за свою собственную запись.',
+                            status=status.HTTP_403_FORBIDDEN)
         instance.like(user=user)
 
         return Response(data='Лайк поставлен успешно')
@@ -204,7 +227,8 @@ class LikeDislikeViewSet(GenericViewSet):
         user = request.user
 
         if instance.user == user:
-            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+            return Response(data='Вы не можете голосовать за свою собственную запись.',
+                            status=status.HTTP_403_FORBIDDEN)
         instance.dislike(user=user)
 
         return Response(data='Дизлайк поставленен успешно')
@@ -239,10 +263,23 @@ class QuestionViewSet(ModelViewSet):
         return self.serializer_classes.get(self.action)
 
     def get_queryset(self):
-        limit = self.request.query_params.get('limit')
-        if not limit or not self.action == 'list':
+        query_params = self.request.query_params
+        limit = query_params.get('limit')
+        if limit:
+            limit = int(limit)
+
+        sort = query_params.get('sort')
+        if not sort and (not limit or not self.action == 'list'):
             return Question.objects.all()
-        return Question.objects.all()[:int(limit)]
+        elif sort == 'closed' and limit:
+            return Question.objects.filter(is_solved=True)[:limit]
+        elif sort == 'opened' and limit:
+            return Question.objects.filter(is_solved=False)[:limit]
+        elif sort == 'latest' and limit:
+            return Question.objects.order_by('-creation_date')[:limit]
+        elif sort == 'best' and limit:
+            raise NotImplementedError
+        return Question.objects.all()[:limit]
 
 
 class AnswerViewSet(ModelViewSet):
@@ -277,13 +314,3 @@ class MarkAnswerSolving(RetrieveAPIView):
         vote_answer_solving(answer=answer, related_question=related_question)
 
         return Response(status=status.HTTP_200_OK)
-
-
-class UserNotificationViewSet(ModelViewSet):
-    serializer_class = UserNotificationListSerializer
-    http_method_names = ['get', ]
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        user = self.request.user
-        return user.notifications.all()

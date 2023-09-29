@@ -44,3 +44,7 @@
 <span>`./manage.py createdata`</span>
 <hr>
 <h3><a href="https://github.com/RRoxxxsii/forum-collab/blob/backend-main/backend/admin_info.txt">Реквизиты для доступа к админ-панели с тестовыми данными по ссылке</a></h3>
+<hr>
+<h3>Документация API доступна по адресу:</h3>
+
+`localhost:8000/swagger`
