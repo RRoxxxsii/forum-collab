@@ -5,8 +5,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
+from forum.helpers import LikeDislikeModelMixin
 from forum.models import (AnswerComment, Question, QuestionAnswer,
-                          QuestionAnswerImages, QuestionImages, ThemeTag)
+                          QuestionAnswerImages, QuestionImages, ThemeTag, QuestionRating)
 from forum.tests.test_serializers import generate_photo_file
 
 
@@ -77,8 +78,33 @@ class TestQuestionQueryParams(APITestCase):
     def setUp(self) -> None:
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq')
+
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user, is_solved=True)
+        self.question3 = Question.objects.create(title='Заголовок3', content='Контент', user=self.user)
+        self.question4 = Question.objects.create(title='Заголовок4', content='Контент', user=self.user)
+        self.question5 = Question.objects.create(title='Заголовок5', content='Контент', user=self.user, is_solved=True)
+        self.question6 = Question.objects.create(title='Заголовок6', content='Контент', user=self.user)
+        self.question7 = Question.objects.create(title='Заголовок7', content='Контент', user=self.user, is_solved=True)
+        self.question8 = Question.objects.create(title='Заголовок8', content='Контент', user=self.user)
+        self.question9 = Question.objects.create(title='Заголовок9', content='Контент', user=self.user, is_solved=True)
+        self.question10 = Question.objects.create(title='Заголовок10', content='Контент', user=self.user)
+        self.question11 = Question.objects.create(title='Заголовок11', content='Контент', user=self.user)
+
+        self.question2.like(self.user2)
+        self.question2.like(self.user3)
+
+        self.answer1 = QuestionAnswer.objects.create(question=self.question, answer='Ответ', user=self.user)
+        self.answer2 = QuestionAnswer.objects.create(question=self.question5, answer='Ответ', user=self.user)
+        self.answer3 = QuestionAnswer.objects.create(question=self.question7, answer='Ответ', user=self.user)
+        self.answer4 = QuestionAnswer.objects.create(question=self.question9, answer='Ответ', user=self.user)
+
+        self.comment = AnswerComment.objects.create(question_answer=self.answer1, user=self.user, comment='Коммент')
+
         self.tag = ThemeTag.objects.create(tag_name='django')
         question_image = generate_photo_file()
         question_image2 = generate_photo_file()
@@ -103,7 +129,7 @@ class TestQuestionQueryParams(APITestCase):
         """
         response = self.client.get(self.url)
         content = json.loads(response.content.decode())
-        self.assertEqual(len(content), 2)
+        self.assertEqual(len(content), len(Question.objects.all()))
 
     def test_sort_closed_query_param(self):
         """
@@ -124,4 +150,10 @@ class TestQuestionQueryParams(APITestCase):
             self.assertFalse(question.get('is_solved'))
 
     def test_sort_best_query_param(self):
+        """
+        Параметр запроса sort = closed.
+        """
         response = self.client.get(f'{self.url}?sort=best&limit=10')
+        # content = json.loads(response.content.decode())
+        # content = json.dumps(content, indent=4, ensure_ascii=False)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
