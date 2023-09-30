@@ -2,11 +2,11 @@ import re
 
 from django.core import mail
 from django.urls import reverse
+from forum.tests.test_serializers import generate_photo_file
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
-from forum.tests.test_serializers import generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):
@@ -367,3 +367,74 @@ class TestUserViewSet(APITestCase):
     def test_detail_response_status_code(self):
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestUpdateProfileImage(APITestCase):
+
+    def setUp(self) -> None:
+        self.img_to_update = generate_photo_file()
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True)
+        self.url = reverse('update-image')
+
+    def test_update_image_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.patch(self.url, data={'profile_image': self.img_to_update})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_image_content(self):
+        self.client.force_authenticate(self.user)
+        self.client.patch(self.url, data={'profile_image': self.img_to_update})
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.profile_image, self.img_to_update)
+
+    def test_update_profile_img_not_authenticated(self):
+        response = self.client.patch(self.url, data={'profile_image': self.img_to_update})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class TestUpdateProfileAbout(APITestCase):
+
+    def setUp(self) -> None:
+        self.img_to_update = generate_photo_file()
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True)
+        self.url = reverse('update-about')
+        self.about = 'Фейковая информация'
+
+    def test_update_about_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.patch(self.url, data={'about': self.about})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_about_content(self):
+        self.client.force_authenticate(self.user)
+        self.client.patch(self.url, data={'about': self.about})
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.about, self.about)
+
+    def test_update_profile_about_not_authenticated(self):
+        response = self.client.patch(self.url, data={'about': self.about})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class TestGetPersonalProfile(APITestCase):
+
+    def setUp(self) -> None:
+        img = generate_photo_file()
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True,
+                                                profile_image=img)
+        self.url = reverse('personal-page')
+
+    def test_profile_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_profile_status_code_not_authenticated(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+

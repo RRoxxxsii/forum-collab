@@ -76,3 +76,5 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'user_name', 'about', 'profile_image',
                   'is_active', 'is_banned', 'email_confirmed', 'created')
         extra_kwargs = {'created': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('id', 'email', 'user_name', 'is_active', 'is_banned',
+                            'email_confirmed', 'created')

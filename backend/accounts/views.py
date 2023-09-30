@@ -1,12 +1,12 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, UpdateAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .helpers import BaseEmailConfirmAPIView
+from .helpers import BaseEmailConfirmAPIView, BaseUserUpdateProfileMixin, BaseUserMixin
 from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
@@ -194,6 +194,22 @@ class UserViewSet(ModelViewSet):
     http_method_names = ('get', )
 
 
-class UploadProfileImageAPIView(UpdateAPIView):
+class UserPersonalProfilePageAPIView(BaseUserMixin, RetrieveAPIView):
+    """
+    Получение своего профиля.
+    """
     pass
 
+
+class UploadProfileImageAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление картинки профиля пользователя.
+    """
+    pass
+
+
+class UploadProfileAboutAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление информации профиля пользователя.
+    """
+    pass

@@ -1,6 +1,6 @@
+from accounts.models import NewUser
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerRating,
                           QuestionRating, ThemeTag)
 
