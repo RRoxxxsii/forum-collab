@@ -264,7 +264,7 @@ class QuestionViewSet(ModelViewSet):
                              description="сортировка от большего к меньшему best/latest/closed/opened",
                              type=openapi.TYPE_STRING, required=True)
 
-    @swagger_auto_schema(manual_parameters=[limit])
+    @swagger_auto_schema(manual_parameters=[limit, sort])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
