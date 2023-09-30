@@ -3,13 +3,13 @@ import io
 import json
 import random
 
+from accounts.models import NewUser
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from PIL import Image
 from rest_framework.test import APITestCase
 
-from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 from forum.serializers import DetailQuestionSerializer
@@ -67,7 +67,17 @@ class TestQuestionDetailAPITestCase(APITestCase):
 
         expected_data = {
             "id": 1,
-            "user": 1,
+            "user": {
+                "id": 1,
+                "email": "testuser@gmail.com",
+                "user_name": "testuser",
+                "about": "",
+                "profile_image": None,
+                "is_active": True,
+                "is_banned": False,
+                "email_confirmed": False,
+                "created": current_datetime
+            },
             "title": "Заголовок",
             "content": "Контент",
             "answers_amount": 2,
@@ -92,7 +102,17 @@ class TestQuestionDetailAPITestCase(APITestCase):
                 {
                     "id": 1,
                     "question": 1,
-                    "user": 1,
+                    "user": {
+                        "id": 1,
+                        "email": "testuser@gmail.com",
+                        "user_name": "testuser",
+                        "about": "",
+                        "profile_image": None,
+                        "is_active": True,
+                        "is_banned": False,
+                        "email_confirmed": False,
+                        "created": current_datetime
+                    },
                     "answer": "Изначальный ответ...",
                     "is_solving": False,
                     "creation_date": current_datetime,
@@ -113,19 +133,39 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "comments": [
                         {
                             "id": 1,
+                            "user": {
+                                "id": 1,
+                                "email": "testuser@gmail.com",
+                                "user_name": "testuser",
+                                "about": "",
+                                "profile_image": None,
+                                "is_active": True,
+                                "is_banned": False,
+                                "email_confirmed": False,
+                                "created": current_datetime
+                            },
                             "comment": "agagag",
                             "creation_date": current_datetime,
                             "updated_date": current_datetime,
-                            "user": 1,
                             "question_answer": 1,
                             "parent": None
                         },
                         {
                             "id": 2,
+                            "user": {
+                                "id": 1,
+                                "email": "testuser@gmail.com",
+                                "user_name": "testuser",
+                                "about": "",
+                                "profile_image": None,
+                                "is_active": True,
+                                "is_banned": False,
+                                "email_confirmed": False,
+                                "created": current_datetime
+                            },
                             "comment": "bfbd",
                             "creation_date": current_datetime,
                             "updated_date": current_datetime,
-                            "user": 1,
                             "question_answer": 1,
                             "parent": None
                         }
@@ -134,7 +174,17 @@ class TestQuestionDetailAPITestCase(APITestCase):
                 {
                     "id": 2,
                     "question": 1,
-                    "user": 1,
+                    "user": {
+                        "id": 1,
+                        "email": "testuser@gmail.com",
+                        "user_name": "testuser",
+                        "about": "",
+                        "profile_image": None,
+                        "is_active": True,
+                        "is_banned": False,
+                        "email_confirmed": False,
+                        "created": current_datetime
+                    },
                     "answer": "Изначальный ответ2...",
                     "is_solving": False,
                     "creation_date": current_datetime,
@@ -160,7 +210,6 @@ class TestQuestionDetailAPITestCase(APITestCase):
                     "is_user_tag": False
                 }
             ]
-
         }
 
         self.expected_data_json = json.dumps(expected_data, indent=4, ensure_ascii=False)

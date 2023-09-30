@@ -3,13 +3,13 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
+from accounts.models import NewUser
 from django.db.models import QuerySet
+from notifications.utils import notify
 from rest_framework.exceptions import ValidationError
 
-from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
-from notifications.utils import notify
 
 
 def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
@@ -96,8 +96,8 @@ def parse_comment(comment: str) -> [NewUser | None]:
     """
     Проверка, есть ли упоминание других пользователей в комментарии.
     """
-    pattern = r'(\s|^)?@[a-zA-Z0-9_]+,?.+(\s|$)'
-    result = re.findall(r'@[a-zA-Z0-9_]+', comment)
+    pattern = r'@[a-zA-Z0-9_]+'
+    result = re.findall(pattern, comment)
     for match in result:
         # if NewUser.objects.filter(user_name=match).exists():
         match = match.strip('@')
