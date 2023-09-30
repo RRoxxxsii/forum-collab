@@ -14,9 +14,11 @@ export interface IQuestion {
 	is_solved: boolean
 	answers: IAnswer[]
 	creation_date: string
+	updated_date: string
 	images: string[] // Assuming these are image URLs
 	rating: IRating
 	tags: ITag[]
+	answers_amount: number
 }
 
 export interface ITag {
@@ -56,7 +58,10 @@ export interface IRating {
 	id: number
 	like_amount: number
 	dislike_amount: number
+	is_disliked: boolean
+	is_liked: boolean
 	question: number
 	users_liked: number[]
+	users_disliked: number[]
 	// Add other properties for rating as needed
 }
