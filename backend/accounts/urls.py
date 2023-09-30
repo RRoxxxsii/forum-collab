@@ -21,6 +21,9 @@ urlpatterns = [
     path('update-image/', views.UploadProfileImageAPIView.as_view(), name='update-image'),
     path('update-about/', views.UploadProfileAboutAPIView.as_view(), name='update-about'),
 
+    # Получение своего профиля
+    path('me/', views.UserPersonalProfilePageAPIView.as_view(), name='personal-page'),
+
     # Удаление аккаунта
     path('delete-account/', views.DeleteAccountAPIView.as_view(), name='delete-account'),
 

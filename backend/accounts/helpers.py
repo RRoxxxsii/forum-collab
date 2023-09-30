@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -38,14 +38,21 @@ class BaseEmailConfirmAPIView(BaseEmailConfirmMixin, GenericAPIView):
         return DummySerializer
 
 
-class BaseUserUpdateProfileMixin(UpdateAPIView):
+class BaseUserMixin:
+    """
+    Базовый класс для получения профиля пользователя.
+    """
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = NewUser.objects.all()
+    http_method_names = ['get', ]
+
+    def get_object(self):
+        return self.request.user
+
+
+class BaseUserUpdateProfileMixin(BaseUserMixin):
     """
     Базовый класс для обновления профиля пользователя методом patch.
     """
     http_method_names = ['patch', ]
-    queryset = NewUser.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, ]
-
-    def get_object(self):
-        return self.request.user

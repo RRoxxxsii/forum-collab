@@ -418,3 +418,23 @@ class TestUpdateProfileAbout(APITestCase):
     def test_update_profile_about_not_authenticated(self):
         response = self.client.patch(self.url, data={'about': self.about})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class TestGetPersonalProfile(APITestCase):
+
+    def setUp(self) -> None:
+        img = generate_photo_file()
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True,
+                                                profile_image=img)
+        self.url = reverse('personal-page')
+
+    def test_profile_status_code(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_profile_status_code_not_authenticated(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
