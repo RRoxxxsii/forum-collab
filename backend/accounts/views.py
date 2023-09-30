@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -192,3 +192,8 @@ class UserViewSet(ModelViewSet):
     queryset = NewUser.objects.all()
     serializer_class = UserSerializer
     http_method_names = ('get', )
+
+
+class UploadProfileImageAPIView(UpdateAPIView):
+    pass
+

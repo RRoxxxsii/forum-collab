@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
+from accounts.serializers import UserSerializer
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
@@ -99,6 +100,7 @@ class AnswerRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = AnswerComment
@@ -118,6 +120,7 @@ class AnswerSerializer(serializers.ModelSerializer):
         required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False),
         validators=[validate_answer_related_obj_amount]
     )
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = QuestionAnswer
@@ -139,6 +142,7 @@ class QuestionRelatedAnswersAmountSerializer(serializers.Serializer):
 class ListQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
     tags = BaseTagFieldSerializer(read_only=True, many=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Question
@@ -155,6 +159,7 @@ class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serialize
     images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='question-detail',
                                                  source='question_images')
     tags = BaseTagFieldSerializer(read_only=True, many=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Question
