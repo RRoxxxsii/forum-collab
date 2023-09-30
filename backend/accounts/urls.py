@@ -17,6 +17,10 @@ urlpatterns = [
     path('new-email-confirmation-result/', views.ConfirmNewEmailAPIView.as_view(),
          name='new-email-confirmation-result'),
 
+    # Обновление данных
+    path('update-image/', views.UploadProfileImageAPIView.as_view(), name='update-image'),
+    path('update-about/', views.UploadProfileAboutAPIView.as_view(), name='update-about'),
+
     # Удаление аккаунта
     path('delete-account/', views.DeleteAccountAPIView.as_view(), name='delete-account'),
 
