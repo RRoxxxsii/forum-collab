@@ -45,11 +45,7 @@ export const QuestionItemActions = ({
 			</Box>
 			<Box sx={{ display: 'flex', flex: '50%', justifyContent: 'flex-end' }}>
 				<IconButton aria-label='comments'>
-					<Typography sx={{ mr: 1 }}>
-						{questionData.answers && questionData?.answers?.length !== 0
-							? questionData?.answers?.length
-							: 0}
-					</Typography>
+					<Typography sx={{ mr: 1 }}>{questionData?.answers_amount}</Typography>
 					<TextsmsIcon />
 				</IconButton>
 			</Box>
