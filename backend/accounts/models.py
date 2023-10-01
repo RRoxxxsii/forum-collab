@@ -3,6 +3,7 @@ from uuid import uuid4
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
+from django.db.models import QuerySet, Count, Sum
 from django.utils import timezone
 
 
@@ -74,7 +75,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.user_name
 
-    def get_top_expert_tags(self):
+    def get_top_expert_tags(self) -> QuerySet:
         from forum.models import ThemeTag
 
         expert_tags = (
@@ -85,10 +86,30 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
         )
         return expert_tags
 
-    def get_amount_question_solved(self):
+    def get_amount_question_solved(self) -> int:
         return self.question_answers.filter(is_solving=True).count()
 
+    def count_question_likes(self) -> int:
+        count = self.questions.aggregate(
+            count=Sum('rating__like_amount')
+        )
+        return count.get('count')
 
+    def count_question_dislikes(self):
+        raise NotImplementedError
+
+    def count_answer_likes(self):
+        raise NotImplementedError
+
+    def count_answer_dislikes(self):
+        raise NotImplementedError
+
+    def count_karma(self) -> int:
+        karma = self.get_amount_question_solved() * 10
+        if self.email_confirmed:
+            karma += 10
+        # return karma
+        raise NotImplementedError             # Необходимо досчитать карму
 
 
 class EmailConfirmationToken(models.Model):
