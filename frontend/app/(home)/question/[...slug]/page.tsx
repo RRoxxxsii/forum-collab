@@ -108,7 +108,11 @@ export default function QuestionPage() {
 						</Typography>
 					</Typography>
 					<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
-						<AnswerCreateForm pageId={id} />
+						<AnswerCreateForm
+							questionData={questionData}
+							setQuestionData={setQuestionData}
+							pageId={id}
+						/>
 						<AnswerList questionData={questionData} />
 					</Box>
 				</Paper>

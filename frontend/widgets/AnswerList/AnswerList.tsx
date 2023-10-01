@@ -1,26 +1,26 @@
 'use client'
-import { BASE_URL } from '@/shared/constants'
-import { IAnswer, IQuestion } from '@/types/types'
+import { IAnswer, IComment, IQuestion } from '@/types/types'
 import {
-	ArrowUpwardOutlined,
-	ArrowUpward,
-	ArrowDownwardOutlined,
 	ArrowDownward,
-	MoreHoriz,
+	ArrowDownwardOutlined,
+	ArrowUpward,
+	ArrowUpwardOutlined,
 	Comment,
+	MoreHoriz,
 } from '@mui/icons-material'
 import {
-	Box,
 	Avatar,
-	Typography,
+	Box,
+	Button,
 	Checkbox,
+	Divider,
 	FormControlLabel,
 	IconButton,
-	Button,
+	Typography,
 } from '@mui/material'
-import { red } from '@mui/material/colors'
+import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Comment as CommentComponent } from '../Comment'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
@@ -37,21 +37,37 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 
 	return (
 		<>
-			<Box
-				className='bg-zinc-800 p-2 rounded-md'
-				sx={{ px: 3, py: 2, width: '100%', mb: 2 }}>
-				<Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-					<Avatar
+			<Box sx={{ px: 3, py: 2, width: '100%' }}>
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'flex-start',
+						position: 'relative',
+					}}>
+					<Box
 						sx={{
-							width: 32,
-							height: 32,
-							fontSize: 12,
-							bgcolor: red[500],
-							marginRight: 1,
-						}}
-						aria-label='recipe'>
-						R
-					</Avatar>
+							display: 'inline-flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							height: '100%',
+						}}>
+						<Avatar
+							sx={{
+								width: 32,
+								height: 32,
+								fontSize: 12,
+								bgcolor: green[500],
+								mb: 2,
+								position: 'relative',
+							}}
+							aria-label='recipe'>
+							Г
+						</Avatar>
+						<Divider
+							sx={{ display: 'block', height: '100%' }}
+							orientation='vertical'
+						/>
+					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
 							<Typography sx={{ marginRight: 1 }} variant='caption'>
@@ -98,10 +114,15 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 							</IconButton>
 						</Box>
 					</Box>
-					<Button variant='outlined'>Отметить ответ решающим</Button>
+					<Button size='small' variant='outlined'>
+						Отметить решающим
+					</Button>
 				</Box>
+				{isCommenting && <CommentComponent answerData={answerData} />}
+				{answerData.comments.map((comment) => (
+					<CommentCard comment={comment} />
+				))}
 			</Box>
-			{isCommenting && <CommentComponent answerData={answerData} />}
 		</>
 	)
 }
@@ -144,4 +165,71 @@ const dislikeComment = async ({ id }: { id: number }) => {
 	} catch (error) {
 		console.log(error)
 	}
+}
+
+const CommentCard = ({ comment }: { comment: IComment }) => {
+	return (
+		<>
+			<Box sx={{ display: 'flex' }}>
+				<Box sx={{ px: 8, py: 1, width: '100%' }}>
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'flex-start',
+							postion: 'relative',
+						}}>
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								height: '100%',
+							}}>
+							<Avatar
+								sx={{
+									width: 24,
+									height: 24,
+									fontSize: 12,
+									bgcolor: green[500],
+									marginRight: 1,
+								}}
+								aria-label='recipe'>
+								Г
+							</Avatar>
+						</Box>
+						<Box sx={{ width: '100%' }}>
+							<Box sx={{ display: 'flex' }}>
+								<Typography sx={{ marginRight: 1 }} variant='caption'>
+									{comment?.user?.username || 'Гость'}
+								</Typography>
+								<Typography sx={{ color: 'GrayText' }} variant='caption'>
+									{dayjs(comment?.creation_date).format('DD-MM-YYYY')}
+								</Typography>
+							</Box>
+							<Typography className='comment' sx={{}} variant='body1'>
+								{comment.comment}
+							</Typography>
+							<Box
+								sx={{
+									display: 'flex',
+									alignItems: 'center',
+								}}>
+								<FormControlLabel
+									sx={{ fontSize: 10 }}
+									control={
+										<IconButton sx={{ ml: 0.5, mr: 0 }}>
+											<Comment sx={{ width: 16 }} />
+										</IconButton>
+									}
+									label='Ответить'
+								/>
+								<IconButton>
+									<MoreHoriz sx={{ width: 12, height: 12 }} />
+								</IconButton>
+							</Box>
+						</Box>
+					</Box>
+				</Box>
+			</Box>
+		</>
+	)
 }
