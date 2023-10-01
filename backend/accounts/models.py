@@ -74,6 +74,22 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.user_name
 
+    def get_top_expert_tags(self):
+        from forum.models import ThemeTag
+
+        expert_tags = (
+            ThemeTag.objects
+            .filter(questions__question_answers__user=self, questions__question_answers__is_solving=True)
+            .annotate(answer_count=models.Count('questions__question_answers'))
+            .order_by('-answer_count')[:5]
+        )
+        return expert_tags
+
+    def get_amount_question_solved(self):
+        return self.question_answers.filter(is_solving=True).count()
+
+
+
 
 class EmailConfirmationToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
