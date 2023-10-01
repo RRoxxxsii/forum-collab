@@ -6,6 +6,7 @@ from rest_framework.serializers import \
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from forum.models import ThemeTag
 from .models import NewUser
 
 
@@ -78,3 +79,23 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'created': {'format': "%Y-%m-%d %H:%M:%S"}}
         read_only_fields = ('id', 'email', 'user_name', 'is_active', 'is_banned',
                             'email_confirmed', 'created')
+
+
+class UserRatingSerializer(UserSerializer):
+    amount_solved = serializers.SerializerMethodField()
+    best_tags = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = UserSerializer.Meta.fields + ('amount_solved', 'best_tags')
+        model = UserSerializer.Meta.model
+
+    def get_amount_solved(self, instance: NewUser):
+        return instance.get_amount_question_solved()
+
+    def get_best_tags(self, instance: NewUser):
+        from forum.serializers import BaseTagFieldSerializer
+        best_tags = instance.get_top_expert_tags()
+
+        serializer = BaseTagFieldSerializer(data=best_tags, many=True)
+        serializer.is_valid(raise_exception=False)
+        return serializer.data
