@@ -1,17 +1,19 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .helpers import BaseEmailConfirmAPIView, BaseUserUpdateProfileMixin, BaseUserMixin
+from .helpers import (BaseEmailConfirmAPIView, BaseUserMixin,
+                      BaseUserUpdateProfileMixin)
 from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
-                          UserSerializer, UserRatingSerializer)
+                          UserRatingSerializer, UserSerializer)
 from .utils import email_exists, get_current_site, send_confirmation_email
 
 

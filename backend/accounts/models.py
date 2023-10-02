@@ -3,7 +3,8 @@ from uuid import uuid4
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
-from django.db.models import QuerySet, Count, Sum
+from django.db.models import QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 
@@ -31,8 +32,7 @@ class CustomAccountManager(BaseUserManager):
             raise ValueError('Необходимо предоставить адрес электронной почты')
 
         email = self.normalize_email(email)
-        user = self.model(email=email, user_name=user_name,
-                          **other_fields)
+        user = self.model(email=email, user_name=user_name, **other_fields)
         user.set_password(password)
         user.save()
         return user
@@ -91,25 +91,44 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
     def count_question_likes(self) -> int:
         count = self.questions.aggregate(
-            count=Sum('rating__like_amount')
+            count=Coalesce(Sum('rating__like_amount'), 0)
         )
         return count.get('count')
 
-    def count_question_dislikes(self):
-        raise NotImplementedError
+    def count_question_dislikes(self) -> int:
+        count = self.questions.aggregate(
+            count=Coalesce(Sum('rating__dislike_amount'), 0)
+        )
+        return count.get('count')
 
-    def count_answer_likes(self):
-        raise NotImplementedError
+    def count_answer_likes(self) -> int:
+        count = self.question_answers.aggregate(
+            count=Coalesce(Sum('rating__like_amount'), 0)
+        )
+        return count.get('count')
 
-    def count_answer_dislikes(self):
-        raise NotImplementedError
+    def count_answer_dislikes(self) -> int:
+        count = self.question_answers.aggregate(
+            count=Coalesce(Sum('rating__dislike_amount'), 0)
+        )
+        return count.get('count')
 
     def count_karma(self) -> int:
+        """
+        Карма = количество решенных пользователем вопросов * 10 + количество лайков
+        вопросов + количество лайков ответов + 10 (если почта подтверждена)
+        """
+        questions_like_amount = self.count_question_likes()
+        answers_like_amount = self.count_answer_likes()
+
         karma = self.get_amount_question_solved() * 10
         if self.email_confirmed:
             karma += 10
-        # return karma
-        raise NotImplementedError             # Необходимо досчитать карму
+
+        karma += questions_like_amount
+        karma += answers_like_amount
+
+        return karma
 
 
 class EmailConfirmationToken(models.Model):
