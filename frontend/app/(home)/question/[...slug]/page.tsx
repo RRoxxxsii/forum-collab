@@ -9,7 +9,8 @@ import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-export default function QuestionPage() {
+
+export default function QuestionPage() {  
 	const pathname = usePathname()
 
 	const id = (pathname?.match(/\/question\/(\d+)/)?.[0] || '').replace(
@@ -120,3 +121,4 @@ export default function QuestionPage() {
 		</Box>
 	)
 }
+

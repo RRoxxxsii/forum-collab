@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.models import EmailConfirmationToken
-from accounts.serializers import DummySerializer
+from accounts.models import EmailConfirmationToken, NewUser
+from accounts.serializers import DummySerializer, UserSerializer
 
 
 @dataclass(init=False, repr=False, eq=False)
@@ -35,3 +36,23 @@ class BaseEmailConfirmAPIView(BaseEmailConfirmMixin, GenericAPIView):
     def get_serializer_class(self):
         # Возвращает сериализатор-заглушку, так как представление класса не нуждается в сериализаторе
         return DummySerializer
+
+
+class BaseUserMixin:
+    """
+    Базовый класс для получения профиля пользователя.
+    """
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, ]
+    queryset = NewUser.objects.all()
+    http_method_names = ['get', ]
+
+    def get_object(self):
+        return self.request.user
+
+
+class BaseUserUpdateProfileMixin(BaseUserMixin):
+    """
+    Базовый класс для обновления профиля пользователя методом patch.
+    """
+    http_method_names = ['patch', ]

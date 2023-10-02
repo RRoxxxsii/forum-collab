@@ -1,4 +1,8 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import AnonymousUser
+from django.db.models import Count, ExpressionWrapper, F, IntegerField
+from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -12,7 +16,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         vote_answer_solving, parse_comment)
+                         parse_comment, vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -106,7 +110,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         images = serializer.data.get('uploaded_images')
         question_id = serializer.data.get('question')
         question = Question.objects.get(id=question_id)
-        question_user = question.user    # автор вопроса
+        question_user = question.user  # автор вопроса
         user = request.user
         answer = serializer.data.get('answer')
         question_answer = QuestionAnswer.objects.create(
@@ -115,7 +119,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         )
 
         if isinstance(user, NewUser):
-            question_answer.user = request.user
+            question_answer.user = user
             question_answer.save()
 
         notify(
@@ -247,15 +251,20 @@ class QuestionViewSet(ModelViewSet):
     """
     Листинг вопросов и вопроса со всеми его ответами и комментариями.
     Параметр запроса - limit, определяющий кол-во возвращаемых записей.
+    Параметр sort - best/latest/closed/opened.
     """
     serializer_classes = {'list': ListQuestionSerializer, 'retrieve': DetailQuestionSerializer}
-    http_method_names = ('get', )
+    http_method_names = ('get',)
 
     limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
                               description="кол-во возвращаемых записей",
                               type=openapi.TYPE_STRING, required=True)
 
-    @swagger_auto_schema(manual_parameters=[limit])
+    sort = openapi.Parameter(name='sort', in_=openapi.IN_QUERY,
+                             description="сортировка от большего к меньшему best/latest/closed/opened",
+                             type=openapi.TYPE_STRING, required=False)
+
+    @swagger_auto_schema(manual_parameters=[limit, sort])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -278,7 +287,23 @@ class QuestionViewSet(ModelViewSet):
         elif sort == 'latest' and limit:
             return Question.objects.order_by('-creation_date')[:limit]
         elif sort == 'best' and limit:
-            raise NotImplementedError
+
+            month_ago = timezone.now() - timedelta(days=30)
+            amount_of_questions = 100
+
+            questions = Question.objects.annotate(
+                answer_count=Count('question_answers'),
+                comment_count=Count('question_answers__answer_comments'),
+                like_count=Count('rating__users_liked'),
+                dislike_count=Count('rating__users_disliked'),
+                score=ExpressionWrapper(
+                    F('like_count') + F('answer_count') * 2 +
+                    F('comment_count') - F('dislike_count') * 0.5,
+                    output_field=IntegerField()
+                )
+            ).filter(creation_date__gte=month_ago).order_by('-score', '-creation_date')[:amount_of_questions]
+            return questions
+
         return Question.objects.all()[:limit]
 
 
@@ -288,7 +313,7 @@ class AnswerViewSet(ModelViewSet):
     """
     queryset = QuestionAnswer.objects.all()
     serializer_class = AnswerSerializer
-    http_method_names = ('get', )
+    http_method_names = ('get',)
 
 
 class RetrieveCommentAPIView(RetrieveAPIView):

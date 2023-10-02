@@ -96,8 +96,8 @@ def parse_comment(comment: str) -> [NewUser | None]:
     """
     Проверка, есть ли упоминание других пользователей в комментарии.
     """
-    pattern = r'(\s|^)?@[a-zA-Z0-9_]+,?.+(\s|$)'
-    result = re.findall(r'@[a-zA-Z0-9_]+', comment)
+    pattern = r'@[a-zA-Z0-9_]+'
+    result = re.findall(pattern, comment)
     for match in result:
         # if NewUser.objects.filter(user_name=match).exists():
         match = match.strip('@')

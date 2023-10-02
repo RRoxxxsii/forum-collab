@@ -1,17 +1,19 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .helpers import BaseEmailConfirmAPIView
+from .helpers import (BaseEmailConfirmAPIView, BaseUserMixin,
+                      BaseUserUpdateProfileMixin)
 from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
-                          UserSerializer)
+                          UserRatingSerializer, UserSerializer)
 from .utils import email_exists, get_current_site, send_confirmation_email
 
 
@@ -190,5 +192,32 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 
 class UserViewSet(ModelViewSet):
     queryset = NewUser.objects.all()
-    serializer_class = UserSerializer
     http_method_names = ('get', )
+    serializer_classes = {
+        'retrieve': UserRatingSerializer,
+        'list': UserSerializer
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action)
+
+
+class UserPersonalProfilePageAPIView(BaseUserMixin, RetrieveAPIView):
+    """
+    Получение своего профиля.
+    """
+    serializer_class = UserRatingSerializer
+
+
+class UploadProfileImageAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление картинки профиля пользователя.
+    """
+    pass
+
+
+class UploadProfileAboutAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление информации профиля пользователя.
+    """
+    pass

@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
-from forum.models import Question, ThemeTag, QuestionAnswer, AnswerComment
+from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 from notifications.models import Notification
 
 
