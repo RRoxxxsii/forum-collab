@@ -7,6 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from forum.models import ThemeTag
+
 from .models import NewUser
 
 
@@ -84,9 +85,10 @@ class UserSerializer(serializers.ModelSerializer):
 class UserRatingSerializer(UserSerializer):
     amount_solved = serializers.SerializerMethodField()
     best_tags = serializers.SerializerMethodField()
+    karma = serializers.SerializerMethodField()
 
     class Meta:
-        fields = UserSerializer.Meta.fields + ('amount_solved', 'best_tags')
+        fields = UserSerializer.Meta.fields + ('amount_solved', 'best_tags', 'karma')
         model = UserSerializer.Meta.model
 
     def get_amount_solved(self, instance: NewUser):
@@ -99,3 +101,6 @@ class UserRatingSerializer(UserSerializer):
         serializer = BaseTagFieldSerializer(data=best_tags, many=True)
         serializer.is_valid(raise_exception=False)
         return serializer.data
+
+    def get_karma(self, instance: NewUser):
+        return self.instance.count_karma()

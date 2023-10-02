@@ -2,15 +2,13 @@ import json
 import re
 
 from django.core import mail
-from django.db.models import Q, Count
 from django.urls import reverse
-
-from forum.models import ThemeTag, Question, QuestionAnswer
-from forum.tests.test_serializers import generate_photo_file
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
+from forum.models import Question, QuestionAnswer, ThemeTag
+from forum.tests.test_serializers import generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):
@@ -537,6 +535,7 @@ class TestUserRating(APITestCase):
 
         self.assertEqual(len(user_answered_question_tags), 14)
         self.assertEqual(content.get('amount_solved'), 5)
+        self.assertIsNotNone(content.get('karma'))
 
     def test_answer_get_rating_user2(self):
         self.client.force_authenticate(self.user2)
@@ -548,3 +547,4 @@ class TestUserRating(APITestCase):
 
         self.assertEqual(len(user_answered_question_tags), 1)
         self.assertEqual(content.get('amount_solved'), 10)
+        self.assertIsNotNone(content.get('karma'))

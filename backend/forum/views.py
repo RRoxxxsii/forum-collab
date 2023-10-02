@@ -1,12 +1,10 @@
 from datetime import timedelta
 
-from accounts.models import NewUser
 from django.contrib.auth.models import AnonymousUser
 from django.db.models import Count, ExpressionWrapper, F, IntegerField
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from notifications.utils import notify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
@@ -15,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from accounts.models import NewUser
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
                          parse_comment, vote_answer_solving)
@@ -27,6 +26,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
+from notifications.utils import notify
 
 
 class AskQuestionAPIView(GenericAPIView):

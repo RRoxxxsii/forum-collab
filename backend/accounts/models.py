@@ -3,6 +3,8 @@ from uuid import uuid4
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
+from django.db.models import QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 
@@ -30,8 +32,7 @@ class CustomAccountManager(BaseUserManager):
             raise ValueError('Необходимо предоставить адрес электронной почты')
 
         email = self.normalize_email(email)
-        user = self.model(email=email, user_name=user_name,
-                          **other_fields)
+        user = self.model(email=email, user_name=user_name, **other_fields)
         user.set_password(password)
         user.save()
         return user
@@ -74,7 +75,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.user_name
 
-    def get_top_expert_tags(self):
+    def get_top_expert_tags(self) -> QuerySet:
         from forum.models import ThemeTag
 
         expert_tags = (
@@ -85,10 +86,49 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
         )
         return expert_tags
 
-    def get_amount_question_solved(self):
+    def get_amount_question_solved(self) -> int:
         return self.question_answers.filter(is_solving=True).count()
 
+    def count_question_likes(self) -> int:
+        count = self.questions.aggregate(
+            count=Coalesce(Sum('rating__like_amount'), 0)
+        )
+        return count.get('count')
 
+    def count_question_dislikes(self) -> int:
+        count = self.questions.aggregate(
+            count=Coalesce(Sum('rating__dislike_amount'), 0)
+        )
+        return count.get('count')
+
+    def count_answer_likes(self) -> int:
+        count = self.question_answers.aggregate(
+            count=Coalesce(Sum('rating__like_amount'), 0)
+        )
+        return count.get('count')
+
+    def count_answer_dislikes(self) -> int:
+        count = self.question_answers.aggregate(
+            count=Coalesce(Sum('rating__dislike_amount'), 0)
+        )
+        return count.get('count')
+
+    def count_karma(self) -> int:
+        """
+        Карма = количество решенных пользователем вопросов * 10 + количество лайков
+        вопросов + количество лайков ответов + 10 (если почта подтверждена)
+        """
+        questions_like_amount = self.count_question_likes()
+        answers_like_amount = self.count_answer_likes()
+
+        karma = self.get_amount_question_solved() * 10
+        if self.email_confirmed:
+            karma += 10
+
+        karma += questions_like_amount
+        karma += answers_like_amount
+
+        return karma
 
 
 class EmailConfirmationToken(models.Model):
