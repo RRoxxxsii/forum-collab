@@ -42,6 +42,7 @@ urlpatterns = [
     path('api/v1/account/', include('accounts.urls')),
     path('api/v1/forum/', include('forum.urls')),
     path('api/v1/notifications/', include('notifications.urls')),
+    path('api/v1/favourites/', include('favourites.urls')),
 
     # Docs
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),

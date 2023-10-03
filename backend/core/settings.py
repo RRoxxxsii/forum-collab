@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'forum',
     'notifications',
+    'favourites',
 ]
 
 MIDDLEWARE = [
