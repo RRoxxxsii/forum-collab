@@ -1,3 +1,5 @@
+import { AskFastProvider } from '@/providers/AskFastProvider'
+import { CategoryProvider } from '@/providers/CategoryProvider'
 import { Header } from '@/widgets/Header'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -22,8 +24,11 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
 				theme='dark'
 				limit={5}
 			/>
-
-			<Header>{children}</Header>
+			<Header>
+				<CategoryProvider>
+					<AskFastProvider>{children}</AskFastProvider>
+				</CategoryProvider>
+			</Header>
 		</>
 	)
 }

@@ -4,7 +4,7 @@ import { TextareaAutosize } from '@mui/base/TextareaAutosize'
 import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
 
-export const Comment = ({ answerData }: { answerData: IAnswer }) => {
+export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
 	const [commentContent, setCommentContent] = React.useState('')
 
 	const handleComment = async () => {
