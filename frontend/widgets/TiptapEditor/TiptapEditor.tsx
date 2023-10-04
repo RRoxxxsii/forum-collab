@@ -4,10 +4,11 @@ import { AddPhotoAlternate } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
 import Link from 'next/link'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useContext } from 'react'
 import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
 import { EditorExtensions } from './utils/Extensions'
+import { AskFastContext } from '@/providers/AskFastProvider'
 
 const EditorContentValue = ``
 

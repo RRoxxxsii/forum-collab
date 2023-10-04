@@ -1,4 +1,6 @@
 'use client'
+import { CategoryContext, CategoryType } from '@/providers/CategoryProvider'
+import { Verified } from '@mui/icons-material'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import StarIcon from '@mui/icons-material/Star'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
@@ -9,13 +11,16 @@ import {
 	Tab,
 	Tabs,
 } from '@mui/material'
-import React, { useState } from 'react'
+import { useContext } from 'react'
 
 export const CategoryTabs = () => {
-	const [value, setValue] = useState(0)
+	const { category, setCategory } = useContext(CategoryContext)
 
-	const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-		setValue(newValue)
+	const handleCategoryChange = (
+		event: React.ChangeEvent<{}>,
+		newCategory: CategoryType
+	) => {
+		setCategory(newCategory)
 	}
 
 	return (
@@ -23,22 +28,34 @@ export const CategoryTabs = () => {
 			<Tabs
 				sx={desktopTabs}
 				orientation='vertical'
-				value={value}
-				onChange={handleChange}
+				value={category}
+				onChange={handleCategoryChange}
 				aria-label='icon label tabs example'>
-				<Tab icon={<AccessTimeIcon />} label='ПОСЛЕДНИЕ' />
-				<Tab icon={<WhatshotIcon />} label='ОТКРЫТЫЕ' />
-				<Tab icon={<StarIcon />} label='ЛУЧШИЕ' />
+				<Tab value={'opened'} icon={<AccessTimeIcon />} label='ОТКРЫТЫЕ' />
+				<Tab value={'closed'} icon={<Verified />} label='ЗАКРЫТЫЕ' />
+				<Tab value={'best'} icon={<WhatshotIcon />} label='ПОПУЛЯРНЫЕ' />
 			</Tabs>
 			<BottomNavigation
 				showLabels
 				sx={mobileTabs}
-				value={value}
-				onChange={handleChange}
+				value={category}
+				onChange={handleCategoryChange}
 				aria-label='icon label tabs example'>
-				<BottomNavigationAction label='Новые' icon={<AccessTimeIcon />} />
-				<BottomNavigationAction label='Открытые' icon={<WhatshotIcon />} />
-				<BottomNavigationAction label='Лучшие' icon={<StarIcon />} />
+				<BottomNavigationAction
+					value={'opened'}
+					label='Открытые'
+					icon={<AccessTimeIcon />}
+				/>
+				<BottomNavigationAction
+					value={'closed'}
+					label='Закрытые'
+					icon={<Verified />}
+				/>
+				<BottomNavigationAction
+					value={'best'}
+					label='Популярные'
+					icon={<WhatshotIcon />}
+				/>
 			</BottomNavigation>
 		</Box>
 	)

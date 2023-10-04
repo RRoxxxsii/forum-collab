@@ -4,9 +4,16 @@ import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { BASE_URL } from '@/shared/constants'
 import { ITag } from '@/types/types'
 import { Box, TextField } from '@mui/material'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import {
+	Dispatch,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useState,
+} from 'react'
 import { TiptapEditor } from '../TiptapEditor'
 import theme from '@/shared/theme/theme'
+import { AskFastContext } from '@/providers/AskFastProvider'
 const fetchTagsOnQuery = async ({
 	setTagsToDisplay,
 	tagQuery,
@@ -32,9 +39,10 @@ const fetchTagsOnQuery = async ({
 }
 
 export const AskQuestionForm = ({}: {}) => {
-	const [titleValue, setTitleValue] = useState('')
 	const [questionContent, setQuestionContent] = useState('')
 	const [images, setImages] = useState<string[]>([])
+	const { askFastValue } = useContext(AskFastContext)
+	const [titleValue, setTitleValue] = useState(askFastValue ? askFastValue : '')
 
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')

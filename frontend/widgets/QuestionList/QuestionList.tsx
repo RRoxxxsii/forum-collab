@@ -2,18 +2,22 @@
 import { QuestionItemContent } from '@/entities/QuestionItemContent'
 import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
+import { CategoryContext } from '@/providers/CategoryProvider'
 import { BASE_URL } from '@/shared/constants'
 import { IQuestion, ITag } from '@/types/types'
 import { Box, Card } from '@mui/material'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
+	const { category } = useContext(CategoryContext)
 
 	const fetchQuestionList = async () => {
 		try {
-			const response = await fetch(`${BASE_URL}/forum/questions/`)
+			const response = await fetch(
+				`${BASE_URL}/forum/questions/?limit=10&sort=${category}`
+			)
 			const questionsData = await response.json()
 
 			setQuestions(questionsData)
@@ -24,12 +28,12 @@ export const QuestionList = () => {
 
 	useEffect(() => {
 		fetchQuestionList()
-	}, [])
+	}, [category])
 
 	return (
 		<>
-			{questions.reverse().map((questionData: IQuestion) => (
-				<QuestionCard questionData={questionData} />
+			{questions.map((questionData: IQuestion) => (
+				<QuestionCard key={questionData.id} questionData={questionData} />
 			))}
 		</>
 	)
@@ -93,9 +97,10 @@ const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 				p: 0.8,
 			}}>
 			<Link
-				href={`/question/${questionData.id}/${
-					questionData.title
-				}/?tags=${questionData.tags.map((tag: ITag) => tag.tag_name)}`}
+				href={`/question/${questionData.id}/${questionData.title.replaceAll(
+					/ /g,
+					'_'
+				)}/?tags=${questionData.tags.map((tag: ITag) => tag.tag_name)}`}
 				className='flex hover:no-underline'>
 				<QuestionItemRating
 					questionData={questionData}

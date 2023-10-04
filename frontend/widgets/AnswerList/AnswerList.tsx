@@ -21,7 +21,7 @@ import {
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import { Comment as CommentComponent } from '../Comment'
+import { Comment as CommentComponent } from '../AddComment'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
