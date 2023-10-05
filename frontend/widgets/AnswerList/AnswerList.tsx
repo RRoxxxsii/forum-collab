@@ -21,7 +21,8 @@ import {
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import { Comment as CommentComponent } from '../AddComment'
+import { toast } from 'react-toastify'
+import { AddComment } from '../AddComment'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
@@ -35,6 +36,36 @@ export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 function AnswerCard({ answerData }: { answerData: IAnswer }) {
 	const [isCommenting, setIsCommenting] = useState<boolean>(false)
 
+	const handleSolved = async () => {
+		const solveToast = toast.loading('Обработка ответа...')
+		const response = await fetch('/api/forum/mark-answer-solving', {
+			method: 'POST',
+			body: JSON.stringify({
+				question_answer_id: answerData.id,
+			}),
+		})
+
+		const result = await response.json()
+
+		if (!response.ok) {
+			toast.update(solveToast, {
+				render: result.error,
+				type: 'error',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			return null
+		}
+
+		answerData.is_solving = result.is_solving
+		toast.update(solveToast, {
+			render: result.message,
+			type: 'success',
+			isLoading: false,
+			autoClose: 3000,
+		})
+	}
+
 	return (
 		<>
 			<Box sx={{ px: 3, py: 2, width: '100%' }}>
@@ -46,32 +77,34 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 					}}>
 					<Box
 						sx={{
-							display: 'inline-flex',
+							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'center',
 							height: '100%',
 						}}>
 						<Avatar
 							sx={{
-								width: 32,
-								height: 32,
+								width: 18,
+								height: 18,
 								fontSize: 12,
 								bgcolor: green[500],
-								mb: 2,
-								position: 'relative',
+								marginRight: 1,
 							}}
-							aria-label='recipe'>
-							Г
+							aria-label='recipe'
+							src={
+								answerData?.user?.profile_image
+									? answerData?.user?.profile_image
+									: ''
+							}>
+							{!answerData?.user?.profile_image &&
+								answerData?.user?.user_name[0]}
 						</Avatar>
-						<Divider
-							sx={{ display: 'block', height: '100%' }}
-							orientation='vertical'
-						/>
+						<Divider orientation='vertical' flexItem />
 					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
 							<Typography sx={{ marginRight: 1 }} variant='caption'>
-								{answerData?.user?.username || 'Гость'}
+								{answerData?.user?.user_name || 'Гость'}
 							</Typography>
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
 								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
@@ -87,38 +120,46 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 							sx={{
 								display: 'flex',
 								alignItems: 'center',
+								justifyContent: 'space-between',
 							}}>
-							<Checkbox
-								icon={<ArrowUpwardOutlined />}
-								checkedIcon={<ArrowUpward />}
-								onClick={() => likeComment({ id: answerData.id })}
-							/>
-							{answerData.rating.like_amount - answerData.rating.dislike_amount}
-							<Checkbox
-								icon={<ArrowDownwardOutlined />}
-								checkedIcon={<ArrowDownward />}
-								onClick={() => dislikeComment({ id: answerData.id })}
-							/>
-							<FormControlLabel
-								control={
-									<IconButton
-										onClick={() => setIsCommenting((state) => (state = !state))}
-										sx={{ ml: 1, mr: 0.5 }}>
-										<Comment />
-									</IconButton>
-								}
-								label='Ответить'
-							/>
-							<IconButton>
-								<MoreHoriz sx={{ width: 16, height: 16 }} />
-							</IconButton>
+							<Box sx={{ display: 'flex', alignItems: 'center' }}>
+								<Checkbox
+									icon={<ArrowUpwardOutlined />}
+									checkedIcon={<ArrowUpward />}
+									onClick={() => likeComment({ id: answerData.id })}
+								/>
+								{answerData.rating.like_amount -
+									answerData.rating.dislike_amount}
+								<Checkbox
+									icon={<ArrowDownwardOutlined />}
+									checkedIcon={<ArrowDownward />}
+									onClick={() => dislikeComment({ id: answerData.id })}
+								/>
+								<FormControlLabel
+									control={
+										<IconButton
+											onClick={() =>
+												setIsCommenting((state) => (state = !state))
+											}
+											sx={{ ml: 1, mr: 0.5 }}>
+											<Comment />
+										</IconButton>
+									}
+									label='Ответить'
+								/>
+								<IconButton>
+									<MoreHoriz sx={{ width: 16, height: 16 }} />
+								</IconButton>
+							</Box>
+							<Box sx={{ display: 'flex', alignItems: 'center' }}>
+								<Button onClick={handleSolved} size='small' variant='outlined'>
+									Отметить решающим
+								</Button>
+							</Box>
 						</Box>
 					</Box>
-					<Button size='small' variant='outlined'>
-						Отметить решающим
-					</Button>
 				</Box>
-				{isCommenting && <CommentComponent answerData={answerData} />}
+				{isCommenting && <AddComment answerData={answerData} />}
 				{answerData.comments.map((comment) => (
 					<CommentCard comment={comment} />
 				))}
@@ -186,20 +227,27 @@ const CommentCard = ({ comment }: { comment: IComment }) => {
 							}}>
 							<Avatar
 								sx={{
-									width: 24,
-									height: 24,
+									width: 18,
+									height: 18,
 									fontSize: 12,
 									bgcolor: green[500],
 									marginRight: 1,
 								}}
-								aria-label='recipe'>
-								Г
+								aria-label='recipe'
+								src={
+									comment?.user?.profile_image
+										? comment?.user?.profile_image
+										: ''
+								}>
+								{comment?.user?.profile_image
+									? ''
+									: comment?.user?.user_name[0]}
 							</Avatar>
 						</Box>
 						<Box sx={{ width: '100%' }}>
 							<Box sx={{ display: 'flex' }}>
 								<Typography sx={{ marginRight: 1 }} variant='caption'>
-									{comment?.user?.username || 'Гость'}
+									{comment?.user?.user_name || 'Гость'}
 								</Typography>
 								<Typography sx={{ color: 'GrayText' }} variant='caption'>
 									{dayjs(comment?.creation_date).format('DD-MM-YYYY')}

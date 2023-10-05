@@ -1,8 +1,12 @@
 'use client'
 import { IQuestion } from '@/types/types'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import { Box, IconButton, Typography } from '@mui/material'
+import {
+	ArrowDownward,
+	ArrowDownwardOutlined,
+	ArrowUpward,
+	ArrowUpwardOutlined,
+} from '@mui/icons-material'
+import { Box, Checkbox, IconButton, Typography } from '@mui/material'
 
 interface QuestionItemRatingProps {
 	questionData: IQuestion
@@ -23,15 +27,19 @@ export const QuestionItemRating = ({
 				alignItems: 'center',
 				color: 'white',
 			}}>
-			<IconButton onClick={() => setLike({ id: questionData.id })}>
-				<ArrowUpwardIcon></ArrowUpwardIcon>
-			</IconButton>
+			<Checkbox
+				icon={<ArrowUpwardOutlined />}
+				checkedIcon={<ArrowUpward />}
+				onClick={() => setLike({ id: questionData.id })}
+			/>
 			<Typography fontWeight={700}>
 				{questionData.rating?.like_amount - questionData.rating?.dislike_amount}
 			</Typography>
-			<IconButton onClick={() => setDislike({ id: questionData.id })}>
-				<ArrowDownwardIcon></ArrowDownwardIcon>
-			</IconButton>
+			<Checkbox
+				icon={<ArrowDownwardOutlined />}
+				checkedIcon={<ArrowDownward />}
+				onClick={() => setDislike({ id: questionData.id })}
+			/>
 		</Box>
 	)
 }

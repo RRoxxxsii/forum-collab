@@ -3,14 +3,13 @@ import { AnswerCreateForm } from '@/features/AnswerCreateForm'
 import { QuestionActionsMenu } from '@/features/QuestionActionsMenu'
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { QuestionContent } from '@/shared/QuestionContent'
-import { BASE_URL } from '@/shared/constants'
-import { IQuestion } from '@/types/types'
+import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function QuestionPage() {  
+export default function QuestionPage() {
 	const pathname = usePathname()
 
 	const id = (pathname?.match(/\/question\/(\d+)/)?.[0] || '').replace(
@@ -21,8 +20,8 @@ export default function QuestionPage() {
 	const dislikeQuestion = async ({ id }: { id: number }) => {
 		try {
 			const response = await fetch(`/api/forum/dislike`, {
-				body: JSON.stringify({ id: id, model: 'question' }),
 				method: 'POST',
+				body: JSON.stringify({ id: id, model: 'question' }),
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -42,8 +41,8 @@ export default function QuestionPage() {
 	const likeQuestion = async ({ id }: { id: number }) => {
 		try {
 			const response = await fetch(`/api/forum/like`, {
-				body: JSON.stringify({ id: id, model: 'question' }),
 				method: 'POST',
+				body: JSON.stringify({ id: id, model: 'question' }),
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -62,20 +61,47 @@ export default function QuestionPage() {
 	}
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
+	const [profileData, setProfileData] = useState<IUser | null>(null)
 
 	useEffect(() => {
 		fetchQuestion()
+		fetchUser()
 	}, [])
 
 	async function fetchQuestion() {
 		try {
-			const response = await fetch(`${BASE_URL}/forum/questions/${id}/`)
-			if (response.ok) {
-				const data = await response.json()
-				setQuestionData(data)
-			} else {
+			const response = await fetch(`/api/forum/questions`, {
+				method: 'POST',
+				body: JSON.stringify({ page_id: id }),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+
+			const result = await response.json()
+			if (!response.ok) {
+				throw new Error(result)
 			}
-		} catch (error) {}
+
+			setQuestionData(result)
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	async function fetchUser() {
+		try {
+			const response = await fetch(`/api/account/me/`)
+
+			const result = await response.json()
+			if (!response.ok) {
+				throw new Error(result)
+			}
+
+			setProfileData(result)
+		} catch (error) {
+			console.log(error)
+		}
 	}
 
 	return (
@@ -121,4 +147,3 @@ export default function QuestionPage() {
 		</Box>
 	)
 }
-
