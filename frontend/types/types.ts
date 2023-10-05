@@ -51,7 +51,14 @@ export interface IComment {
 
 export interface IUser {
 	id: number
-	username: string
+	about: string
+	user_name: string
+	created: Date
+	email: string
+	email_confirmed: boolean
+	is_active: boolean
+	is_banned: boolean
+	profile_image: null | string
 }
 
 export interface IRating {

@@ -1,6 +1,6 @@
 import { IQuestion } from '@/types/types'
 import { Box, Avatar, Typography } from '@mui/material'
-import { red } from '@mui/material/colors'
+import { green, red } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import React from 'react'
 
@@ -16,14 +16,21 @@ export const UserInformation = ({
 					width: 18,
 					height: 18,
 					fontSize: 12,
-					bgcolor: red[500],
+					bgcolor: green[500],
 					marginRight: 1,
 				}}
-				aria-label='recipe'>
-				R
+				aria-label='recipe'
+				src={
+					questionData?.user?.profile_image
+						? questionData?.user?.profile_image
+						: ''
+				}>
+				{questionData?.user?.profile_image
+					? ''
+					: questionData?.user?.user_name[0]}
 			</Avatar>
 			<Typography sx={{ marginRight: 1 }} variant='caption'>
-				{questionData?.user?.username || 'Гость'}
+				{questionData?.user?.user_name || 'Гость'}
 			</Typography>
 			<Typography sx={{ color: 'GrayText' }} variant='caption'>
 				{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}

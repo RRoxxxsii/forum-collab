@@ -1,5 +1,5 @@
 'use client'
-import { IAnswer, IQuestion } from '@/types/types'
+import { IAnswer } from '@/types/types'
 import { TextareaAutosize } from '@mui/base/TextareaAutosize'
 import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
@@ -37,7 +37,7 @@ export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
 				maxWidth: 600,
 			}}>
 			<Typography variant='caption' color={'GrayText'}>
-				Вы отвечаете пользователю {'@' + answerData?.user?.username || 'Гость'}
+				Вы отвечаете пользователю {'@' + answerData?.user?.user_name || 'Гость'}
 			</Typography>
 
 			<TextareaAutosize

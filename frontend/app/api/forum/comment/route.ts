@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: 'ID or Model was not provided' })
 	}
 	const response = await fetch(`${BASE_URL}/forum/create-comment/`, {
+		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${access_token ?? ''}`,
 		},
-		method: 'POST',
 		body: JSON.stringify({
 			comment: comment,
 			question_answer: question_answer,
@@ -27,6 +27,6 @@ export async function POST(req: NextRequest) {
 	if (response.ok) {
 		return NextResponse.json({ message: result })
 	} else {
-		return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+		return NextResponse.json({ error: result }, { status: 500 })
 	}
 }

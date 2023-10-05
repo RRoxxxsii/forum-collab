@@ -1,9 +1,10 @@
 import { IQuestion } from '@/types/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Avatar, Box, CardContent, IconButton, Typography } from '@mui/material'
+import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import ru from 'dayjs/locale/ru'
+import relativeTime from 'dayjs/plugin/relativeTime'
 export const QuestionItemContent = ({
 	questionData,
 }: {
@@ -49,12 +50,28 @@ export const QuestionItemContent = ({
 							}}>
 							<Box
 								sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-								<Avatar sx={{ width: 16, height: 16, mr: 1 }}></Avatar>
+								<Avatar
+									sx={{
+										width: 18,
+										height: 18,
+										fontSize: 12,
+										bgcolor: green[500],
+										marginRight: 1,
+									}}
+									aria-label='recipe'
+									src={
+										questionData?.user?.profile_image
+											? questionData?.user?.profile_image
+											: ''
+									}>
+									{!questionData?.user?.profile_image &&
+										questionData?.user?.user_name[0]}
+								</Avatar>
 								<Typography
 									variant='body2'
 									fontSize={12}
 									color='text.secondary'>
-									Отправлено: {user.username || 'Гость'}
+									Отправлено: {user.user_name || 'Гость'}
 								</Typography>
 								<Typography
 									variant='body2'
