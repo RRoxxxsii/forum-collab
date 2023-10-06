@@ -2,7 +2,9 @@ import { CategoryTabs } from '@/widgets/CategoryTabs'
 import { QuestionList } from '@/widgets/QuestionList'
 import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
 
-import { Alert, AlertTitle, Box } from '@mui/material'
+import { Alert, AlertTitle, Box, Typography } from '@mui/material'
+import { Suspense } from 'react'
+import Loading from './loading'
 
 export default async function HomePage() {
 	return (

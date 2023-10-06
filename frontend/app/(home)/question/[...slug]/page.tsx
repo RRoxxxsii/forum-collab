@@ -7,7 +7,8 @@ import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import QuestionLoading from './loading'
 
 export default function QuestionPage() {
 	const pathname = usePathname()
@@ -105,45 +106,47 @@ export default function QuestionPage() {
 	}
 
 	return (
-		<Box sx={{ minHeight: '80vh' }}>
-			{questionData && (
-				<Paper sx={{ maxWidth: 1280 }}>
-					<Box sx={{ px: 3, py: 2 }}>
-						<Box sx={{ display: 'flex' }}>
-							<Box sx={{ justifyContent: 'center' }}>
-								<QuestionItemRating
-									questionData={questionData}
-									setDislike={dislikeQuestion}
-									setLike={likeQuestion}
-								/>
-							</Box>
-							<Box sx={{ padding: 1.5 }}>
-								<QuestionContent questionData={questionData} />
-								<QuestionActionsMenu />
+		<Suspense fallback={<QuestionLoading />}>
+			<Box sx={{ minHeight: '80vh' }}>
+				{questionData && (
+					<Paper sx={{ maxWidth: 1280 }}>
+						<Box sx={{ px: 3, py: 2 }}>
+							<Box sx={{ display: 'flex' }}>
+								<Box sx={{ justifyContent: 'center' }}>
+									<QuestionItemRating
+										questionData={questionData}
+										setDislike={dislikeQuestion}
+										setLike={likeQuestion}
+									/>
+								</Box>
+								<Box sx={{ padding: 1.5 }}>
+									<QuestionContent questionData={questionData} />
+									<QuestionActionsMenu />
+								</Box>
 							</Box>
 						</Box>
-					</Box>
-					<Divider />
-					<Typography
-						variant='h6'
-						sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>
-						Ответы:
+						<Divider />
 						<Typography
-							className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
-							sx={{ ml: 1 }}>
-							{questionData.answers.length}
+							variant='h6'
+							sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>
+							Ответы:
+							<Typography
+								className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
+								sx={{ ml: 1 }}>
+								{questionData.answers.length}
+							</Typography>
 						</Typography>
-					</Typography>
-					<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
-						<AnswerCreateForm
-							questionData={questionData}
-							setQuestionData={setQuestionData}
-							pageId={id}
-						/>
-						<AnswerList questionData={questionData} />
-					</Box>
-				</Paper>
-			)}
-		</Box>
+						<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
+							<AnswerCreateForm
+								questionData={questionData}
+								setQuestionData={setQuestionData}
+								pageId={id}
+							/>
+							<AnswerList questionData={questionData} />
+						</Box>
+					</Paper>
+				)}
+			</Box>
+		</Suspense>
 	)
 }

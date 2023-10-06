@@ -5,15 +5,16 @@ import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRa
 import { CategoryContext } from '@/providers/CategoryProvider'
 import { BASE_URL } from '@/shared/constants'
 import { IQuestion, ITag } from '@/types/types'
-import { Box, Card } from '@mui/material'
+import { Box, Card, Skeleton } from '@mui/material'
 import Link from 'next/link'
-import { useContext, useEffect, useState } from 'react'
+import { Suspense, useContext, useEffect, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
 	const { category } = useContext(CategoryContext)
 
 	const fetchQuestionList = async () => {
+		setQuestions([])
 		try {
 			const response = await fetch(
 				`${BASE_URL}/forum/questions/?limit=10&sort=${category}`
@@ -32,57 +33,67 @@ export const QuestionList = () => {
 
 	return (
 		<>
-			{questions.map((questionData: IQuestion) => (
-				<QuestionCard key={questionData.id} questionData={questionData} />
-			))}
+			{questions.length !== 0
+				? questions.map((questionData: IQuestion) => (
+						<QuestionCard key={questionData.id} questionData={questionData} />
+				  ))
+				: Array.from({ length: 10 }).map((_, index) => (
+						<Skeleton
+							sx={{ mb: 2, borderRadius: 1 }}
+							variant='rectangular'
+							width={'100%'}
+							height={210}
+							key={index}
+						/>
+				  ))}
 		</>
 	)
 }
 
+const dislikeQuestion = async ({ id }: { id: number }) => {
+	try {
+		const response = await fetch(`/api/forum/dislike`, {
+			body: JSON.stringify({ id: id, model: 'question' }),
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+		const data = await response.json()
+
+		if (!response.ok) {
+			throw new Error(data)
+		}
+
+		return data
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+const likeQuestion = async ({ id }: { id: number }) => {
+	try {
+		const response = await fetch(`/api/forum/like`, {
+			body: JSON.stringify({ id: id, model: 'question' }),
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		const data = await response.json()
+
+		if (!response.ok) {
+			throw new Error(data)
+		}
+
+		return data
+	} catch (error) {
+		console.log(error)
+	}
+}
+
 const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
-	const dislikeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/dislike`, {
-				body: JSON.stringify({ id: id, model: 'question' }),
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-	const likeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/like`, {
-				body: JSON.stringify({ id: id, model: 'question' }),
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
 	return (
 		<Card
 			key={questionData.id}

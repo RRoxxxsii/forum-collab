@@ -161,7 +161,7 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 				</Box>
 				{isCommenting && <AddComment answerData={answerData} />}
 				{answerData.comments.map((comment) => (
-					<CommentCard comment={comment} />
+					<CommentCard key={comment.id} comment={comment} />
 				))}
 			</Box>
 		</>
