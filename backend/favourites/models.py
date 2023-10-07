@@ -6,7 +6,7 @@ from forum.models import Question
 
 class Favourite(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='ID вопроса')
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, verbose_name='Автор')
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, verbose_name='Автор', related_name='favourites')
     creation_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -15,3 +15,5 @@ class Favourite(models.Model):
 
     def __str__(self):
         return self.question
+
+
