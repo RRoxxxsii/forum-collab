@@ -21,7 +21,7 @@ export const QuestionContent = ({
 			/>
 			<Box>
 				{questionData.tags.map((tag) => (
-					<Chip sx={{ mr: 1 }} label={tag.tag_name} />
+					<Chip key={tag.tag_name} sx={{ mr: 1 }} label={tag.tag_name} />
 				))}
 			</Box>
 		</Box>

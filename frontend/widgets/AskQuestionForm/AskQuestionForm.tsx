@@ -47,7 +47,6 @@ export const AskQuestionForm = ({}: {}) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
-	console.log(selectedTags)
 	useEffect(() => {
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests

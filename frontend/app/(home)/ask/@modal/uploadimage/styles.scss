@@ -1,0 +1,14 @@
+.image-item {
+	&:hover {
+		img {
+			filter: brightness(50%);
+		}
+		button {
+			display: block;
+		}
+	}
+
+	button {
+		display: none;
+	}
+}
