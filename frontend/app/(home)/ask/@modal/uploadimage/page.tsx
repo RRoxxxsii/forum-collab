@@ -1,0 +1,135 @@
+'use client'
+import { ModalComponent } from '@/shared/Modal'
+import { Delete, Link, OpenInFull, UploadFile } from '@mui/icons-material'
+import { Box, Tab, Tabs, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { useDropzone } from 'react-dropzone'
+import './styles.scss'
+
+export interface CustomFile {
+	file: File
+	preview: string
+}
+
+export default function UploadImagePage() {
+	const router = useRouter()
+
+	const [value, setValue] = useState<number>(0)
+	const [files, setFiles] = useState<CustomFile[]>([])
+
+	const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+		setValue(newValue)
+	}
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		accept: 'image/*',
+		onDrop: (acceptedFiles: File[]) => {
+			const updatedFiles: CustomFile[] = acceptedFiles.map((file) => ({
+				file,
+				preview: URL.createObjectURL(file),
+			}))
+			setFiles(updatedFiles)
+		},
+	})
+
+	const removeImage = (index: number) => {
+		// Remove an image from the preview
+		const updatedFiles = [...files]
+		URL.revokeObjectURL(updatedFiles[index].preview)
+		updatedFiles.splice(index, 1)
+		setFiles(updatedFiles)
+	}
+	const openImage = ({
+		file,
+		photoId,
+	}: {
+		file: CustomFile
+		photoId: number
+	}) => {
+		// Remove an image from the preview
+		router.push(`/ask/uploadimage/photo/${photoId}`)
+	}
+
+	const handleClose = () => {
+		router.push('/ask/uploadimage')
+	}
+
+	useEffect(() => {
+		// Make sure to revoke the data URIs to avoid memory leaks
+		return () => {
+			files.forEach((file) => URL.revokeObjectURL(file.preview))
+		}
+	}, [files])
+
+	return (
+		<ModalComponent handleClose={handleClose}>
+			<div className='p-2'>
+				<Typography variant='h5'>Добавление фото</Typography>
+				<Tabs
+					sx={{ mb: 2 }}
+					value={value}
+					onChange={handleChange}
+					aria-label='basic tabs example'>
+					<Tab icon={<UploadFile />} label='Загрузить с устройства' />
+					<Tab icon={<Link />} label='Загрузить по ссылке' />
+				</Tabs>
+				<section className='container'>
+					<Box
+						{...getRootProps({
+							className:
+								'dropzone h-80 max-w-60 min-w-20 flex justify-center items-center border border-slate-200 p-4 border-dashed max-w-20 cursor-pointer',
+						})}>
+						<input {...getInputProps()} />
+						{isDragActive ? (
+							<Typography>Drop file(s) here ...</Typography>
+						) : (
+							<Typography>
+								Drag and drop file(s) here, or click to select files
+							</Typography>
+						)}
+					</Box>
+					<div className='mt-4'>
+						{files.map((file, index) => (
+							<div
+								className='max-h-32 w-24 overflow-hidden'
+								key={file.file.name}>
+								<div className='relative w-24 image-item'>
+									<img
+										className='max-h-24 max-w-24 rounded-sm aspect-square object-cover '
+										src={file.preview}
+										alt={file.file.name}></img>
+									<button
+										className='absolute hover:brightness-200'
+										style={{
+											transform: `translate(-50%, -50%)`,
+											top: '50%',
+											left: '35%',
+										}}
+										onClick={() => openImage({ file: file, photoId: index })}>
+										<OpenInFull />
+									</button>
+									<button
+										className='absolute hover:brightness-200'
+										style={{
+											transform: `translate(-50%, -50%)`,
+											top: '50%',
+											left: '65%',
+										}}
+										onClick={() => removeImage(index)}>
+										<Delete />
+									</button>
+								</div>
+								<Typography variant='caption'>{file.file.name}</Typography>
+							</div>
+						))}
+					</div>
+				</section>
+			</div>
+		</ModalComponent>
+	)
+}
+
+const tab = {
+	'font-size': { md: '12px', xl: 0 },
+}

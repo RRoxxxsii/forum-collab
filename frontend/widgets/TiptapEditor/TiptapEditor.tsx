@@ -4,11 +4,10 @@ import { AddPhotoAlternate } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useContext } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
 import { EditorExtensions } from './utils/Extensions'
-import { AskFastContext } from '@/providers/AskFastProvider'
 
 const EditorContentValue = ``
 
@@ -97,16 +96,15 @@ export const TiptapEditor = ({
 					<BubbleMenuContent editor={editor} />
 				</BubbleMenu>
 			)}
-			{type === 'question' ||
-				(type === 'answer' && (
-					<Box sx={{ height: 40, px: 1 }} border={'1px solid #343947'}>
-						<IconButton sx={{ width: 36, height: 36, color: '#b7b8c4' }}>
-							<Link href={'addimage'}>
-								<AddPhotoAlternate />
-							</Link>
-						</IconButton>
-					</Box>
-				))}
+			{(type === 'question' || type === 'answer') && (
+				<Box sx={{ height: 40, px: 1 }} border={'1px solid #343947'}>
+					<IconButton sx={{ width: 36, height: 36, color: '#b7b8c4' }}>
+						<Link href={'/ask/uploadimage'}>
+							<AddPhotoAlternate />
+						</Link>
+					</IconButton>
+				</Box>
+			)}
 
 			<EditorContent
 				style={{ height: '100%' }}

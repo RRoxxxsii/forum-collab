@@ -3,8 +3,6 @@ import { QuestionList } from '@/widgets/QuestionList'
 import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
 
 import { Alert, AlertTitle, Box, Typography } from '@mui/material'
-import { Suspense } from 'react'
-import Loading from './loading'
 
 export default async function HomePage() {
 	return (
@@ -14,7 +12,7 @@ export default async function HomePage() {
 				<Box sx={HomeContainer}>
 					<Box sx={desktopList}>
 						<Alert variant='outlined' severity='warning' sx={{ mb: 2 }}>
-							<AlertTitle>Подтвердите почту</AlertTitle>
+							<AlertTitle>По дтвердите почту</AlertTitle>
 							Эта надпись исчезнет, когда вы подтведите свою почту
 						</Alert>
 						<QuestionListAskFast />
