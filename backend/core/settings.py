@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     # Third Party Libraries
     'rest_framework',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'forum',
     'notifications',
     'favourites',
+    'search',
 ]
 
 MIDDLEWARE = [
