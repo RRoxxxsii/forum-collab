@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
 from favourites.models import Favourite
-from forum.models import ThemeTag, Question
+from forum.models import Question, ThemeTag
 
 
 class AddToFavourites(APITestCase):
