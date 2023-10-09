@@ -1,3 +1,4 @@
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
 from accounts.models import NewUser
@@ -79,6 +80,8 @@ class Question(models.Model, LikeDislikeModelMixin):
     is_solved = models.BooleanField(default=False, verbose_name='Вопрос решен')
     creation_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    # search_vector = SearchVectorField(null=True)
 
     def __str__(self):
         return self.title

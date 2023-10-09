@@ -279,13 +279,11 @@ class QuestionViewSet(ModelViewSet):
 
         sort = query_params.get('sort')
         if not sort and (not limit or not self.action == 'list'):
-            return Question.objects.all()
+            return Question.objects.all().order_by('-creation_date')
         elif sort == 'closed' and limit:
-            return Question.objects.filter(is_solved=True)[:limit]
+            return Question.objects.filter(is_solved=True).order_by('-creation_date')[:limit]
         elif sort == 'opened' and limit:
-            return Question.objects.filter(is_solved=False)[:limit]
-        elif sort == 'latest' and limit:
-            return Question.objects.order_by('-creation_date')[:limit]
+            return Question.objects.filter(is_solved=False).order_by('-creation_date')[:limit]
         elif sort == 'best' and limit:
 
             month_ago = timezone.now() - timedelta(days=30)

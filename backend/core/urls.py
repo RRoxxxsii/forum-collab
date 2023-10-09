@@ -42,6 +42,8 @@ urlpatterns = [
     path('api/v1/account/', include('accounts.urls')),
     path('api/v1/forum/', include('forum.urls')),
     path('api/v1/notifications/', include('notifications.urls')),
+    path('api/v1/favourites/', include('favourites.urls')),
+    path('api/v1/search/', include('search.urls')),
 
     # Docs
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -49,4 +51,6 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
