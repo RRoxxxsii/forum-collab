@@ -10,6 +10,48 @@ import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
 
+const dislikeQuestion = async ({ id }: { id: number }) => {
+	try {
+		const response = await fetch(`/api/forum/dislike`, {
+			method: 'POST',
+			body: JSON.stringify({ id: id, model: 'question' }),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+		const data = await response.json()
+
+		if (!response.ok) {
+			throw new Error(data)
+		}
+
+		return data
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+const likeQuestion = async ({ id }: { id: number }) => {
+	try {
+		const response = await fetch(`/api/forum/like`, {
+			method: 'POST',
+			body: JSON.stringify({ id: id, model: 'question' }),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		const data = await response.json()
+
+		if (!response.ok) {
+			throw new Error(data)
+		}
+
+		return data
+	} catch (error) {
+		console.log(error)
+	}
+}
 export default function QuestionPage() {
 	const pathname = usePathname()
 
@@ -17,49 +59,6 @@ export default function QuestionPage() {
 		'/question/',
 		''
 	)
-
-	const dislikeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/dislike`, {
-				method: 'POST',
-				body: JSON.stringify({ id: id, model: 'question' }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-	const likeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/like`, {
-				method: 'POST',
-				body: JSON.stringify({ id: id, model: 'question' }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 	const [profileData, setProfileData] = useState<IUser | null>(null)

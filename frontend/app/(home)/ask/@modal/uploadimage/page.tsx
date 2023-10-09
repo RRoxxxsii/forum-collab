@@ -1,11 +1,18 @@
 'use client'
 import { ModalComponent } from '@/shared/Modal'
-import { Delete, Link, OpenInFull, UploadFile } from '@mui/icons-material'
+import {
+	Delete,
+	OpenInFull,
+	Link as LinkIcon,
+	UploadFile,
+} from '@mui/icons-material'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import './styles.scss'
+import { CustomFile } from '@/types/types'
+import Link from 'next/link'
 
 export default function UploadImagePage() {
 	const router = useRouter()
@@ -16,7 +23,6 @@ export default function UploadImagePage() {
 	const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
 		setValue(newValue)
 	}
-
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		accept: 'image/*',
 		onDrop: (acceptedFiles: File[]) => {
@@ -47,7 +53,7 @@ export default function UploadImagePage() {
 	}
 
 	const handleClose = () => {
-		router.push('/ask/uploadimage')
+		router.back()
 	}
 
 	useEffect(() => {
@@ -67,7 +73,7 @@ export default function UploadImagePage() {
 					onChange={handleChange}
 					aria-label='basic tabs example'>
 					<Tab icon={<UploadFile />} label='Загрузить с устройства' />
-					<Tab icon={<Link />} label='Загрузить по ссылке' />
+					<Tab icon={<LinkIcon />} label='Загрузить по ссылке' />
 				</Tabs>
 				<section className='container'>
 					<Box
@@ -84,10 +90,10 @@ export default function UploadImagePage() {
 							</Typography>
 						)}
 					</Box>
-					<div className='mt-4'>
+					<div className='mt-4 flex'>
 						{files.map((file, index) => (
 							<div
-								className='max-h-32 w-24 overflow-hidden'
+								className='max-h-32 w-24 overflow-hidden mr-2'
 								key={file.file.name}>
 								<div className='relative w-24 image-item'>
 									<img
@@ -101,8 +107,18 @@ export default function UploadImagePage() {
 											top: '50%',
 											left: '35%',
 										}}
-										onClick={() => openImage({ file: file, photoId: index })}>
-										<OpenInFull />
+										// onClick={() => openImage({ file: file, photoId: index })}
+									>
+										<Link
+											href={{
+												pathname: `uploadimage/photo/${index}`,
+												query: {
+													imageUrl: file.preview,
+													imageName: file.file.name,
+												},
+											}}>
+											<OpenInFull />
+										</Link>
 									</button>
 									<button
 										className='absolute hover:brightness-200'
