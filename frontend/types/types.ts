@@ -72,3 +72,8 @@ export interface IRating {
 	users_disliked: number[]
 	// Add other properties for rating as needed
 }
+
+export interface CustomFile {
+	file: File
+	preview: string
+}
