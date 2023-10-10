@@ -6,7 +6,7 @@ import { QuestionContent } from '@/shared/QuestionContent'
 import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
 
@@ -59,6 +59,7 @@ export default function QuestionPage() {
 		'/question/',
 		''
 	)
+	const searchParams = useSearchParams()
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 	const [profileData, setProfileData] = useState<IUser | null>(null)
@@ -120,7 +121,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
-									<QuestionActionsMenu />
+									<QuestionActionsMenu questionData={questionData} />
 								</Box>
 							</Box>
 						</Box>

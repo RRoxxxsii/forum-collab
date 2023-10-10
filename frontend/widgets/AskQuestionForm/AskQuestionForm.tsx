@@ -1,9 +1,10 @@
 'use client'
 import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
 import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
-import { BASE_URL } from '@/shared/constants'
+import { AskFastContext } from '@/providers/AskFastProvider'
 import { ITag } from '@/types/types'
 import { Box, TextField } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
 import {
 	Dispatch,
 	SetStateAction,
@@ -12,8 +13,6 @@ import {
 	useState,
 } from 'react'
 import { TiptapEditor } from '../TiptapEditor'
-import theme from '@/shared/theme/theme'
-import { AskFastContext } from '@/providers/AskFastProvider'
 const fetchTagsOnQuery = async ({
 	setTagsToDisplay,
 	tagQuery,
@@ -39,6 +38,11 @@ const fetchTagsOnQuery = async ({
 }
 
 export const AskQuestionForm = ({}: {}) => {
+	const searchParams = useSearchParams()
+	const title = searchParams.get('title')
+	const content = searchParams.get('content')
+	const tags = searchParams.get('tags')
+
 	const [questionContent, setQuestionContent] = useState('')
 	const [images, setImages] = useState<string[]>([])
 	const { askFastValue } = useContext(AskFastContext)
@@ -47,7 +51,14 @@ export const AskQuestionForm = ({}: {}) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
+
+	console.log(title, content, tags)
 	useEffect(() => {
+		if (title && content && tags) {
+			setTitleValue(title)
+			setQuestionContent(content)
+			setSelectedTags((selectedTags) => [...selectedTags, tags])
+		}
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
 			const timerId = setTimeout(() => {
@@ -86,7 +97,7 @@ export const AskQuestionForm = ({}: {}) => {
 					setContent={setQuestionContent}
 				/>
 			</Box>
-			<Box sx={questionFormBottom}>
+			<Box>
 				<AskQuestionFormTags
 					tagQuery={tagQuery}
 					setTagQuery={setTagQuery}
@@ -105,14 +116,4 @@ export const AskQuestionForm = ({}: {}) => {
 			</Box>
 		</>
 	)
-}
-
-const questionFormBottom = {
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-	[theme.breakpoints.down('md')]: {
-		alignItems: 'flex-start',
-		flexDirection: 'column ',
-	},
 }

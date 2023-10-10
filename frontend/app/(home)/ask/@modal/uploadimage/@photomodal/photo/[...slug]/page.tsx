@@ -25,7 +25,7 @@ export default function UploadImagePage() {
 				alt={imageUrl ?? ''}
 				src={imageName ?? ''}
 			/>
-			<Typography>{imageUrl ?? ''}</Typography>
+			<Typography>{imageName ?? ''}</Typography>
 			<Typography>dadad</Typography>
 		</ModalComponent>
 	)
