@@ -548,3 +548,80 @@ class TestUserRating(APITestCase):
         self.assertEqual(len(user_answered_question_tags), 1)
         self.assertEqual(content.get('amount_solved'), 10)
         self.assertIsNotNone(content.get('karma'))
+
+
+class TestKarmaCalculated(APITestCase):
+
+    def setUp(self):
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user4 = NewUser.objects.create_user(email='testuser4@gmail.com', user_name='testuser4',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
+                                                 password='Ax6!a7OpNvq', is_active=True)
+
+        self.tag = ThemeTag.objects.create(tag_name=f'django')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
+        self.question.tags.add(self.tag)
+
+        self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user2)
+        self.question2.tags.add(self.tag)
+
+        self.answer = QuestionAnswer.objects.create(question=self.question2, user=self.user, answer='Ответ',
+                                                    is_solving=True)
+        self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
+
+        self.question.like(user=self.user2)
+        self.question.like(user=self.user3)
+        self.question.like(user=self.user4)
+        self.question.dislike(user=self.user5)
+
+        self.question2.like(user=self.user)
+        self.question2.like(user=self.user3)
+        self.question2.like(user=self.user4)
+        self.question2.dislike(user=self.user5)
+
+        self.answer.like(user=self.user2)
+        self.answer.like(user=self.user3)
+        self.answer.like(user=self.user4)
+        self.answer.dislike(user=self.user5)
+
+        self.answer2.like(user=self.user)
+        self.answer2.like(user=self.user3)
+        self.answer2.like(user=self.user4)
+        self.answer2.dislike(user=self.user5)
+
+        self.url_personal_page = reverse('personal-page')
+        self.url = reverse('newuser-detail', kwargs={'pk': self.user2.pk})
+
+    def test_karma_calculated_request_user_is_returned_obj_user(self):
+        """
+        Проверяем, что при возвращаемый ресурс своего профиля равен данным
+        пользователя отправившего запрос.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url_personal_page)
+        content = json.loads(response.content.decode())
+        self.assertEqual(content.get('karma'), self.user.count_karma())
+
+    def test_karma_calculated_request_user_is_not_returned_obj_user(self):
+        """
+        Проверяем, что данные профиля другого пользователя не равны данным
+        пользователя, запрашивающего ресурс.
+        """
+        self.assertNotEqual(self.user.count_karma(), self.user2.count_karma())
+
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url)             # получаем профиль user2
+        content = json.loads(response.content.decode())
+        self.assertNotEqual(self.user.count_karma(), content.get('karma'))
+
+        response = self.client.get(reverse('newuser-detail',
+                                           kwargs={'pk': self.user.pk}))    # получаем профиль user1
+        content2 = json.loads(response.content.decode())
+        self.assertNotEqual(content.get('karma'), content2.get('karma'))

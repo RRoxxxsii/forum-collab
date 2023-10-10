@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
+from forum.utils import invalidate_questions_solved
 from notifications.utils import notify
 
 
@@ -87,6 +88,8 @@ def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
 
         notify(target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
                sender=related_question.user)
+
+    invalidate_questions_solved(user=answer.user)
 
     related_question.save()
     answer.save()
