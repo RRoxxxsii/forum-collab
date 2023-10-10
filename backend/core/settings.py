@@ -244,3 +244,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 DJANGO_NOTIFICATIONS_CONFIG = {'USE_JSONFIELD': True}
+
+# CONSTANTS FOR CACHING
+ANSWER_DISLIKE_NAME = 'answer_dislike_amount'
+ANSWER_LIKE_NAME = 'answer_like_amount'
+QUESTION_DISLIKE_NAME = 'question_dislike_amount'
+QUESTION_LIKE_NAME = 'question_like_amount'
+
+QUESTION_SOLVED_NAME = 'questions_solved_amount'
+EXPERT_TAGS_NAME = 'expert_tags'

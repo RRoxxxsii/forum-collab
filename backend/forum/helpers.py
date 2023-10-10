@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from accounts.models import NewUser
 from forum.permissions import IsOwner
+from forum.utils import invalidate_dislikes_cache, invalidate_likes_cache
 
 
 class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
@@ -51,6 +52,8 @@ class LikeDislikeModelMixin:
             self.rating.users_liked.remove(user)
             self.rating.like_amount -= 1
 
+        invalidate_likes_cache(instance=self, user=user)
+
         self.rating.save()
 
     def dislike(self, user: NewUser):
@@ -75,5 +78,7 @@ class LikeDislikeModelMixin:
             # убираем дизлайк
             self.rating.users_disliked.remove(user)
             self.rating.dislike_amount -= 1
+
+        invalidate_dislikes_cache(instance=self, user=user)
 
         self.rating.save()
