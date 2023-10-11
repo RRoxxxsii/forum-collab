@@ -1,13 +1,14 @@
 import { AskQuestionForm } from '@/widgets/AskQuestionForm'
 import { AskTabs } from '@/widgets/AskTabs'
 import { Box, Paper } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
 
 const askPageWrapper = {
 	width: '100%',
 	padding: { md: 3, xs: 0 },
 }
 
-export default async function AskPage() {
+export default async function AskEditPage() {
 	return (
 		<Box className='flex min-h-screen items-start max-h-80 relative'>
 			<Box sx={askPageWrapper}>
@@ -22,8 +23,7 @@ export default async function AskPage() {
 						minHeight: '400px',
 						alignItems: 'center',
 					}}>
-					<AskTabs />
-					<AskQuestionForm type='create'/>
+					<AskQuestionForm type='edit' />
 				</Paper>
 			</Box>
 		</Box>

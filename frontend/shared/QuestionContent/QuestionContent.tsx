@@ -1,7 +1,7 @@
-import { Box, Typography, Chip } from '@mui/material'
-import React from 'react'
-import { UserInformation } from '../UserInformation'
 import { IQuestion } from '@/types/types'
+import { Box, Chip, Typography } from '@mui/material'
+import { UserInformation } from '../UserInformation'
+import { useSearchParams } from 'next/navigation'
 
 export const QuestionContent = ({
 	questionData,

@@ -1,9 +1,11 @@
 'use client'
 import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
 import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
-import { BASE_URL } from '@/shared/constants'
-import { ITag } from '@/types/types'
+import { AskFastContext } from '@/providers/AskFastProvider'
+import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
+import { IQuestion, ITag, IUser } from '@/types/types'
 import { Box, TextField } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
 import {
 	Dispatch,
 	SetStateAction,
@@ -12,8 +14,6 @@ import {
 	useState,
 } from 'react'
 import { TiptapEditor } from '../TiptapEditor'
-import theme from '@/shared/theme/theme'
-import { AskFastContext } from '@/providers/AskFastProvider'
 const fetchTagsOnQuery = async ({
 	setTagsToDisplay,
 	tagQuery,
@@ -38,7 +38,14 @@ const fetchTagsOnQuery = async ({
 	}
 }
 
-export const AskQuestionForm = ({}: {}) => {
+export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
+	const searchParams = useSearchParams()
+	const pageId = searchParams.get('page_id')
+	// const editContent = searchParams.get('content')
+	// const editTags = searchParams.getAll('tag_name')
+
+	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
+	const [profileData, setProfileData] = useState<IUser | null>(null)
 	const [questionContent, setQuestionContent] = useState('')
 	const [images, setImages] = useState<string[]>([])
 	const { askFastValue } = useContext(AskFastContext)
@@ -47,6 +54,14 @@ export const AskQuestionForm = ({}: {}) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
+
+	useEffect(() => {
+		fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
+		fetchMe({ setProfileData: setProfileData })
+	}, [])
+
+	console.log(questionData, profileData)
+
 	useEffect(() => {
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
@@ -61,6 +76,17 @@ export const AskQuestionForm = ({}: {}) => {
 			setTagsToDisplay([])
 		}
 	}, [tagQuery])
+
+	useEffect(() => {
+		if (questionData) {
+			setTitleValue(questionData.title)
+			setQuestionContent(questionData.content)
+			setSelectedTags((selectedTags) => [
+				...selectedTags,
+				...questionData.tags.map((tag) => tag.tag_name),
+			])
+		}
+	}, [questionData])
 
 	return (
 		<>
@@ -86,33 +112,26 @@ export const AskQuestionForm = ({}: {}) => {
 					setContent={setQuestionContent}
 				/>
 			</Box>
-			<Box sx={questionFormBottom}>
+			<Box>
 				<AskQuestionFormTags
 					tagQuery={tagQuery}
 					setTagQuery={setTagQuery}
 					tagsToDisplay={tagsToDisplay}
 					setSelectedTags={setSelectedTags}
 					selectedTags={selectedTags}
-					disabled={false}
+					disabled={type === 'create' ? false : true}
 					limit={5}
 				/>
 				<AskQuestionFormSubmit
+					type={type}
 					titleValue={titleValue}
 					questionContent={questionContent}
 					tags={selectedTags}
 					images={images}
+					userId={profileData?.id}
+					questionId={questionData?.id}
 				/>
 			</Box>
 		</>
 	)
-}
-
-const questionFormBottom = {
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-	[theme.breakpoints.down('md')]: {
-		alignItems: 'flex-start',
-		flexDirection: 'column ',
-	},
 }

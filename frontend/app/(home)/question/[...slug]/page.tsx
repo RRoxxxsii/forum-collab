@@ -6,9 +6,11 @@ import { QuestionContent } from '@/shared/QuestionContent'
 import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
+import { dislikeQuestion, likeQuestion } from '@/shared/api/changeRaring'
+import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 
 export default function QuestionPage() {
 	const pathname = usePathname()
@@ -17,93 +19,13 @@ export default function QuestionPage() {
 		'/question/',
 		''
 	)
-
-	const dislikeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/dislike`, {
-				method: 'POST',
-				body: JSON.stringify({ id: id, model: 'question' }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-	const likeQuestion = async ({ id }: { id: number }) => {
-		try {
-			const response = await fetch(`/api/forum/like`, {
-				method: 'POST',
-				body: JSON.stringify({ id: id, model: 'question' }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-
-			const data = await response.json()
-
-			if (!response.ok) {
-				throw new Error(data)
-			}
-
-			return data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 	const [profileData, setProfileData] = useState<IUser | null>(null)
 
 	useEffect(() => {
-		fetchQuestion()
-		fetchUser()
+		fetchQuestion({ id: id, setQuestionData: setQuestionData })
+		fetchMe({ setProfileData: setProfileData })
 	}, [])
-
-	async function fetchQuestion() {
-		try {
-			const response = await fetch(`/api/forum/questions`, {
-				method: 'POST',
-				body: JSON.stringify({ page_id: id }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-
-			const result = await response.json()
-			if (!response.ok) {
-				throw new Error(result)
-			}
-
-			setQuestionData(result)
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-	async function fetchUser() {
-		try {
-			const response = await fetch(`/api/account/me/`)
-
-			const result = await response.json()
-			if (!response.ok) {
-				throw new Error(result)
-			}
-
-			setProfileData(result)
-		} catch (error) {
-			console.log(error)
-		}
-	}
 
 	return (
 		<Suspense fallback={<QuestionLoading />}>
@@ -121,7 +43,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
-									<QuestionActionsMenu />
+									<QuestionActionsMenu questionData={questionData} />
 								</Box>
 							</Box>
 						</Box>
@@ -138,9 +60,9 @@ export default function QuestionPage() {
 						</Typography>
 						<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
 							<AnswerCreateForm
+								profileData={profileData}
 								questionData={questionData}
 								setQuestionData={setQuestionData}
-								pageId={id}
 							/>
 							<AnswerList questionData={questionData} />
 						</Box>

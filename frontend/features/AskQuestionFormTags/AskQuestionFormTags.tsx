@@ -33,6 +33,7 @@ export const AskQuestionFormTags = ({
 				disabled={disabled || disableInput}
 				id='question-tags'
 				options={tagsToDisplay}
+				value={selectedTags}
 				//@ts-ignore tag could only be an ITag, so we turnoff ts here
 				getOptionLabel={(tag: ITag) => `${tag.tag_name} (${tag.use_count})`}
 				sx={{ width: '100%' }}

@@ -1,3 +1,4 @@
+import { IQuestion } from '@/types/types'
 import {
 	ShareOutlined,
 	Share,
@@ -15,11 +16,16 @@ import {
 	MenuItem,
 	Typography,
 	Divider,
+	Button,
 } from '@mui/material'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-export const QuestionActionsMenu = () => {
+export const QuestionActionsMenu = ({
+	questionData,
+}: {
+	questionData: IQuestion
+}) => {
 	const [moreButtonEl, setMoreButtonEl] = useState<HTMLElement | null>(null)
 
 	const moreDropdownOpen = Boolean(moreButtonEl)
@@ -55,16 +61,23 @@ export const QuestionActionsMenu = () => {
 				open={moreDropdownOpen}
 				onClose={handleClose}>
 				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-					<Link href={`edit`} className='flex'>
+					<Link
+						href={{
+							pathname: `/ask/edit`,
+							query: {
+								id: questionData.id,
+							},
+						}}
+						className='flex'>
 						<Edit sx={{ mr: 1 }} />
 						<Typography>Редактировать</Typography>
 					</Link>
 				</MenuItem>
 				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-					<Link href={`edit`} className='flex'>
+					<Button variant='text' className='flex'>
 						<Report sx={{ mr: 1 }} />
 						<Typography>Пожаловаться</Typography>
-					</Link>
+					</Button>
 				</MenuItem>
 				<Divider />
 				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>

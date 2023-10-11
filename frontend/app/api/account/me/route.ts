@@ -3,7 +3,7 @@ import { IUser } from '@/types/types'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-export async function POST() {
+export async function GET() {
 	const access_token = cookies().get('access_token')?.value
 
 	const response = await fetch(`${BASE_URL}/account/me/`, {
@@ -13,7 +13,7 @@ export async function POST() {
 			Authorization: `Bearer ${access_token ?? ''}`,
 		},
 	})
-	const result:IUser = await response.json()
+	const result: IUser = await response.json()
 
 	if (response.ok) {
 		return NextResponse.json({ ...result })
