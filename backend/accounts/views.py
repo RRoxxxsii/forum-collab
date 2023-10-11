@@ -72,6 +72,8 @@ class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
         user.email_confirmed = True
         user.save()
 
+        # raise NotImplementedError         # использовате setter
+
 
 class ChangeEmailAddressAPIView(GenericAPIView):
     """

@@ -14,6 +14,7 @@ import './styles.scss'
 import { CustomFile } from '@/types/types'
 import Link from 'next/link'
 
+
 export default function UploadImagePage() {
 	const router = useRouter()
 

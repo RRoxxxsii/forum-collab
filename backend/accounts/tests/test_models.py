@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
@@ -51,7 +52,6 @@ class TestNewUserModelTest(APITestCase):
         self.answer2.dislike(user=self.user5)
 
     def test_count_question_user_likes(self):
-
         self.assertEqual(self.user.count_question_likes(), self.question.rating.like_amount)
         self.assertEqual(self.user2.count_question_likes(), self.question2.rating.like_amount)
 
