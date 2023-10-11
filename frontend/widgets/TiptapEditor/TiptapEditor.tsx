@@ -79,7 +79,11 @@ export const TiptapEditor = ({
 	})
 
 	if (editor) {
-		setContent(editor?.getHTML())
+		if (content.length === 0) {
+			setContent(editor?.getHTML())
+		} else {
+			editor.commands.setContent(content)
+		}
 	}
 
 	return (

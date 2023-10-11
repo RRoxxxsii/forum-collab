@@ -9,8 +9,6 @@ const askPageWrapper = {
 }
 
 export default async function AskEditPage() {
-
-
 	return (
 		<Box className='flex min-h-screen items-start max-h-80 relative'>
 			<Box sx={askPageWrapper}>
@@ -25,8 +23,7 @@ export default async function AskEditPage() {
 						minHeight: '400px',
 						alignItems: 'center',
 					}}>
-					<AskTabs />
-					<AskQuestionForm />
+					<AskQuestionForm type='edit' />
 				</Paper>
 			</Box>
 		</Box>

@@ -23,7 +23,7 @@ export default async function AskPage() {
 						alignItems: 'center',
 					}}>
 					<AskTabs />
-					<AskQuestionForm />
+					<AskQuestionForm type='create'/>
 				</Paper>
 			</Box>
 		</Box>

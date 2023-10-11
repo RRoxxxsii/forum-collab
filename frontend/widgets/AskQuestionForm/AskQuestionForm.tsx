@@ -37,11 +37,11 @@ const fetchTagsOnQuery = async ({
 	}
 }
 
-export const AskQuestionForm = ({}: {}) => {
+export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const searchParams = useSearchParams()
-	const title = searchParams.get('title')
-	const content = searchParams.get('content')
-	const tags = searchParams.get('tags')
+	const editTitle = searchParams.get('title')
+	const editContent = searchParams.get('content')
+	const editTags = searchParams.get('tags')
 
 	const [questionContent, setQuestionContent] = useState('')
 	const [images, setImages] = useState<string[]>([])
@@ -52,13 +52,9 @@ export const AskQuestionForm = ({}: {}) => {
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
 
-	console.log(title, content, tags)
+	console.log(editTitle, editContent, editTags)
+	console.log(selectedTags)
 	useEffect(() => {
-		if (title && content && tags) {
-			setTitleValue(title)
-			setQuestionContent(content)
-			setSelectedTags((selectedTags) => [...selectedTags, tags])
-		}
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
 			const timerId = setTimeout(() => {
@@ -72,6 +68,14 @@ export const AskQuestionForm = ({}: {}) => {
 			setTagsToDisplay([])
 		}
 	}, [tagQuery])
+
+	useEffect(() => {
+		if (editTitle && editContent && editTags) {
+			setTitleValue(editTitle)
+			setQuestionContent(editContent)
+			setSelectedTags((selectedTags) => [...selectedTags, editTags])
+		}
+	}, [])
 
 	return (
 		<>
@@ -108,6 +112,7 @@ export const AskQuestionForm = ({}: {}) => {
 					limit={5}
 				/>
 				<AskQuestionFormSubmit
+					type={type}
 					titleValue={titleValue}
 					questionContent={questionContent}
 					tags={selectedTags}
