@@ -2,7 +2,8 @@
 import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
 import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { AskFastContext } from '@/providers/AskFastProvider'
-import { ITag } from '@/types/types'
+import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
+import { IQuestion, ITag, IUser } from '@/types/types'
 import { Box, TextField } from '@mui/material'
 import { useSearchParams } from 'next/navigation'
 import {
@@ -39,10 +40,12 @@ const fetchTagsOnQuery = async ({
 
 export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const searchParams = useSearchParams()
-	const editTitle = searchParams.get('title')
-	const editContent = searchParams.get('content')
-	const editTags = searchParams.get('tags')
+	const pageId = searchParams.get('page_id')
+	// const editContent = searchParams.get('content')
+	// const editTags = searchParams.getAll('tag_name')
 
+	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
+	const [profileData, setProfileData] = useState<IUser | null>(null)
 	const [questionContent, setQuestionContent] = useState('')
 	const [images, setImages] = useState<string[]>([])
 	const { askFastValue } = useContext(AskFastContext)
@@ -52,8 +55,13 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
 
-	console.log(editTitle, editContent, editTags)
-	console.log(selectedTags)
+	useEffect(() => {
+		fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
+		fetchMe({ setProfileData: setProfileData })
+	}, [])
+
+	console.log(questionData, profileData)
+
 	useEffect(() => {
 		if (tagQuery !== '') {
 			// Delay the fetch request by 300ms to avoid excessive requests
@@ -70,12 +78,15 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	}, [tagQuery])
 
 	useEffect(() => {
-		if (editTitle && editContent && editTags) {
-			setTitleValue(editTitle)
-			setQuestionContent(editContent)
-			setSelectedTags((selectedTags) => [...selectedTags, editTags])
+		if (questionData) {
+			setTitleValue(questionData.title)
+			setQuestionContent(questionData.content)
+			setSelectedTags((selectedTags) => [
+				...selectedTags,
+				...questionData.tags.map((tag) => tag.tag_name),
+			])
 		}
-	}, [])
+	}, [questionData])
 
 	return (
 		<>
@@ -108,7 +119,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 					tagsToDisplay={tagsToDisplay}
 					setSelectedTags={setSelectedTags}
 					selectedTags={selectedTags}
-					disabled={false}
+					disabled={type === 'create' ? false : true}
 					limit={5}
 				/>
 				<AskQuestionFormSubmit
@@ -117,6 +128,8 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 					questionContent={questionContent}
 					tags={selectedTags}
 					images={images}
+					userId={profileData?.id}
+					questionId={questionData?.id}
 				/>
 			</Box>
 		</>

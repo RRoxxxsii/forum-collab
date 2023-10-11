@@ -65,9 +65,7 @@ export const QuestionActionsMenu = ({
 						href={{
 							pathname: `/ask/edit`,
 							query: {
-								title: questionData.title,
-								content: questionData.content,
-								tags: questionData.tags.map((tag) => tag.tag_name),
+								id: questionData.id,
 							},
 						}}
 						className='flex'>

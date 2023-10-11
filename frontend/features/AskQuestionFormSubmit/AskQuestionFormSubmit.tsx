@@ -2,6 +2,7 @@
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
+import { NonNullExpression } from 'typescript'
 
 export const AskQuestionFormSubmit = ({
 	titleValue,
@@ -9,12 +10,16 @@ export const AskQuestionFormSubmit = ({
 	tags,
 	images,
 	type,
+	userId,
+	questionId,
 }: {
 	titleValue: string
 	questionContent: string
 	tags: string[]
 	images: string[]
 	type: 'edit' | 'create'
+	userId?: number | null
+	questionId?: number | null
 }) => {
 	const router = useRouter()
 
@@ -83,15 +88,18 @@ export const AskQuestionFormSubmit = ({
 	}
 
 	async function editSubmit() {
+		if (!questionId || !userId) return null
 		const questionToast = toast.loading('Обновление вопроса...')
 		try {
 			const response = await fetch('/api/forum/update-question', {
 				method: 'POST',
 				body: JSON.stringify({
-					tags: tags,
-					title: titleValue,
-					content: questionContent,
-					uploaded_images: images,
+					data: {
+						user: userId,
+						title: titleValue,
+						content: questionContent,
+					},
+					id: questionId,
 				}),
 				headers: { 'Content-Type': 'application/json' },
 			})
@@ -150,7 +158,7 @@ export const AskQuestionFormSubmit = ({
 		<Button
 			onClick={type === 'create' ? createSubmit : editSubmit}
 			sx={{ height: 50 }}>
-			Открыть вопрос
+			{type === 'create' ? 'Открыть вопрос' : 'Обновить вопрос'}
 		</Button>
 	)
 }

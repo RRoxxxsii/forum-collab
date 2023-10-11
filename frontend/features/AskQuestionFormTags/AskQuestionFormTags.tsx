@@ -3,7 +3,6 @@
 import { ITag } from '@/types/types'
 import { Box, Chip, TextField } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import { nanoid } from 'nanoid'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 interface AskQuestionFormTagsProps {
@@ -34,6 +33,7 @@ export const AskQuestionFormTags = ({
 				disabled={disabled || disableInput}
 				id='question-tags'
 				options={tagsToDisplay}
+				value={selectedTags}
 				//@ts-ignore tag could only be an ITag, so we turnoff ts here
 				getOptionLabel={(tag: ITag) => `${tag.tag_name} (${tag.use_count})`}
 				sx={{ width: '100%' }}
@@ -44,7 +44,7 @@ export const AskQuestionFormTags = ({
 							variant='outlined'
 							label={typeof tag === 'string' ? tag : tag.tag_name}
 							{...getTagProps({
-								index: nanoid(),
+								index: index,
 							})}
 							disabled={disabled}
 							key={typeof tag === 'string' ? tag : tag.tag_name}

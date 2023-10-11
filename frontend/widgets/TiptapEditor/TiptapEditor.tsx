@@ -82,7 +82,7 @@ export const TiptapEditor = ({
 		if (content.length === 0) {
 			setContent(editor?.getHTML())
 		} else {
-			editor.commands.setContent(content)
+			type === 'question' && editor.commands.setContent(content)
 		}
 	}
 

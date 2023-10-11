@@ -4,6 +4,7 @@ import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { CategoryContext } from '@/providers/CategoryProvider'
 import { BASE_URL } from '@/shared/constants'
+import { transliterate } from '@/shared/transliterate'
 import { IQuestion, ITag } from '@/types/types'
 import { Box, Card, Skeleton } from '@mui/material'
 import Link from 'next/link'
@@ -108,9 +109,8 @@ const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 				p: 0.8,
 			}}>
 			<Link
-				href={`/question/${questionData.id}/${questionData.title.replaceAll(
-					/ /g,
-					'_'
+				href={`/question/${questionData.id}/${transliterate(
+					questionData.title.replaceAll(/ /g, '_')
 				)}/?tags=${questionData.tags.map((tag: ITag) => tag.tag_name)}`}
 				className='flex hover:no-underline'>
 				<QuestionItemRating
