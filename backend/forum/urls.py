@@ -18,6 +18,8 @@ urlpatterns = [
     path('update-comment/<int:pk>/', views.UpdateCommentAPIView.as_view(), name='update-comment'),
     path('retrieve-comment/<int:pk>/', views.RetrieveCommentAPIView.as_view(), name='detail-comment'),
 
+    # path('complaints/<str:content_type>/<int:content_id>/', UserComplaintView.as_view(), name='user_complaint'),
+    path('complain/<str:content_type>/<int:content_id>/', views.ComplainAPIView.as_view(), name='complain')
 ]
 
 router = DefaultRouter()

@@ -118,6 +118,8 @@ class QuestionRating(Rating):
     question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
     users_liked = models.ManyToManyField(NewUser, related_name='liked_question_ratings', blank=True)
     users_disliked = models.ManyToManyField(NewUser, related_name='disliked_question_ratings', blank=True)
+    users_complained = models.ManyToManyField(NewUser, blank=True, verbose_name='Пожаловавшиеся пользователи',
+                                              related_name='question_rating_complained')
 
     class Meta:
         verbose_name = 'Рейтинг вопроса'
@@ -168,6 +170,8 @@ class QuestionAnswerRating(Rating):
     answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
     users_liked = models.ManyToManyField(NewUser, related_name='liked_answer_ratings', blank=True)
     users_disliked = models.ManyToManyField(NewUser, related_name='disliked_answer_ratings', blank=True)
+    users_complained = models.ManyToManyField(NewUser, blank=True, verbose_name='Пожаловавшиеся пользователи',
+                                              related_name='answer_rating_complained')
 
     class Meta:
         verbose_name = 'Рейтинг ответа'
@@ -194,3 +198,18 @@ class AnswerComment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарий'
+
+    def save(self, *args, **kwargs):
+        super(AnswerComment, self).save(*args, **kwargs)
+        self.rating, _ = CommentRating.objects.get_or_create(comment=self)
+
+
+class CommentRating(models.Model):
+    comment = models.OneToOneField(AnswerComment, on_delete=models.CASCADE, related_name='rating')
+    users_complained = models.ManyToManyField(NewUser, blank=True,
+                                              verbose_name='Пожаловавшиеся пользователи',
+                                              related_name='comment_rating_complained')
+
+    class Meta:
+        verbose_name = 'Рейтинг комментария'
+        verbose_name_plural = 'Рейтинги комментариев'
