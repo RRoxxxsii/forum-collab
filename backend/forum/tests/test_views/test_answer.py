@@ -14,6 +14,8 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.url = reverse('answer-question')
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
@@ -41,6 +43,7 @@ class TestLeaveAnswerAPIView(APITestCase):
         """
         self.client.post(self.url, data=self.answer_data)
         answer = QuestionAnswer.objects.first()
+
         self.assertIsNotNone(answer)
         self.assertIsNone(answer.user)
 
@@ -48,31 +51,34 @@ class TestLeaveAnswerAPIView(APITestCase):
         """
         Пользователь аутентифицирован.
         """
-        self.client.force_authenticate(self.user)
+        self.client.force_authenticate(self.user2)
         response = self.client.post(self.url, data=self.answer_data)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_answer_with_one_question_status_code(self):
         """
         Создание ответа с одним вложением. Проверка кода ответа.
         """
-        self.client.force_authenticate(self.user)
+        self.client.force_authenticate(self.user2)
         response = self.client.post(self.url, data=self.answer_data2)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_answer_with_one_question_content_created(self):
         """
         Создание ответа с одним вложением. Проверка сохранения вложений в БД.
         """
-        self.client.force_authenticate(self.user)
+        self.client.force_authenticate(self.user2)
         self.client.post(self.url, data=self.answer_data2)
+
         self.assertEqual(len(QuestionAnswerImages.objects.all()), 1)
 
     def test_answer_with_several_question_status_code(self):
         """
         Создание ответа с более чем одним вложением.
         """
-        self.client.force_authenticate(self.user)
+        self.client.force_authenticate(self.user2)
         response = self.client.post(self.url, data=self.answer_data3)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
