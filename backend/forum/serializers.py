@@ -87,14 +87,14 @@ class QuestionRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializer
 
     class Meta:
         model = QuestionRating
-        fields = '__all__'
+        exclude = ('users_complained', )
 
 
 class AnswerRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswerRating
-        fields = '__all__'
+        exclude = ('users_complained', )
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 

@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
+from accounts.serializers import DummySerializer
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (add_image, create_return_tags, get_tags_or_error,
                          parse_comment, vote_answer_solving)
@@ -337,3 +338,29 @@ class MarkAnswerSolving(RetrieveAPIView):
         vote_answer_solving(answer=answer, related_question=related_question)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class ComplainAPIView(GenericAPIView):
+    """
+    Пожаловаться на comment, answer, question. Доступно для
+    аутентифицированных пользователей. content_type=question/answer/comment/.
+    """
+    serializer_class = DummySerializer
+    permission_classes = [IsAuthenticated, ]
+    http_method_names = ['patch', ]
+
+    def patch(self, request, content_type, content_id):
+        obj = None
+        if content_type == 'question':
+            obj = Question.objects.get(id=content_id)
+        elif content_type == 'answer':
+            obj = QuestionAnswer.objects.get(id=content_id)
+        elif content_type == 'comment':
+            obj = AnswerComment.objects.get(id=content_id)
+        else:
+            return Response(data={'message': 'content_type не корректен'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        obj.rating.users_complained.add(request.user)
+        return Response(status=status.HTTP_200_OK)
+

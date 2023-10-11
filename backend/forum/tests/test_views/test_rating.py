@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerRating,
-                          QuestionRating, ThemeTag)
+                          QuestionRating, ThemeTag, AnswerComment)
 
 
 class TestLikeDislikeAPIView(APITestCase):
@@ -464,3 +464,89 @@ class TestMarkAnswerAsSolvingNotification(APITestCase):
         self.assertFalse(self.answer.is_solving)
         self.client.get(self.url)
         self.assertEqual(len(self.user2.notifications.all()), 1)
+
+
+class TestUserComplain(APITestCase):
+
+    def setUp(self):
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq')
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq')
+
+        self.tag = ThemeTag.objects.create(tag_name='django')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
+        self.question.tags.add(self.tag)
+
+        self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
+                                                    answer='Изначальный ответ...')
+
+        self.comment = AnswerComment.objects.create(user=self.user, question_answer=self.answer, comment='Комментарий')
+
+        self.url_question = reverse('complain', kwargs={'content_id': self.question.pk,
+                                                        'content_type': 'question'})
+        self.url_answer = reverse('complain', kwargs={'content_id': self.answer.pk,
+                                                      'content_type': 'answer'})
+        self.url_comment = reverse('complain', kwargs={'content_id': self.comment.pk,
+                                                       'content_type': 'comment'})
+
+        self.wrong_url = reverse('complain', kwargs={'content_id': self.comment.pk,
+                                                     'content_type': 'wrong-content_type'})
+
+    def test_complain_on_question_status_code(self):
+        """
+        Тестируем код ответа при создании жалобы на вопрос.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.patch(self.url_question)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_complain_on_question_user_added(self):
+        """
+        Тестируем обновление данных при создании жалобы на вопрос.
+        """
+        self.client.force_authenticate(self.user2)
+        self.client.patch(self.url_question)
+        self.assertEqual(len(self.question.rating.users_complained.all()), 1)
+
+    def test_complain_on_answer_status_code(self):
+        """
+        Тестируем код ответа при создании жалобы на ответ.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.patch(self.url_answer)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_complain_on_answer_user_added(self):
+        """
+        Тестируем обновление данных при создании жалобы на ответ.
+        """
+        self.client.force_authenticate(self.user2)
+        self.client.patch(self.url_answer)
+        self.assertEqual(len(self.answer.rating.users_complained.all()), 1)
+
+    def test_complain_on_comment_status_code(self):
+        """
+        Тестируем код ответа при создании жалобы на комментарий.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.patch(self.url_comment)
+        print(response.content.decode())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_complain_on_comment_user_added(self):
+        """
+        Тестируем обновление данных при создании жалобы на комментарий.
+        """
+        self.client.force_authenticate(self.user2)
+        self.client.patch(self.url_comment)
+        self.assertEqual(len(self.comment.rating.users_complained.all()), 1)
+
+    def test_wrong_content_type_url_status_code(self):
+        """
+        Тестируем код ответа при создании жалобы с некорректным типом контента.
+        """
+        self.client.force_authenticate(self.user2)
+        response = self.client.patch(self.wrong_url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
