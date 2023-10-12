@@ -30,7 +30,7 @@ export const UserInformation = ({
 					: questionData?.user?.user_name[0]}
 			</Avatar>
 			<Typography sx={{ marginRight: 1 }} variant='caption'>
-				{questionData?.user?.user_name || 'Гость'}
+				{questionData?.user?.user_name ?? 'Гость'}
 			</Typography>
 			<Typography sx={{ color: 'GrayText' }} variant='caption'>
 				{dayjs(questionData?.creation_date).format('DD-MM-YYYY')}

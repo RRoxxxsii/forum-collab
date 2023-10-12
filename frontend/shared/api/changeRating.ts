@@ -1,8 +1,14 @@
-export async function dislikeQuestion({ id }: { id: number }) {
+export async function Dislike({
+	id,
+	model,
+}: {
+	id: number
+	model: 'question' | 'answer'
+}) {
 	try {
 		const response = await fetch(`/api/forum/dislike`, {
 			method: 'POST',
-			body: JSON.stringify({ id: id, model: 'question' }),
+			body: JSON.stringify({ id: id, model: model }),
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -19,11 +25,17 @@ export async function dislikeQuestion({ id }: { id: number }) {
 	}
 }
 
-export async function likeQuestion({ id }: { id: number }) {
+export async function Like({
+	id,
+	model,
+}: {
+	id: number
+	model: 'question' | 'answer'
+}) {
 	try {
 		const response = await fetch(`/api/forum/like`, {
 			method: 'POST',
-			body: JSON.stringify({ id: id, model: 'question' }),
+			body: JSON.stringify({ id: id, model: model }),
 			headers: {
 				'Content-Type': 'application/json',
 			},

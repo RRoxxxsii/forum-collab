@@ -71,7 +71,7 @@ export const QuestionItemContent = ({
 									variant='body2'
 									fontSize={12}
 									color='text.secondary'>
-									Отправлено: {user.user_name || 'Гость'}
+									Отправлено: {user.user_name ?? 'Гость'}
 								</Typography>
 								<Typography
 									variant='body2'

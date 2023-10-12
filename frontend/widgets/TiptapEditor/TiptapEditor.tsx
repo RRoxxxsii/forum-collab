@@ -16,7 +16,7 @@ export const TiptapEditor = ({
 	setContent,
 	type,
 }: {
-	type: 'question' | 'answer' | 'comment'
+	type: 'question' | 'answer'
 	content: string
 	setContent: Dispatch<SetStateAction<string>>
 }) => {
@@ -26,8 +26,7 @@ export const TiptapEditor = ({
 			attributes: {
 				class: `prose-text-field ${
 					(type === 'question' && 'prose-text-field--question') ||
-					(type === 'answer' && 'prose-text-field--answer') ||
-					(type === 'comment' && 'prose-text-field--comment')
+					(type === 'answer' && 'prose-text-field--answer')
 				}`,
 			},
 			handleDrop: function (view, event, slice, moved) {
@@ -82,7 +81,7 @@ export const TiptapEditor = ({
 		if (content.length === 0) {
 			setContent(editor?.getHTML())
 		} else {
-			type === 'question' && editor.commands.setContent(content)
+			editor.commands.setContent(content)
 		}
 	}
 

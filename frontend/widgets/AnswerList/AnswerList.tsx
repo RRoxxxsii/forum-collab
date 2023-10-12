@@ -23,6 +23,8 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
+import { Dislike, Like } from '@/shared/api/changeRating'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
@@ -35,6 +37,8 @@ export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 
 function AnswerCard({ answerData }: { answerData: IAnswer }) {
 	const [isCommenting, setIsCommenting] = useState<boolean>(false)
+
+	const {} = UserDetailsContext()
 
 	const handleSolved = async () => {
 		const solveToast = toast.loading('Обработка ответа...')
@@ -104,7 +108,7 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
 							<Typography sx={{ marginRight: 1 }} variant='caption'>
-								{answerData?.user?.user_name || 'Гость'}
+								{answerData?.user?.user_name ?? 'Гость'}
 							</Typography>
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
 								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
@@ -126,14 +130,16 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 								<Checkbox
 									icon={<ArrowUpwardOutlined />}
 									checkedIcon={<ArrowUpward />}
-									onClick={() => likeComment({ id: answerData.id })}
+									onClick={() => Like({ id: answerData.id, model: 'answer' })}
 								/>
 								{answerData.rating.like_amount -
 									answerData.rating.dislike_amount}
 								<Checkbox
 									icon={<ArrowDownwardOutlined />}
 									checkedIcon={<ArrowDownward />}
-									onClick={() => dislikeComment({ id: answerData.id })}
+									onClick={() =>
+										Dislike({ id: answerData.id, model: 'answer' })
+									}
 								/>
 								<FormControlLabel
 									control={
@@ -159,53 +165,15 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 						</Box>
 					</Box>
 				</Box>
-				{isCommenting && <AddComment answerData={answerData} />}
+				{isCommenting && (
+					<AddComment profileData={profiledata} answerData={answerData} />
+				)}
 				{answerData.comments.map((comment) => (
 					<CommentCard key={comment.id} comment={comment} />
 				))}
 			</Box>
 		</>
 	)
-}
-
-const likeComment = async ({ id }: { id: number }) => {
-	try {
-		const response = await fetch(`/api/forum/like`, {
-			body: JSON.stringify({ id: id, model: 'answer' }),
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-		if (response.ok) {
-			const data = await response.json()
-			console.log(data)
-			return
-		}
-		return null
-	} catch (error) {
-		console.log(error)
-	}
-}
-
-const dislikeComment = async ({ id }: { id: number }) => {
-	try {
-		const response = await fetch(`/api/forum/dislike`, {
-			body: JSON.stringify({ id: id, model: 'answer' }),
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-		if (response.ok) {
-			const data = await response.json()
-			console.log(data)
-			return
-		}
-		return null
-	} catch (error) {
-		console.log(error)
-	}
 }
 
 const CommentCard = ({ comment }: { comment: IComment }) => {
@@ -247,7 +215,7 @@ const CommentCard = ({ comment }: { comment: IComment }) => {
 						<Box sx={{ width: '100%' }}>
 							<Box sx={{ display: 'flex' }}>
 								<Typography sx={{ marginRight: 1 }} variant='caption'>
-									{comment?.user?.user_name || 'Гость'}
+									{comment?.user?.user_name ?? 'Гость'}
 								</Typography>
 								<Typography sx={{ color: 'GrayText' }} variant='caption'>
 									{dayjs(comment?.creation_date).format('DD-MM-YYYY')}

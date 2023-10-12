@@ -41,8 +41,6 @@ const fetchTagsOnQuery = async ({
 export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const searchParams = useSearchParams()
 	const pageId = searchParams.get('page_id')
-	// const editContent = searchParams.get('content')
-	// const editTags = searchParams.getAll('tag_name')
 
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 	const [profileData, setProfileData] = useState<IUser | null>(null)
