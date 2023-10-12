@@ -33,9 +33,6 @@ def invalidate_dislikes_cache(user: NewUser, instance: [models.Question | models
         data = json.dumps({'user_id': user.pk, 'key': settings.ANSWER_DISLIKE_NAME})
         cache.delete(data)
 
-#        raise NotImplementedError('Пользователь всегда получает себя для вычислений в профиле, а надо получать'
-#                                  ' того пользователя, которому профиль пренадлежит')
-
 
 def invalidate_questions_solved(user: NewUser) -> None:
     """

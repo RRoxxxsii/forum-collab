@@ -43,15 +43,23 @@ class CustomAccountManager(BaseUserManager):
 
 class NewUser(AbstractBaseUser, PermissionsMixin):
 
-    email = models.EmailField(verbose_name='Почтовый адрес', unique=True,
-                              error_messages={'unique': 'Указаный почтовый адрес уже занято.'})
-    user_name = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя',
-                                 db_index=True,
-                                 error_messages={'unique': 'Указаное имя уже занято.'})
+    email = models.EmailField(
+        'Почтовый адрес',
+        unique=True,
+        error_messages={'unique': 'Указаный почтовый адрес уже занято.'},
+        db_index=True
+    )
+    user_name = models.CharField(
+        'Имя пользователя',
+        max_length=150,
+        unique=True,
+        db_index=True,
+        error_messages={'unique': 'Указаное имя уже занято.'}
+    )
 
     created = models.DateTimeField(default=timezone.now)
-    about = models.TextField(verbose_name='Описание', max_length=500, blank=True)
-    profile_image = models.ImageField(verbose_name='Аватарка', null=True, blank=True)
+    about = models.TextField('Описание', max_length=500, blank=True)
+    profile_image = models.ImageField('Аватарка', null=True, blank=True)
 
     is_staff = models.BooleanField(default=False)
 
@@ -179,6 +187,11 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailConfirmationToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    id = models.UUIDField(
+        'Токен',
+        primary_key=True,
+        default=uuid4,
+        editable=False
+    )
+    created_at = models.DateTimeField('Время создания', auto_now_add=True)
     user = models.ForeignKey(NewUser, on_delete=models.CASCADE)
