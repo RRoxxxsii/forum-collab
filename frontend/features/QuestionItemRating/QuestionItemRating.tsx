@@ -6,16 +6,25 @@ import {
 	ArrowUpward,
 	ArrowUpwardOutlined,
 } from '@mui/icons-material'
-import { Box, Checkbox, IconButton, Typography } from '@mui/material'
+import { Box, Checkbox, Typography } from '@mui/material'
+
+type Model = 'question' | 'answer'
+
+interface FunctionProps {
+	id: number
+	model: Model
+}
 
 interface QuestionItemRatingProps {
 	questionData: IQuestion
-	setLike: ({ id }: { id: number }) => Promise<null | undefined>
-	setDislike: ({ id }: { id: number }) => Promise<null | undefined>
+	model: Model
+	setLike: ({ id, model }: FunctionProps) => Promise<null | undefined>
+	setDislike: ({ id, model }: FunctionProps) => Promise<null | undefined>
 }
 
 export const QuestionItemRating = ({
 	questionData,
+	model,
 	setLike,
 	setDislike,
 }: QuestionItemRatingProps) => {
@@ -30,7 +39,7 @@ export const QuestionItemRating = ({
 			<Checkbox
 				icon={<ArrowUpwardOutlined />}
 				checkedIcon={<ArrowUpward />}
-				onClick={() => setLike({ id: questionData.id })}
+				onClick={() => setLike({ id: questionData.id, model: model })}
 			/>
 			<Typography fontWeight={700}>
 				{questionData.rating?.like_amount - questionData.rating?.dislike_amount}
@@ -38,7 +47,7 @@ export const QuestionItemRating = ({
 			<Checkbox
 				icon={<ArrowDownwardOutlined />}
 				checkedIcon={<ArrowDownward />}
-				onClick={() => setDislike({ id: questionData.id })}
+				onClick={() => setDislike({ id: questionData.id, model: model })}
 			/>
 		</Box>
 	)

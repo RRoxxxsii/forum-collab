@@ -3,12 +3,13 @@ import { QuestionItemContent } from '@/entities/QuestionItemContent'
 import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { CategoryContext } from '@/providers/CategoryProvider'
+import { Dislike, Like } from '@/shared/api/changeRating'
 import { BASE_URL } from '@/shared/constants'
 import { transliterate } from '@/shared/transliterate'
 import { IQuestion, ITag } from '@/types/types'
 import { Box, Card, Skeleton } from '@mui/material'
 import Link from 'next/link'
-import { Suspense, useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
@@ -51,49 +52,6 @@ export const QuestionList = () => {
 	)
 }
 
-const dislikeQuestion = async ({ id }: { id: number }) => {
-	try {
-		const response = await fetch(`/api/forum/dislike`, {
-			body: JSON.stringify({ id: id, model: 'question' }),
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-		const data = await response.json()
-
-		if (!response.ok) {
-			throw new Error(data)
-		}
-
-		return data
-	} catch (error) {
-		console.log(error)
-	}
-}
-
-const likeQuestion = async ({ id }: { id: number }) => {
-	try {
-		const response = await fetch(`/api/forum/like`, {
-			body: JSON.stringify({ id: id, model: 'question' }),
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-
-		const data = await response.json()
-
-		if (!response.ok) {
-			throw new Error(data)
-		}
-
-		return data
-	} catch (error) {
-		console.log(error)
-	}
-}
-
 const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<Card
@@ -114,9 +72,10 @@ const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 				)}/?tags=${questionData.tags.map((tag: ITag) => tag.tag_name)}`}
 				className='flex hover:no-underline'>
 				<QuestionItemRating
+					model='question'
 					questionData={questionData}
-					setDislike={dislikeQuestion}
-					setLike={likeQuestion}
+					setDislike={() => Dislike({ id: questionData.id, model: 'question' })}
+					setLike={() => Like({ id: questionData.id, model: 'question' })}
 				/>
 				<Box sx={{ width: '100%', ml: 1 }}>
 					<QuestionItemContent questionData={questionData} />

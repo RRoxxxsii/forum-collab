@@ -3,14 +3,14 @@ import { AnswerCreateForm } from '@/features/AnswerCreateForm'
 import { QuestionActionsMenu } from '@/features/QuestionActionsMenu'
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { QuestionContent } from '@/shared/QuestionContent'
+import { Dislike, Like } from '@/shared/api/changeRating'
+import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
-import { dislikeQuestion, likeQuestion } from '@/shared/api/changeRaring'
-import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 
 export default function QuestionPage() {
 	const pathname = usePathname()
@@ -36,9 +36,10 @@ export default function QuestionPage() {
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
 									<QuestionItemRating
+										model='question'
 										questionData={questionData}
-										setDislike={dislikeQuestion}
-										setLike={likeQuestion}
+										setDislike={Dislike}
+										setLike={Like}
 									/>
 								</Box>
 								<Box sx={{ padding: 1.5 }}>

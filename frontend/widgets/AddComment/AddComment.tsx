@@ -1,10 +1,26 @@
 'use client'
-import { IAnswer } from '@/types/types'
+import { IAnswer, IUser } from '@/types/types'
 import { TextareaAutosize } from '@mui/base/TextareaAutosize'
 import { Box, Button, Typography } from '@mui/material'
-import React from 'react'
+import React, {
+	Dispatch,
+	MouseEventHandler,
+	SetStateAction,
+	useEffect,
+	useRef,
+} from 'react'
 
-export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
+export const AddComment = ({
+	answerData,
+	profileData,
+	isCommenting,
+	setIsCommenting,
+}: {
+	isCommenting: boolean
+	setIsCommenting: Dispatch<SetStateAction<boolean>>
+	answerData: IAnswer
+	profileData: IUser | null
+}) => {
 	const [commentContent, setCommentContent] = React.useState('')
 
 	const handleComment = async () => {
@@ -12,6 +28,7 @@ export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
 			const response = await fetch('/api/forum/comment', {
 				method: 'POST',
 				body: JSON.stringify({
+					user: profileData,
 					comment: commentContent,
 					question_answer: answerData.id,
 				}),
@@ -27,8 +44,31 @@ export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
 			answerData.comments.push(data)
 		}
 	}
+	const commentBoxRef = useRef<HTMLDivElement | null>(null)
+	const handleClickOutside = (event: MouseEvent) => {
+		if (
+			commentBoxRef.current &&
+			!commentBoxRef.current.contains(event.target as Node)
+		) {
+			setIsCommenting(false)
+		}
+	}
+
+	useEffect(() => {
+		if (isCommenting) {
+			document.addEventListener('click', handleClickOutside)
+		} else {
+			document.removeEventListener('click', handleClickOutside)
+		}
+
+		return () => {
+			document.removeEventListener('click', handleClickOutside)
+		}
+	}, [isCommenting])
+
 	return (
 		<Box
+			ref={commentBoxRef}
 			sx={{
 				mb: 2,
 				pl: 4,
@@ -37,20 +77,30 @@ export const AddComment = ({ answerData }: { answerData: IAnswer }) => {
 				maxWidth: 600,
 			}}>
 			<Typography variant='caption' color={'GrayText'}>
-				Вы отвечаете пользователю {'@' + answerData?.user?.user_name || 'Гость'}
+				Вы отвечаете пользователю{' '}
+				{'@' + (answerData?.user?.user_name ?? 'Гость')}
 			</Typography>
 
 			<TextareaAutosize
 				minRows={2}
 				onChange={(e) => setCommentContent(e.target.value)}
 				className='textarea'
+				maxLength={320}
 			/>
-			<Button
-				onClick={handleComment}
-				variant='outlined'
-				sx={{ mt: 1, maxWidth: 220 }}>
-				Оставить комментарий
-			</Button>
+			<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+				<Button
+					onClick={handleComment}
+					variant='outlined'
+					sx={{ mt: 1, maxWidth: 220 }}>
+					Оставить комментарий
+				</Button>
+				<Typography
+					sx={{ userSelect: 'none' }}
+					color={'ButtonHighlight'}
+					variant='caption'>
+					{commentContent.length}/320
+				</Typography>
+			</Box>
 		</Box>
 	)
 }
