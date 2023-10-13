@@ -1,9 +1,14 @@
+import { IAnswer, IQuestion } from '@/types/types'
+import { Dispatch, SetStateAction } from 'react'
+//TODO: MAKE THIS UPDATE ON CLIENT SIDE
 export async function Dislike({
 	id,
 	model,
-}: {
+} // setNewState
+: {
 	id: number
 	model: 'question' | 'answer'
+	// setNewState: Dispatch<SetStateAction<IQuestion | IAnswer>>
 }) {
 	try {
 		const response = await fetch(`/api/forum/dislike`, {
@@ -18,7 +23,7 @@ export async function Dislike({
 		if (!response.ok) {
 			throw new Error(data)
 		}
-
+		// setNewState(data)
 		return data
 	} catch (error) {
 		console.log(error)
@@ -28,9 +33,11 @@ export async function Dislike({
 export async function Like({
 	id,
 	model,
-}: {
+} // setNewState
+: {
 	id: number
 	model: 'question' | 'answer'
+	// setNewState: Dispatch<SetStateAction<IQuestion | IAnswer>>
 }) {
 	try {
 		const response = await fetch(`/api/forum/like`, {
@@ -46,7 +53,7 @@ export async function Like({
 		if (!response.ok) {
 			throw new Error(data)
 		}
-
+		// setNewState(data)
 		return data
 	} catch (error) {
 		console.log(error)

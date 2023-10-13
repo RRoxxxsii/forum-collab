@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
 import { Dislike, Like } from '@/shared/api/changeRating'
@@ -38,7 +38,7 @@ export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 function AnswerCard({ answerData }: { answerData: IAnswer }) {
 	const [isCommenting, setIsCommenting] = useState<boolean>(false)
 
-	const {} = UserDetailsContext()
+	const { setUserDetails, userDetails } = useContext(UserDetailsContext)
 
 	const handleSolved = async () => {
 		const solveToast = toast.loading('Обработка ответа...')
@@ -130,7 +130,12 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 								<Checkbox
 									icon={<ArrowUpwardOutlined />}
 									checkedIcon={<ArrowUpward />}
-									onClick={() => Like({ id: answerData.id, model: 'answer' })}
+									onClick={() =>
+										Like({
+											id: answerData.id,
+											model: 'answer',
+										})
+									}
 								/>
 								{answerData.rating.like_amount -
 									answerData.rating.dislike_amount}
@@ -166,7 +171,12 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 					</Box>
 				</Box>
 				{isCommenting && (
-					<AddComment profileData={profiledata} answerData={answerData} />
+					<AddComment
+						isCommenting={isCommenting}
+						setIsCommenting={setIsCommenting}
+						profileData={userDetails}
+						answerData={answerData}
+					/>
 				)}
 				{answerData.comments.map((comment) => (
 					<CommentCard key={comment.id} comment={comment} />
