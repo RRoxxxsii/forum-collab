@@ -52,7 +52,7 @@ export const AnswerCreateForm = ({
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }) => {
 	const [answerContent, setAnswerContent] = useState<string>('')
-	console.log(answerContent)
+
 	return (
 		<>
 			<Typography

@@ -2,7 +2,6 @@
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
-import { NonNullExpression } from 'typescript'
 
 export const AskQuestionFormSubmit = ({
 	titleValue,
@@ -94,11 +93,9 @@ export const AskQuestionFormSubmit = ({
 			const response = await fetch('/api/forum/update-question', {
 				method: 'POST',
 				body: JSON.stringify({
-					data: {
-						user: userId,
-						title: titleValue,
-						content: questionContent,
-					},
+					user: userId,
+					title: titleValue,
+					content: questionContent,
 					id: questionId,
 				}),
 				headers: { 'Content-Type': 'application/json' },
@@ -141,9 +138,7 @@ export const AskQuestionFormSubmit = ({
 				isLoading: false,
 				autoClose: 3000,
 			})
-			router.push(
-				`/question/${result.question}/${result.title}?tags=${result.tags}`
-			)
+			router.push(`/question/${result.id}/${result.title}?tags=${result.tags}`)
 		} catch (error: any | unknown) {
 			toast.update(questionToast, {
 				render: 'Разорвана связь с сервером, проверьте подключение',

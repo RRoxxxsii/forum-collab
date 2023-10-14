@@ -4,7 +4,7 @@ import { AddPhotoAlternate } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
 import Link from 'next/link'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import './styles.scss'
 import { BubbleMenuContent } from './utils/BubbleMenuContent'
 import { EditorExtensions } from './utils/Extensions'
@@ -15,10 +15,12 @@ export const TiptapEditor = ({
 	content,
 	setContent,
 	type,
+	contentOnEdit,
 }: {
 	type: 'question' | 'answer'
 	content: string
 	setContent: Dispatch<SetStateAction<string>>
+	contentOnEdit?: string
 }) => {
 	const editor = useEditor({
 		extensions: EditorExtensions,
@@ -78,12 +80,15 @@ export const TiptapEditor = ({
 	})
 
 	if (editor) {
-		if (content.length === 0) {
-			setContent(editor?.getHTML())
-		} else {
-			editor.commands.setContent(content)
-		}
+		setContent(editor?.getHTML())
 	}
+
+	useEffect(() => {
+		if (contentOnEdit) {
+			editor?.commands.setContent(contentOnEdit)
+			setContent(contentOnEdit)
+		}
+	}, [contentOnEdit])
 
 	return (
 		<Box sx={{ position: 'relative' }}>

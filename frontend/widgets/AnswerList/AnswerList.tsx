@@ -1,4 +1,6 @@
 'use client'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
+import { Dislike, Like } from '@/shared/api/changeRating'
 import { IAnswer, IComment, IQuestion } from '@/types/types'
 import {
 	ArrowDownward,
@@ -23,8 +25,6 @@ import dayjs from 'dayjs'
 import { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
-import { Dislike, Like } from '@/shared/api/changeRating'
-import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
@@ -42,32 +42,41 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 
 	const handleSolved = async () => {
 		const solveToast = toast.loading('Обработка ответа...')
-		const response = await fetch('/api/forum/mark-answer-solving', {
-			method: 'POST',
-			body: JSON.stringify({
-				question_answer_id: answerData.id,
-			}),
-		})
+		try {
+			const response = await fetch('/api/forum/mark-answer-solving', {
+				method: 'POST',
+				body: JSON.stringify({
+					question_answer_id: answerData.id,
+				}),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-		const result = await response.json()
+			const result = await response.json()
 
-		if (!response.ok) {
+			if (!response.ok) {
+				toast.update(solveToast, {
+					render: result.error,
+					type: 'error',
+					isLoading: false,
+					autoClose: 3000,
+				})
+				return null
+			}
+
 			toast.update(solveToast, {
-				render: result.error,
+				render: result.message,
+				type: 'success',
+				isLoading: false,
+				autoClose: 3000,
+			})
+		} catch (error) {
+			toast.update(solveToast, {
+				render: 'Проблема подключения с сервером, повторите попытку позже',
 				type: 'error',
 				isLoading: false,
 				autoClose: 3000,
 			})
-			return null
 		}
-
-		answerData.is_solving = result.is_solving
-		toast.update(solveToast, {
-			render: result.message,
-			type: 'success',
-			isLoading: false,
-			autoClose: 3000,
-		})
 	}
 
 	return (

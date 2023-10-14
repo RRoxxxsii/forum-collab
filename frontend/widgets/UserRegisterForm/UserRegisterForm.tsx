@@ -39,7 +39,6 @@ export const UserRegisterForm = () => {
 		})
 
 		const data = await res.json()
-		console.log(res, data)
 		if (!res.ok) {
 			toast.update(registerToast, {
 				render: data.message,

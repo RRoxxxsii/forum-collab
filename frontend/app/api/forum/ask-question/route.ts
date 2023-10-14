@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 			return null
 		}
 		const { tags, title, content, uploaded_images } = await req.json()
-		console.log(session)
+
 		const res = await fetch(`${BASE_URL}/forum/ask-question/`, {
 			method: 'POST',
 			body: JSON.stringify({

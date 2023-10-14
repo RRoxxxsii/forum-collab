@@ -6,14 +6,14 @@ export async function POST(req: NextRequest) {
 	const { question_answer_id } = await req.json()
 
 	const access_token = cookies().get('access_token')?.value
-	console.log(access_token)
 
 	if (!question_answer_id) {
-		return NextResponse.json({ error: 'ID не был предоставлен' })
+		return NextResponse.json({ error: 'Айди вопроса не было передано' })
 	}
 	const response = await fetch(
 		`${BASE_URL}/forum/mark-answer-solving/${question_answer_id}/`,
 		{
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${access_token ?? ''}`,
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
 		}
 	)
 	const result = await response.json()
+	console.log(result)
 
 	if (response.ok) {
 		return NextResponse.json({ ...result })
