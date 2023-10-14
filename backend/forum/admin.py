@@ -12,8 +12,6 @@ admin.site.register(QuestionAnswerImages)
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ['amount_of_complains', 'user', 'title']
-    fields = ['user', 'title', 'content', 'tags', 'creation_date', 'is_solved',
-              'rating__like_amount', 'rating__dislike_amount']
 
     @admin.display(ordering="-creation_date")
     def amount_of_complains(self, instance):
@@ -23,8 +21,6 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(QuestionAnswer)
 class QuestionAnswerAdmin(admin.ModelAdmin):
     list_display = ['amount_of_complains', 'user', 'answer']
-    fields = ['question', 'user', 'answer', 'is_solving', 'creation_date',
-              'rating__like_amount', 'rating__dislike_amount']
 
     @admin.display(ordering="-creation_date")
     def amount_of_complains(self, instance):
