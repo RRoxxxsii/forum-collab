@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
 	const { id, model } = await req.json()
 
 	const access_token = cookies().get('access_token')?.value
-	console.log(access_token)
+
 
 	if (!id || !model) {
 		return NextResponse.json({ error: 'ID or Model was not provided' })

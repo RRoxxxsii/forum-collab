@@ -19,8 +19,6 @@ export const QuestionListAskFast = () => {
 		router.push('/ask')
 	}
 
-	console.log(askFastValue)
-
 	return (
 		<Box sx={{ width: '100%', mb: 4 }}>
 			<Box

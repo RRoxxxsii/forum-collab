@@ -40,7 +40,7 @@ const fetchTagsOnQuery = async ({
 
 export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const searchParams = useSearchParams()
-	const pageId = searchParams.get('page_id')
+	const pageId = searchParams.get('id')
 
 	const { askFastValue } = useContext(AskFastContext)
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
@@ -57,8 +57,6 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 		fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
 		fetchMe({ setProfileData: setProfileData })
 	}, [])
-
-	console.log(questionData, profileData)
 
 	useEffect(() => {
 		if (tagQuery !== '') {
@@ -108,6 +106,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 					type='question'
 					content={questionContent}
 					setContent={setQuestionContent}
+					contentOnEdit={questionData?.content}
 				/>
 			</Box>
 			<Box>
@@ -120,15 +119,29 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 					disabled={type === 'create' ? false : true}
 					limit={5}
 				/>
-				<AskQuestionFormSubmit
-					type={type}
-					titleValue={titleValue}
-					questionContent={questionContent}
-					tags={selectedTags}
-					images={images}
-					userId={profileData?.id}
-					questionId={questionData?.id}
-				/>
+				{type === 'create' && (
+					<AskQuestionFormSubmit
+						type={type}
+						titleValue={titleValue}
+						questionContent={questionContent}
+						tags={selectedTags}
+						images={images}
+						userId={profileData?.id}
+						questionId={questionData?.id}
+					/>
+				)}
+
+				{questionData && type === 'edit' && (
+					<AskQuestionFormSubmit
+						type={type}
+						titleValue={titleValue}
+						questionContent={questionContent}
+						tags={selectedTags}
+						images={images}
+						userId={profileData?.id}
+						questionId={questionData?.id}
+					/>
+				)}
 			</Box>
 		</>
 	)

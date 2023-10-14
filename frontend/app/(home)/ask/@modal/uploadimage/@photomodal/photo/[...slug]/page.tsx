@@ -15,8 +15,6 @@ export default function UploadImagePage() {
 		router.back()
 	}
 
-	console.log(imageUrl, imageName)
-
 	return (
 		<ModalComponent handleClose={handleClose}>
 			<Image

@@ -44,7 +44,10 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
-									<QuestionActionsMenu questionData={questionData} />
+									<QuestionActionsMenu
+										profileData={profileData}
+										questionData={questionData}
+									/>
 								</Box>
 							</Box>
 						</Box>
