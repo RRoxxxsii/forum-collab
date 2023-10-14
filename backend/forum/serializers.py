@@ -51,9 +51,11 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
     """
     Серилизатор для обновления вопроса.
     """
+    tags = TagFieldWithCountSerializer(read_only=True, many=True)
+
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'tags')
         extra_kwargs = {'title': {'required': False}}
 
 
