@@ -172,7 +172,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/minute',
+        'user': '50/minute'
+    }
 }
 
 
@@ -221,8 +229,6 @@ SIMPLE_JWT = {
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
-
 # Redis
 
 CACHES = {
