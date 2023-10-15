@@ -1,7 +1,7 @@
 'use client'
 import '@/shared/styles/EditorTextStyles.scss'
 import { AddPhotoAlternate } from '@mui/icons-material'
-import { Box, IconButton } from '@mui/material'
+import { Box, IconButton, Skeleton } from '@mui/material'
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect } from 'react'
@@ -89,7 +89,9 @@ export const TiptapEditor = ({
 			setContent(contentOnEdit)
 		}
 	}, [contentOnEdit])
-
+	if (!editor) {
+		return <Skeleton variant='rectangular' height={288} />
+	}
 	return (
 		<Box sx={{ position: 'relative' }}>
 			{editor && (

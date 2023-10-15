@@ -52,21 +52,18 @@ export const QuestionItemContent = ({
 								sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
 								<Avatar
 									sx={{
-										width: 18,
-										height: 18,
-										fontSize: 12,
-										bgcolor: green[500],
+										width: 20,
+										height: 20,
+										fontSize: 16,
+										bgcolor: green[400],
 										marginRight: 1,
 									}}
 									aria-label='recipe'
-									src={
-										questionData?.user?.profile_image
-											? questionData?.user?.profile_image
-											: ''
-									}>
+									src={questionData?.user?.profile_image ?? ''}>
 									{!questionData?.user?.profile_image &&
-										questionData?.user?.user_name[0]}
+										questionData?.user?.user_name[0].toUpperCase()}
 								</Avatar>
+
 								<Typography
 									variant='body2'
 									fontSize={12}

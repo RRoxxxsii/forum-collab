@@ -7,8 +7,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 export const metadata: Metadata = {
-	title: 'Домашняя страница yoman',
-	description: 'Список вопросов',
+	title: 'Yoman',
+	description: 'Форум для решения вопросов всех областей и направлений',
 }
 
 interface HomeLayoutProps {
