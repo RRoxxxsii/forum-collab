@@ -6,8 +6,6 @@ from rest_framework.serializers import \
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from forum.models import ThemeTag
-
 from .models import NewUser
 
 
@@ -92,7 +90,8 @@ class UserRatingSerializer(UserSerializer):
         model = UserSerializer.Meta.model
 
     def get_amount_solved(self, instance: NewUser):
-        return instance.get_amount_question_solved()
+        count = instance.get_amount_question_solved()
+        return count
 
     def get_best_tags(self, instance: NewUser):
         from forum.serializers import BaseTagFieldSerializer

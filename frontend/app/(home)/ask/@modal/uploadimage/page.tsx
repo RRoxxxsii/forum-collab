@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import './styles.scss'
 
+
 export default function UploadImagePage() {
 	const router = useRouter()
 

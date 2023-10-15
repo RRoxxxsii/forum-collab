@@ -1,20 +1,24 @@
-# from datetime import timedelta
-#
-# from celery import shared_task
-# from django.utils import timezone
-#
-# from .models import NewUser
-#
-#
-# @shared_task
-# def delete_inactive_accounts():
-#     # Вычисляем дату, которая будет представлять "сегодня минус time_subtract"
-#     time_subtract = 180
-#     six_months_ago = timezone.now() - timedelta(days=time_subtract)
-#
-#     # Получаем список неактивных аккаунтов, которые неактивны более 6 месяцев
-#     inactive_accounts = NewUser.objects.filter(is_active=False, time_deleted__lte=six_months_ago)
-#
-#     # Удаляем неактивные аккаунты
-#     for account in inactive_accounts:
-#         account.delete()
+from celery import shared_task
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
+
+@shared_task
+def send_confirmation_email(template_name: str, current_url: str, email: str, token_id: int, user_id: int):
+    """
+    Отправляет письмо для подтверждения определенных действий.
+    """
+    data = {
+        'current_site': str(current_url),
+        'token_id': str(token_id),
+        'user_id': str(user_id)
+    }
+
+    message = render_to_string(template_name, context=data)
+    send_mail(
+        subject='Пожалуйста, подтвердите почту',
+        message=message,
+        from_email='admin@ourweb.com',
+        recipient_list=[email],
+        fail_silently=True
+    )

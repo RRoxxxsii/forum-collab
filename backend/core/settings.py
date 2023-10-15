@@ -78,7 +78,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -172,7 +172,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/minute',
+        'user': '50/minute'
+    }
 }
 
 
@@ -221,8 +229,6 @@ SIMPLE_JWT = {
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
-
 # Redis
 
 CACHES = {
@@ -244,3 +250,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 DJANGO_NOTIFICATIONS_CONFIG = {'USE_JSONFIELD': True}
+
+# CONSTANTS FOR CACHING
+ANSWER_DISLIKE_NAME = 'answer_dislike_amount'
+ANSWER_LIKE_NAME = 'answer_like_amount'
+QUESTION_DISLIKE_NAME = 'question_dislike_amount'
+QUESTION_LIKE_NAME = 'question_like_amount'
+
+QUESTION_SOLVED_NAME = 'questions_solved_amount'
+EXPERT_TAGS_NAME = 'expert_tags'

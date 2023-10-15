@@ -9,9 +9,9 @@ class Attachment(models.Model):
     """
     Абстрактный класс для вложений.
     """
-    image = models.ImageField(verbose_name='Изображение')
+    image = models.ImageField('Изображение')
     alt_text = models.CharField(
-        verbose_name="Альтернативный текст",
+        "Альтернативный текст",
         max_length=255,
         null=True,
         blank=True,
@@ -46,17 +46,26 @@ class ThemeTag(models.Model):
     """
     Тег (подтема).
     """
-    tag_name = models.CharField(max_length=255, verbose_name='Тег', unique=True)
-    descriptions = models.TextField(verbose_name='Описание', null=True, blank=True)
+    tag_name = models.CharField('Тег', max_length=255, unique=True)
+    descriptions = models.TextField('Описание', null=True, blank=True)
 
-    is_relevant = models.BooleanField(default=True, verbose_name='Релеватный тег')
-    is_user_tag = models.BooleanField(default=False, verbose_name='Авторский тег')
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, null=True,
-                             verbose_name='Автор, если есть', editable=False,
-                             related_name='tags')
+    is_relevant = models.BooleanField('Релевантный тег', default=True)
+    is_user_tag = models.BooleanField('Авторский тег', default=False)
+    user = models.ForeignKey(
+        NewUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Автор, если есть',
+        editable=False,
+        related_name='tags'
+    )
 
-    creation_date = models.DateTimeField(auto_now_add=True, null=True, blank=True,
-                                         editable=False)
+    creation_date = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+        editable=False
+    )
 
     def __str__(self):
         return self.tag_name
@@ -71,15 +80,20 @@ class Question(models.Model, LikeDislikeModelMixin):
     Вопрос.
     """
     tags = models.ManyToManyField(ThemeTag, verbose_name='Тег', related_name='questions')
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, verbose_name='Автор',
-                             related_name='questions', null=True)
+    user = models.ForeignKey(
+        NewUser,
+        on_delete=models.SET_NULL,
+        verbose_name='Автор',
+        related_name='questions',
+        null=True
+    )
 
-    title = models.CharField(max_length=255, verbose_name='Заголовок вопроса')
-    content = models.TextField(verbose_name='Вопрос')
+    title = models.CharField('Заголовок вопроса', max_length=255)
+    content = models.TextField('Вопрос')
 
-    is_solved = models.BooleanField(default=False, verbose_name='Вопрос решен')
+    is_solved = models.BooleanField('Вопрос решен', default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    updated_date = models.DateTimeField('Дата обновления', auto_now=True)
 
     # search_vector = SearchVectorField(null=True)
 
@@ -115,9 +129,27 @@ class QuestionRating(Rating):
     """
     Лайки и дизлайки для вопроса. Рейтинг вопроса.
     """
-    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='rating')
-    users_liked = models.ManyToManyField(NewUser, related_name='liked_question_ratings', blank=True)
-    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_question_ratings', blank=True)
+    question = models.OneToOneField(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='rating'
+    )
+    users_liked = models.ManyToManyField(
+        NewUser,
+        related_name='liked_question_ratings',
+        blank=True
+    )
+    users_disliked = models.ManyToManyField(
+        NewUser,
+        related_name='disliked_question_ratings',
+        blank=True
+    )
+    users_complained = models.ManyToManyField(
+        NewUser,
+        blank=True,
+        verbose_name='Пожаловавшиеся пользователи',
+        related_name='question_rating_complained'
+    )
 
     class Meta:
         verbose_name = 'Рейтинг вопроса'
@@ -128,14 +160,23 @@ class QuestionAnswer(models.Model, LikeDislikeModelMixin):
     """
     Ответ на вопрос.
     """
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_answers')
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='question_answers', null=True)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='question_answers'
+    )
+    user = models.ForeignKey(
+        NewUser,
+        on_delete=models.SET_NULL,
+        related_name='question_answers',
+        null=True
+    )
 
-    answer = models.TextField(verbose_name='Текс ответа')
+    answer = models.TextField('Текс ответа')
 
     is_solving = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    updated_date = models.DateTimeField('Дата обновления', auto_now=True)
 
     def __str__(self):
         return self.answer
@@ -153,8 +194,12 @@ class QuestionAnswerImages(Attachment):
     """
     Вложения к ответу на вопрос.
     """
-    parent = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_images',
-                               verbose_name='Ответ')
+    parent = models.ForeignKey(
+        QuestionAnswer,
+        on_delete=models.CASCADE,
+        related_name='answer_images',
+        verbose_name='Ответ'
+    )
 
     class Meta:
         verbose_name = 'Вложение к ответу на вопрос'
@@ -165,9 +210,27 @@ class QuestionAnswerRating(Rating):
     """
     Лайки и дизлайки ответа на вопрос. Рейтинг ответа.
     """
-    answer = models.OneToOneField(QuestionAnswer, on_delete=models.CASCADE, related_name='rating')
-    users_liked = models.ManyToManyField(NewUser, related_name='liked_answer_ratings', blank=True)
-    users_disliked = models.ManyToManyField(NewUser, related_name='disliked_answer_ratings', blank=True)
+    answer = models.OneToOneField(
+        QuestionAnswer,
+        on_delete=models.CASCADE,
+        related_name='rating'
+    )
+    users_liked = models.ManyToManyField(
+        NewUser,
+        related_name='liked_answer_ratings',
+        blank=True
+    )
+    users_disliked = models.ManyToManyField(
+        NewUser,
+        related_name='disliked_answer_ratings',
+        blank=True
+    )
+    users_complained = models.ManyToManyField(
+        NewUser,
+        blank=True,
+        verbose_name='Пожаловавшиеся пользователи',
+        related_name='answer_rating_complained'
+    )
 
     class Meta:
         verbose_name = 'Рейтинг ответа'
@@ -178,15 +241,24 @@ class AnswerComment(models.Model):
     """
     Комментарий. Ответ на 'ответ'. Под 'ответ' подразумевается ответ на комментарий.
     """
-    user = models.ForeignKey(NewUser, on_delete=models.SET_NULL, related_name='answer_comments', null=True)
-    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, related_name='answer_comments',
-                                        verbose_name='Ответ на вопрос (ID)')
+    user = models.ForeignKey(
+        NewUser,
+        on_delete=models.SET_NULL,
+        related_name='answer_comments',
+        null=True
+    )
+    question_answer = models.ForeignKey(
+        QuestionAnswer,
+        on_delete=models.CASCADE,
+        related_name='answer_comments',
+        verbose_name='Ответ на вопрос (ID)'
+    )
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
-    comment = models.TextField(max_length=320, verbose_name='Текст комментария')
+    comment = models.TextField('Текст комментария', max_length=320)
 
     creation_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    updated_date = models.DateTimeField('Дата обновления', auto_now=True)
 
     def __str__(self):
         return self.comment
@@ -194,3 +266,21 @@ class AnswerComment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарий'
+
+    def save(self, *args, **kwargs):
+        super(AnswerComment, self).save(*args, **kwargs)
+        self.rating, _ = CommentRating.objects.get_or_create(comment=self)
+
+
+class CommentRating(models.Model):
+    comment = models.OneToOneField(AnswerComment, on_delete=models.CASCADE, related_name='rating')
+    users_complained = models.ManyToManyField(
+        NewUser,
+        blank=True,
+        verbose_name='Пожаловавшиеся пользователи',
+        related_name='comment_rating_complained'
+    )
+
+    class Meta:
+        verbose_name = 'Рейтинг комментария'
+        verbose_name_plural = 'Рейтинги комментариев'

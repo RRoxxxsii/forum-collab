@@ -53,21 +53,25 @@ class Notification(models.Model):
         (FAIL, 'fail')
     ]
 
-    sender = models.ForeignKey(NewUser,
-                               null=True,
-                               blank=True,
-                               on_delete=models.CASCADE,
-                               verbose_name='Отправитель')
-    receiver = models.ForeignKey(NewUser,
-                                 on_delete=models.CASCADE,
-                                 verbose_name='Получатель',
-                                 related_name='notifications')
+    sender = models.ForeignKey(
+        NewUser,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name='Отправитель'
+    )
+    receiver = models.ForeignKey(
+        NewUser,
+        on_delete=models.CASCADE,
+        verbose_name='Получатель',
+        related_name='notifications'
+    )
 
-    level = models.CharField(verbose_name='Цель уведомления', choices=LEVEL_CHOICES, default=INFO)
+    level = models.CharField('Цель уведомления', choices=LEVEL_CHOICES, default=INFO)
 
     # Целевой объект, автор которого получит уведомление, т.е. относится к receiver
     target = GenericForeignKey('target_content_type', 'target_object_id')
-    target_object_id = models.PositiveIntegerField(verbose_name='ID целевого объекта получателя')
+    target_object_id = models.PositiveIntegerField('ID целевого объекта получателя')
     target_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -77,8 +81,11 @@ class Notification(models.Model):
 
     # Текущий объект, который был создан, относится к sender
     action_obj = GenericForeignKey('action_obj_content_type', 'action_obj_object_id')
-    action_obj_object_id = models.PositiveIntegerField(verbose_name='ID объекта отправителя',
-                                                       blank=True, null=True)
+    action_obj_object_id = models.PositiveIntegerField(
+        'ID объекта отправителя',
+        blank=True,
+        null=True
+    )
     action_obj_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -88,10 +95,10 @@ class Notification(models.Model):
         null=True
     )
 
-    text = models.TextField(verbose_name='Текст уведомления', null=True, blank=True)
-    emailed = models.BooleanField(default=False, verbose_name='Отправлять уведомления')
-    unread = models.BooleanField(default=True, verbose_name='Не прочитано')
-    creation_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    text = models.TextField('Текст уведомления', null=True, blank=True)
+    emailed = models.BooleanField('Отправлять уведомления', default=False)
+    unread = models.BooleanField('Не прочитано', default=True)
+    creation_date = models.DateTimeField('Дата создания', auto_now_add=True)
 
     objects = NotificationQuerySet.as_manager()
 

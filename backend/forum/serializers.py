@@ -24,7 +24,7 @@ class TagFieldWithCountSerializer(serializers.ModelSerializer):
     use_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('tag_name', 'use_count', 'is_relevant', 'is_user_tag')
+        fields = ('id', 'tag_name', 'use_count', 'is_relevant', 'is_user_tag')
         model = ThemeTag
 
     def get_use_count(self, instance: ThemeTag):
@@ -51,9 +51,11 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
     """
     Серилизатор для обновления вопроса.
     """
+    tags = TagFieldWithCountSerializer(read_only=True, many=True)
+
     class Meta:
         model = Question
-        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date')
+        fields = ('id', 'user', 'title', 'content', 'creation_date', 'updated_date', 'tags')
         extra_kwargs = {'title': {'required': False}}
 
 
@@ -87,14 +89,14 @@ class QuestionRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializer
 
     class Meta:
         model = QuestionRating
-        fields = '__all__'
+        exclude = ('users_complained', )
 
 
 class AnswerRatingSerializer(BaseRatingIsLikedOrDislikedSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = QuestionAnswerRating
-        fields = '__all__'
+        exclude = ('users_complained', )
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
 

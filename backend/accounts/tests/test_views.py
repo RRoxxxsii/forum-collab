@@ -4,7 +4,7 @@ import re
 from django.core import mail
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, ThemeTag
@@ -78,6 +78,7 @@ class TestEmailConfirmAPIView(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_send_request_user_authenticated(self):
         """
         Проверка отправки письма пользователю и факта получения.
@@ -88,6 +89,7 @@ class TestEmailConfirmAPIView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(email_msg), 1)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_content(self):
         """
         Проверка содержимого отправленого пользователю письма.
@@ -98,6 +100,7 @@ class TestEmailConfirmAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_confirm(self):
         """
         Проверка изменения статуса пользователя email_confirmed.
@@ -111,6 +114,7 @@ class TestEmailConfirmAPIView(APITestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.email_confirmed)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_send_request_email_already_confirmed(self):
         """
         Попытка отправить запрос на получение письма, при этом эл. почта у пользователя
@@ -170,6 +174,7 @@ class TestChangeEmailAPIView(APITestCase):
         response = self.client.post(self.url, data={'email': 'testuser@gmail.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_content(self):
         """
         Проверка содержимого в письме.
@@ -180,6 +185,7 @@ class TestChangeEmailAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_change_email_status_code(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
@@ -191,6 +197,7 @@ class TestChangeEmailAPIView(APITestCase):
         response = self.client.get(link, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_change_email_result(self):
         """
         Проверка, действительно ли в базе данных изменился email пользователя.
@@ -299,6 +306,7 @@ class TestRestoreAccountAPIView(APITestCase):
         response = self.client.post(self.url, data={'email': 'emailowned-byanother@user.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_response_content(self):
         """
         Проверка, было ли отправлено сообщение на почту.
@@ -309,6 +317,7 @@ class TestRestoreAccountAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_restore_account_status_code(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
@@ -320,6 +329,7 @@ class TestRestoreAccountAPIView(APITestCase):
         response = self.client.get(link, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_restore_account_user_is_active(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
@@ -548,3 +558,80 @@ class TestUserRating(APITestCase):
         self.assertEqual(len(user_answered_question_tags), 1)
         self.assertEqual(content.get('amount_solved'), 10)
         self.assertIsNotNone(content.get('karma'))
+
+
+class TestKarmaCalculated(APITestCase):
+
+    def setUp(self):
+        self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
+                                                password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user4 = NewUser.objects.create_user(email='testuser4@gmail.com', user_name='testuser4',
+                                                 password='Ax6!a7OpNvq', email_confirmed=True, is_active=True)
+        self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
+                                                 password='Ax6!a7OpNvq', is_active=True)
+
+        self.tag = ThemeTag.objects.create(tag_name=f'django')
+
+        self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
+        self.question.tags.add(self.tag)
+
+        self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user2)
+        self.question2.tags.add(self.tag)
+
+        self.answer = QuestionAnswer.objects.create(question=self.question2, user=self.user, answer='Ответ',
+                                                    is_solving=True)
+        self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
+
+        self.question.like(user=self.user2)
+        self.question.like(user=self.user3)
+        self.question.like(user=self.user4)
+        self.question.dislike(user=self.user5)
+
+        self.question2.like(user=self.user)
+        self.question2.like(user=self.user3)
+        self.question2.like(user=self.user4)
+        self.question2.dislike(user=self.user5)
+
+        self.answer.like(user=self.user2)
+        self.answer.like(user=self.user3)
+        self.answer.like(user=self.user4)
+        self.answer.dislike(user=self.user5)
+
+        self.answer2.like(user=self.user)
+        self.answer2.like(user=self.user3)
+        self.answer2.like(user=self.user4)
+        self.answer2.dislike(user=self.user5)
+
+        self.url_personal_page = reverse('personal-page')
+        self.url = reverse('newuser-detail', kwargs={'pk': self.user2.pk})
+
+    def test_karma_calculated_request_user_is_returned_obj_user(self):
+        """
+        Проверяем, что при возвращаемый ресурс своего профиля равен данным
+        пользователя отправившего запрос.
+        """
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url_personal_page)
+        content = json.loads(response.content.decode())
+        self.assertEqual(content.get('karma'), self.user.count_karma())
+
+    def test_karma_calculated_request_user_is_not_returned_obj_user(self):
+        """
+        Проверяем, что данные профиля другого пользователя не равны данным
+        пользователя, запрашивающего ресурс.
+        """
+        self.assertNotEqual(self.user.count_karma(), self.user2.count_karma())
+
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url)             # получаем профиль user2
+        content = json.loads(response.content.decode())
+        self.assertNotEqual(self.user.count_karma(), content.get('karma'))
+
+        response = self.client.get(reverse('newuser-detail',
+                                           kwargs={'pk': self.user.pk}))    # получаем профиль user1
+        content2 = json.loads(response.content.decode())
+        self.assertNotEqual(content.get('karma'), content2.get('karma'))
