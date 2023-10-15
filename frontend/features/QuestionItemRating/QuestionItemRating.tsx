@@ -11,7 +11,7 @@ import { useState } from 'react'
 
 type Model = 'question' | 'answer'
 
-interface FunctionProps {
+export interface LikeFunctionProps {
 	id: number
 	model: Model
 	checked?: boolean
@@ -21,8 +21,8 @@ interface QuestionItemRatingProps {
 	questionData: IQuestion
 	profileData: IUser | null
 	model: Model
-	setLike: ({ id, model }: FunctionProps) => Promise<null | undefined>
-	setDislike: ({ id, model }: FunctionProps) => Promise<null | undefined>
+	setLike: ({ id, model }: LikeFunctionProps) => Promise<null | undefined>
+	setDislike: ({ id, model }: LikeFunctionProps) => Promise<null | undefined>
 }
 
 export const QuestionItemRating = ({
@@ -35,7 +35,7 @@ export const QuestionItemRating = ({
 	const [userLike, setUserLike] = useState(0)
 	const [checked, setChecked] = useState<null | number>(null)
 
-	const handleUserLike = ({ id, model, checked }: FunctionProps) => {
+	const handleUserLike = ({ id, model, checked }: LikeFunctionProps) => {
 		setLike({ id: id, model: model })
 		if (checked) {
 			setUserLike((userLike) => (userLike = 1))
@@ -46,7 +46,7 @@ export const QuestionItemRating = ({
 		}
 	}
 
-	const handleUserDislike = ({ id, model, checked }: FunctionProps) => {
+	const handleUserDislike = ({ id, model, checked }: LikeFunctionProps) => {
 		setLike({ id: id, model: model })
 		if (checked) {
 			setUserLike((userLike) => (userLike = -1))
