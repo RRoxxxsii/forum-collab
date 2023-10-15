@@ -4,7 +4,7 @@ import re
 from django.core import mail
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, ThemeTag
@@ -78,6 +78,7 @@ class TestEmailConfirmAPIView(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_send_request_user_authenticated(self):
         """
         Проверка отправки письма пользователю и факта получения.
@@ -88,6 +89,7 @@ class TestEmailConfirmAPIView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(email_msg), 1)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_content(self):
         """
         Проверка содержимого отправленого пользователю письма.
@@ -98,6 +100,7 @@ class TestEmailConfirmAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_confirm(self):
         """
         Проверка изменения статуса пользователя email_confirmed.
@@ -111,6 +114,7 @@ class TestEmailConfirmAPIView(APITestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.email_confirmed)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_send_request_email_already_confirmed(self):
         """
         Попытка отправить запрос на получение письма, при этом эл. почта у пользователя
@@ -170,6 +174,7 @@ class TestChangeEmailAPIView(APITestCase):
         response = self.client.post(self.url, data={'email': 'testuser@gmail.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_email_content(self):
         """
         Проверка содержимого в письме.
@@ -180,6 +185,7 @@ class TestChangeEmailAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_change_email_status_code(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
@@ -191,6 +197,7 @@ class TestChangeEmailAPIView(APITestCase):
         response = self.client.get(link, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_change_email_result(self):
         """
         Проверка, действительно ли в базе данных изменился email пользователя.
@@ -299,6 +306,7 @@ class TestRestoreAccountAPIView(APITestCase):
         response = self.client.post(self.url, data={'email': 'emailowned-byanother@user.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_response_content(self):
         """
         Проверка, было ли отправлено сообщение на почту.
@@ -309,6 +317,7 @@ class TestRestoreAccountAPIView(APITestCase):
         link = re.search(r'http://.+', email_msg.body).group()
         self.assertIsNotNone(link)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_restore_account_status_code(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
@@ -320,6 +329,7 @@ class TestRestoreAccountAPIView(APITestCase):
         response = self.client.get(link, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
     def test_restore_account_user_is_active(self):
         """
         Запрос на получение ссылки на почтовый адрес и переход по ссылке. Статус код - 200.
