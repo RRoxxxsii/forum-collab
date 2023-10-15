@@ -1,3 +1,4 @@
+from django.template.loader import get_template
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
@@ -14,7 +15,8 @@ from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
                           UserRatingSerializer, UserSerializer)
-from .utils import email_exists, get_current_site, send_confirmation_email
+from .tasks import send_confirmation_email
+from .utils import email_exists, get_current_site
 
 
 class CustomUserRegisterAPIView(GenericAPIView):
@@ -54,8 +56,11 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
 
         # Создание токена (будет частью url-адреса) для того, чтобы в дальнейшем подтвердить эл. почту.
         token = EmailConfirmationToken.objects.create(user=user)
-        send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url,
-                                email=user.email, token_id=token.id, user_id=user.id)
+
+        send_confirmation_email.delay(
+            template_name='email/confirm_email.txt', current_url=current_url,
+            email=user.email, token_id=token.id, user_id=user.id
+        )
 
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
@@ -71,8 +76,6 @@ class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
     def perform_action(self, user):
         user.email_confirmed = True
         user.save()
-
-        # raise NotImplementedError         # использовате setter
 
 
 class ChangeEmailAddressAPIView(GenericAPIView):
@@ -101,8 +104,10 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         # Создаем новый токен
         token = EmailConfirmationToken.objects.create(user=user)
 
-        send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url, email=email,
-                                token_id=token.id, user_id=user.id)
+        send_confirmation_email.delay(
+            template_name='email/confirm_email.txt', current_url=current_url, email=email,
+            token_id=token.id, user_id=user.id
+        )
 
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
@@ -163,8 +168,10 @@ class RestoreAccountAPIView(GenericAPIView):
             # Создаем новый токен
             token = EmailConfirmationToken.objects.create(user=user)
             current_url = get_current_site(request=request, path='restore-account-email-confirm')
-            send_confirmation_email(template_name='email/restore_account.txt', email=email, user_id=user.id,
-                                    current_url=current_url, token_id=token.id)
+            send_confirmation_email.delay(
+                template_name='email/restore_account.txt', email=email, user_id=user.id,
+                current_url=current_url, token_id=token.id
+            )
 
             return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         # В случае, если что-то пошло не так
