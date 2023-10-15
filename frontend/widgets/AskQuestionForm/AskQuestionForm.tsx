@@ -4,7 +4,7 @@ import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { AskFastContext } from '@/providers/AskFastProvider'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IQuestion, ITag, IUser } from '@/types/types'
-import { Box, TextField } from '@mui/material'
+import { Box, Skeleton, TextField, Typography } from '@mui/material'
 import { useSearchParams } from 'next/navigation'
 import {
 	Dispatch,
@@ -93,10 +93,17 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 				fullWidth
 				label='Тема вопроса'
 				id='headline'
-				sx={{ mb: 2 }}
 				value={titleValue}
 				onChange={(e) => setTitleValue(e.target.value)}
+				inputProps={{ maxLength: 255 }}
 			/>
+			<Typography
+				textAlign={'end'}
+				color={'slategray'}
+				sx={{ width: '100%', display: 'block' }}
+				variant='caption'>
+				{titleValue.length}/255
+			</Typography>
 			<Box
 				sx={{
 					minHeight: 220,

@@ -3,6 +3,7 @@ import { QuestionItemContent } from '@/entities/QuestionItemContent'
 import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
 import { CategoryContext } from '@/providers/CategoryProvider'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { Dislike, Like } from '@/shared/api/changeRating'
 import { BASE_URL } from '@/shared/constants'
 import { transliterate } from '@/shared/transliterate'
@@ -53,6 +54,8 @@ export const QuestionList = () => {
 }
 
 const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
+	const { userDetails } = useContext(UserDetailsContext)
+
 	return (
 		<Card
 			key={questionData.id}
@@ -74,6 +77,7 @@ const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 				<QuestionItemRating
 					model='question'
 					questionData={questionData}
+					profileData={userDetails}
 					setDislike={() => Dislike({ id: questionData.id, model: 'question' })}
 					setLike={() => Like({ id: questionData.id, model: 'question' })}
 				/>

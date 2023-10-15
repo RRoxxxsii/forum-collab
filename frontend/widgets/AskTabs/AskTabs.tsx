@@ -15,8 +15,8 @@ export const AskTabs = () => {
 	}
 
 	const tabs = [
-		{ label: 'Вопрос', value: 'Вопрос' },
-		{ label: 'Опрос', value: 'Опрос' },
+		{ label: 'Создать вопрос', value: 'Вопрос' },
+		// { label: 'Опрос', value: 'Опрос' },
 	]
 
 	return (

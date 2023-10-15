@@ -93,26 +93,24 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'center',
-							height: '100%',
+							height: '80px',
+							mr: 1,
 						}}>
 						<Avatar
 							sx={{
-								width: 18,
-								height: 18,
-								fontSize: 12,
-								bgcolor: green[500],
-								marginRight: 1,
+								width: 20,
+								height: 20,
+								fontSize: 16,
+								bgcolor: green[400],
+
+								mb: 1,
 							}}
 							aria-label='recipe'
-							src={
-								answerData?.user?.profile_image
-									? answerData?.user?.profile_image
-									: ''
-							}>
+							src={answerData?.user?.profile_image ?? ''}>
 							{!answerData?.user?.profile_image &&
-								answerData?.user?.user_name[0]}
+								answerData?.user?.user_name[0].toUpperCase()}
 						</Avatar>
-						<Divider orientation='vertical' flexItem />
+						<Divider orientation='vertical'></Divider>
 					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
@@ -214,21 +212,17 @@ const CommentCard = ({ comment }: { comment: IComment }) => {
 							}}>
 							<Avatar
 								sx={{
-									width: 18,
-									height: 18,
-									fontSize: 12,
-									bgcolor: green[500],
+									width: 20,
+									height: 20,
+									fontSize: 16,
+									bgcolor: green[400],
 									marginRight: 1,
 								}}
 								aria-label='recipe'
-								src={
-									comment?.user?.profile_image
-										? comment?.user?.profile_image
-										: ''
-								}>
+								src={comment?.user?.profile_image ?? ''}>
 								{comment?.user?.profile_image
 									? ''
-									: comment?.user?.user_name[0]}
+									: comment?.user?.user_name[0].toUpperCase()}
 							</Avatar>
 						</Box>
 						<Box sx={{ width: '100%' }}>

@@ -38,6 +38,7 @@ export default function QuestionPage() {
 									<QuestionItemRating
 										model='question'
 										questionData={questionData}
+										profileData={profileData}
 										setDislike={Dislike}
 										setLike={Like}
 									/>

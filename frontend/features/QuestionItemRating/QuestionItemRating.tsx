@@ -1,5 +1,5 @@
 'use client'
-import { IQuestion } from '@/types/types'
+import { IQuestion, IUser } from '@/types/types'
 import {
 	ArrowDownward,
 	ArrowDownwardOutlined,
@@ -7,16 +7,19 @@ import {
 	ArrowUpwardOutlined,
 } from '@mui/icons-material'
 import { Box, Checkbox, Typography } from '@mui/material'
+import { useState } from 'react'
 
 type Model = 'question' | 'answer'
 
 interface FunctionProps {
 	id: number
 	model: Model
+	checked?: boolean
 }
 
 interface QuestionItemRatingProps {
 	questionData: IQuestion
+	profileData: IUser | null
 	model: Model
 	setLike: ({ id, model }: FunctionProps) => Promise<null | undefined>
 	setDislike: ({ id, model }: FunctionProps) => Promise<null | undefined>
@@ -24,10 +27,35 @@ interface QuestionItemRatingProps {
 
 export const QuestionItemRating = ({
 	questionData,
+	profileData,
 	model,
 	setLike,
 	setDislike,
 }: QuestionItemRatingProps) => {
+	const [userLike, setUserLike] = useState(0)
+	const [checked, setChecked] = useState<null | number>(null)
+
+	const handleUserLike = ({ id, model, checked }: FunctionProps) => {
+		setLike({ id: id, model: model })
+		if (checked) {
+			setUserLike((userLike) => (userLike = 1))
+			setChecked(0)
+		} else {
+			setUserLike((userLike) => (userLike = 0))
+			setChecked(null)
+		}
+	}
+
+	const handleUserDislike = ({ id, model, checked }: FunctionProps) => {
+		setLike({ id: id, model: model })
+		if (checked) {
+			setUserLike((userLike) => (userLike = -1))
+			setChecked(1)
+		} else {
+			setUserLike((userLike) => (userLike = 0))
+			setChecked(null)
+		}
+	}
 	return (
 		<Box
 			sx={{
@@ -37,17 +65,35 @@ export const QuestionItemRating = ({
 				color: 'white',
 			}}>
 			<Checkbox
+				disabled={questionData?.user?.id === profileData?.id}
+				checked={checked === 0}
 				icon={<ArrowUpwardOutlined />}
 				checkedIcon={<ArrowUpward />}
-				onClick={() => setLike({ id: questionData.id, model: model })}
+				onChange={(e) =>
+					handleUserLike({
+						id: questionData.id,
+						model: model,
+						checked: e.target.checked,
+					})
+				}
 			/>
 			<Typography fontWeight={700}>
-				{questionData.rating?.like_amount - questionData.rating?.dislike_amount}
+				{questionData.rating?.like_amount -
+					questionData.rating?.dislike_amount +
+					userLike}
 			</Typography>
 			<Checkbox
+				disabled={questionData?.user?.id === profileData?.id}
+				checked={checked === 1}
 				icon={<ArrowDownwardOutlined />}
 				checkedIcon={<ArrowDownward />}
-				onClick={() => setDislike({ id: questionData.id, model: model })}
+				onChange={(e) =>
+					handleUserDislike({
+						id: questionData.id,
+						model: model,
+						checked: e.target.checked,
+					})
+				}
 			/>
 		</Box>
 	)
