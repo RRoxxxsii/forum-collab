@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		if (!req.body) {
-			return null
+			return
 		}
 		const { email, user_name, password } = await req.json()
 
@@ -51,6 +51,6 @@ export async function POST(req: NextRequest) {
 			{ status: 200 }
 		)
 	} catch (error) {
-		return null
+		return
 	}
 }

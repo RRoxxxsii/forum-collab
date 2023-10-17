@@ -5,28 +5,35 @@ import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRa
 import { CategoryContext } from '@/providers/CategoryProvider'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { Dislike, Like } from '@/shared/api/changeRating'
-import { BASE_URL } from '@/shared/constants'
+import { fetchQuestions } from '@/shared/api/fetchData'
 import { transliterate } from '@/shared/transliterate'
 import { IQuestion, ITag } from '@/types/types'
-import { Box, Card, Skeleton } from '@mui/material'
+import { Error } from '@mui/icons-material'
+import { Box, Card, Skeleton, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useContext, useEffect, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
+	const [listLoadingState, setListLoadingState] = useState<
+		'loading' | 'success' | 'error'
+	>()
 	const { category } = useContext(CategoryContext)
 
 	const fetchQuestionList = async () => {
 		setQuestions([])
+		setListLoadingState('loading')
 		try {
-			const response = await fetch(
-				`${BASE_URL}/forum/questions/?limit=10&sort=${category}`
-			)
-			const questionsData = await response.json()
+			const response = await fetchQuestions({ category: category })
 
-			setQuestions(questionsData)
+			if ('id' in response) {
+				setQuestions(response)
+				setListLoadingState('success')
+			} else {
+				setListLoadingState('error')
+			}
 		} catch (error) {
-			console.log(error)
+			setListLoadingState('error')
 		}
 	}
 
@@ -34,13 +41,29 @@ export const QuestionList = () => {
 		fetchQuestionList()
 	}, [category])
 
+	if (listLoadingState === 'error') {
+		return (
+			<>
+				<Typography sx={{ fontSize: 24, textAlign: 'center' }}>
+					При получении списка вопросов возникла ошибка. Попробуйте попытку
+					позже
+				</Typography>
+				<Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+					<Error sx={{ width: 36, height: 36 }} />
+				</Box>
+			</>
+		)
+	}
+
 	return (
 		<>
-			{questions.length !== 0
-				? questions.map((questionData: IQuestion) => (
-						<QuestionCard key={questionData.id} questionData={questionData} />
-				  ))
-				: Array.from({ length: 10 }).map((_, index) => (
+			{questions.length !== 0 ? (
+				questions.map((questionData: IQuestion) => (
+					<QuestionCard key={questionData.id} questionData={questionData} />
+				))
+			) : (
+				<>
+					{Array.from({ length: 10 }).map((_, index) => (
 						<Skeleton
 							sx={{ mb: 2, borderRadius: 1 }}
 							variant='rectangular'
@@ -48,7 +71,9 @@ export const QuestionList = () => {
 							height={210}
 							key={index}
 						/>
-				  ))}
+					))}
+				</>
+			)}
 		</>
 	)
 }

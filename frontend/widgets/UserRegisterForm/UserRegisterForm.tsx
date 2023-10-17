@@ -53,7 +53,7 @@ export const UserRegisterForm = () => {
 				isLoading: false,
 				autoClose: 3000,
 			})
-			router.push('/login')
+			// router.push('/login')
 		}
 	}
 
@@ -107,7 +107,7 @@ export const UserRegisterForm = () => {
 					<TextField
 						label='Имя пользователя'
 						autoFocus
-						placeholder='example@gmail.com'
+						placeholder='username123'
 						id='username'
 						className={`${error && 'border-red-500'}`}
 						sx={{ mb: 1, height: 70, WebkitBoxShadow: 'none' }}
