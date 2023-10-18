@@ -256,8 +256,11 @@ class QuestionViewSet(ModelViewSet):
     Параметр запроса - limit, определяющий кол-во возвращаемых записей.
     Параметр sort - best/latest/closed/opened.
     """
-    serializer_classes = {'list': ListQuestionSerializer, 'retrieve': DetailQuestionSerializer}
     http_method_names = ('get',)
+    serializer_classes = {
+        'list': ListQuestionSerializer,
+        'retrieve': DetailQuestionSerializer,
+    }
 
     limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
                               description="кол-во возвращаемых записей",

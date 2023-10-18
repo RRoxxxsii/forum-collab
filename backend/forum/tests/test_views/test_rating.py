@@ -215,6 +215,18 @@ class TestObjRatedByUser(APITestCase):
         self.answer = QuestionAnswer.objects.create(user=self.user2, question=self.question,
                                                     answer='Изначальный ответ...')
 
+    def test_question_liked_or_disliked(self):
+        """
+        Тестируем, считается ли вопрос оцененным, несмотря на то, что пользователь
+        не лайкал и не дизлайкал.
+        """
+        response = self.client.get(reverse('question-detail', kwargs={'pk': self.question.pk}))
+        content = json.loads(response.content.decode())
+        rating = content.get('rating')
+        user_liked, user_disliked = rating.get('is_liked'), rating.get('is_disliked')
+        self.assertEqual(user_liked, False)
+        self.assertEqual(user_disliked, False)
+
     def test_question_liked_by_a_user(self):
         """
         Тестируем, считается ли вопрос лайкнутым пользователем.
