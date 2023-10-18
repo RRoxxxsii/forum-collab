@@ -63,10 +63,12 @@ class UpdateCommentSerializer(serializers.ModelSerializer):
     """
     Обновление комментария.
     """
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = AnswerComment
-        fields = ('id', 'user',  'comment', 'question_answer', 'creation_date', 'updated_date')
-        read_only_fields = ('id', 'question_answer', 'creation_date', 'updated_date', 'user')
+        fields = ('id', 'user',  'comment', 'question_answer', 'parent', 'creation_date', 'updated_date')
+        read_only_fields = ('id', 'question_answer', 'creation_date', 'parent', 'updated_date', 'user')
 
 
 class BaseRatingIsLikedOrDislikedSerializer(serializers.Serializer):
