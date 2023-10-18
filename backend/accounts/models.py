@@ -105,13 +105,24 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
         return expert_tags
 
     def get_amount_question_solved(self) -> int:
+        """
+        Считает количество решенных вопросов, не считая случаи, когда пользователь ответил на свой вопрос, и
+        отметил ответ как решающий.
+        """
         user_id = self.pk
         data_cache = json.dumps({'user_id': user_id, 'key:': settings.QUESTION_SOLVED_NAME})
+
+        # получаем количество ответов, которые создал пользователь по отношению к своему вопросу и оценил как решенный
+        count_rated_himself = self.question_answers.filter(
+            user=self,
+            is_solving=True,
+            question__user=self
+        ).count()
 
         count = cache.get(data_cache)
 
         if not count:
-            count = self.question_answers.filter(is_solving=True).count()
+            count = self.question_answers.filter(is_solving=True).count() - count_rated_himself
             cache.set(data_cache, count, 60 * 60)
 
         return count
