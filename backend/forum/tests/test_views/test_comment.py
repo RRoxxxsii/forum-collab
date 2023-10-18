@@ -85,6 +85,7 @@ class TestUpdateCommentAPIView(APITestCase):
     def test_update_comment(self):
         self.client.force_authenticate(self.user)
         response = self.client.put(self.url, data=self.data)
+        print(response.content.decode())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
