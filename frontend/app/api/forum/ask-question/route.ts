@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 		const session = cookies().get('access_token')?.value
 
 		if (!req.body) {
-			return null
+			return 
 		}
 		const { tags, title, content, uploaded_images } = await req.json()
 

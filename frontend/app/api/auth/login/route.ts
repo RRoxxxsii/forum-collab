@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		if (!req.body) {
-			return null
+			return
 		}
 		const { email, password } = await req.json()
 
@@ -47,6 +47,13 @@ export async function POST(req: NextRequest) {
 			{ status: 200 }
 		)
 	} catch (error) {
-		return null
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: 'An err or occured. Please check username and password.'
+		return NextResponse.json(
+			{ message: errorMessage, ok: false },
+			{ status: 503 }
+		)
 	}
 }

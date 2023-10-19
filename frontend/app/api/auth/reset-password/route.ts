@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		if (!req.body) {
-			return null
+			return
 		}
 		const { email } = await req.json()
 

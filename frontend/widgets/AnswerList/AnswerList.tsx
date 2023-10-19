@@ -1,5 +1,8 @@
 'use client'
-import { UserDetailsContext } from '@/providers/UserDetailsProvider'
+import {
+	UserDetailsContext,
+	UserDetailsProvider,
+} from '@/providers/UserDetailsProvider'
 import { Dislike, Like } from '@/shared/api/changeRating'
 import { IAnswer, IComment, IQuestion } from '@/types/types'
 import {
@@ -25,6 +28,7 @@ import dayjs from 'dayjs'
 import { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
+import { LikeFunctionProps } from '@/features/QuestionItemRating/QuestionItemRating'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
@@ -76,6 +80,30 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 				isLoading: false,
 				autoClose: 3000,
 			})
+		}
+	}
+	const [userLike, setUserLike] = useState(0)
+	const [checked, setChecked] = useState<null | number>(null)
+
+	const handleUserLike = ({ id, model, checked }: LikeFunctionProps) => {
+		Like({ id: id, model: model })
+		if (checked) {
+			setUserLike((userLike) => (userLike = 1))
+			setChecked(0)
+		} else {
+			setUserLike((userLike) => (userLike = 0))
+			setChecked(null)
+		}
+	}
+
+	const handleUserDislike = ({ id, model, checked }: LikeFunctionProps) => {
+		Dislike({ id: id, model: model })
+		if (checked) {
+			setUserLike((userLike) => (userLike = -1))
+			setChecked(1)
+		} else {
+			setUserLike((userLike) => (userLike = 0))
+			setChecked(null)
 		}
 	}
 
@@ -135,22 +163,32 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 							}}>
 							<Box sx={{ display: 'flex', alignItems: 'center' }}>
 								<Checkbox
+									disabled={answerData?.user?.id === userDetails?.id}
+									checked={checked === 0}
 									icon={<ArrowUpwardOutlined />}
 									checkedIcon={<ArrowUpward />}
-									onClick={() =>
-										Like({
+									onChange={(e) =>
+										handleUserLike({
 											id: answerData.id,
 											model: 'answer',
+											checked: e.target.checked,
 										})
 									}
 								/>
 								{answerData.rating.like_amount -
-									answerData.rating.dislike_amount}
+									answerData.rating.dislike_amount +
+									userLike}
 								<Checkbox
+									disabled={answerData?.user?.id === userDetails?.id}
+									checked={checked === 1}
 									icon={<ArrowDownwardOutlined />}
 									checkedIcon={<ArrowDownward />}
-									onClick={() =>
-										Dislike({ id: answerData.id, model: 'answer' })
+									onChange={(e) =>
+										handleUserDislike({
+											id: answerData.id,
+											model: 'answer',
+											checked: e.target.checked,
+										})
 									}
 								/>
 								<FormControlLabel
