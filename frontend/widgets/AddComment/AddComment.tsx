@@ -1,5 +1,5 @@
 'use client'
-import { IAnswer, IUser } from '@/types/types'
+import { IAnswer, IComment, IUser } from '@/types/types'
 import { TextareaAutosize } from '@mui/base/TextareaAutosize'
 import { Box, Button, Typography } from '@mui/material'
 import React, {
@@ -25,7 +25,7 @@ export const AddComment = ({
 
 	const handleComment = async () => {
 		if (commentContent.length > 0 && commentContent.length < 320) {
-			const response = await fetch('/api/forum/comment', {
+			const response = await fetch('/api/forum/create-comment', {
 				method: 'POST',
 				body: JSON.stringify({
 					user: profileData,
@@ -38,10 +38,17 @@ export const AddComment = ({
 				return
 			}
 
-			const data = await response.json()
+			const data: IComment = await response.json()
+			answerData.comments.push({
+				comment: data?.comment,
+				question_answer: data?.question_answer,
+				creation_date: data?.creation_date,
+				id: data?.id,
+				user: data?.user,
+			})
 
 			setCommentContent('')
-			answerData.comments.push(data)
+			setIsCommenting(false)
 		}
 	}
 	const commentBoxRef = useRef<HTMLDivElement | null>(null)

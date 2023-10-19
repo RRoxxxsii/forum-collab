@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
 	if (response.ok) {
 		return NextResponse.json({ ...result })
 	} else {
-		return NextResponse.json({ error: result.detail }, { status: 500 })
+		return NextResponse.json(
+			{ error: result.detail },
+			{ status: response.status }
+		)
 	}
 }

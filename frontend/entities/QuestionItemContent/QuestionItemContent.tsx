@@ -85,7 +85,7 @@ export const QuestionItemContent = ({
 							</Box>
 						</Box>
 					</Box>
-					<CardContent sx={{ p: 0, ':last-child': { pb: 0 } }}>
+					<Box sx={{ p: 0, ':last-child': { pb: 0 } }}>
 						<Typography fontWeight={700} variant='body1' color='text.primary'>
 							{title}
 						</Typography>
@@ -93,7 +93,7 @@ export const QuestionItemContent = ({
 							dangerouslySetInnerHTML={{ __html: content }}
 							variant='body1'
 							color='text.secondary'></Typography>
-					</CardContent>
+					</Box>
 				</Box>
 			</Box>
 		</>

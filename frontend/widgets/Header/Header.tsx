@@ -1,15 +1,14 @@
+import { BurgerMenu } from '@/features/BurgerMenu'
 import { Navlink } from '@/features/Navlink'
+import { LinkType } from '@/types/types'
 import { Login } from '@mui/icons-material'
 import AccountBoxIcon from '@mui/icons-material/AccountBox'
 import HomeIcon from '@mui/icons-material/Home'
 import LiveHelpIcon from '@mui/icons-material/LiveHelp'
+import Logo from '@mui/icons-material/NotListedLocation'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import SettingsIcon from '@mui/icons-material/Settings'
-import SupportIcon from '@mui/icons-material/Support'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import { BurgerMenu } from '@/features/BurgerMenu'
-import { LinkType } from '@/types/types'
-import Logo from '@mui/icons-material/NotListedLocation'
 import {
 	AppBar,
 	Box,

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 		}
 		const { email, password } = await req.json()
 
-		const res = await fetch(`${BASE_URL}/account/token/`, {
+		const response = await fetch(`${BASE_URL}/account/token/`, {
 			method: 'POST',
 			body: JSON.stringify({
 				email: email,
@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
 			headers: { 'Content-Type': 'application/json' },
 		})
 
-		const data = await res.json()
+		const data = await response.json()
 
-		if (!res.ok) {
+		if (!response.ok) {
 			return NextResponse.json(
 				{
 					...data,
 				},
-				{ status: res.status }
+				{ status: response.status }
 			)
 		}
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(
 			{ message: 'Вы успешно авторизовались!' },
-			{ status: 200 }
+			{ status: response.status }
 		)
 	} catch (error) {
 		const errorMessage =

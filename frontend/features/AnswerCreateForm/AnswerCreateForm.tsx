@@ -1,34 +1,38 @@
 'use client'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IQuestion, IUser } from '@/types/types'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import { Button, Typography } from '@mui/material'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useContext, useState } from 'react'
 
 async function addAnswer({
 	questionData,
 	setQuestionData,
 	answerContent,
 	setAnswerContent,
+	userDetails,
 }: {
 	questionData: IQuestion | null
 	answerContent: string | null
 	setAnswerContent: Dispatch<SetStateAction<string>>
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
+	userDetails: IUser | null
 }) {
 	try {
-		const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
+		const response = await fetch(`/api/forum/create-answer`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				question: questionData?.id,
-				answer: answerContent,
+				question_id: questionData?.id,
+				answer_content: answerContent,
 			}),
 		})
 		if (!response.ok) {
 			throw new Error(response.statusText)
 		}
 		const data: IAnswer = await response.json()
+
 		setAnswerContent('')
 		setQuestionData((questionData) => {
 			if (questionData) {
@@ -52,7 +56,7 @@ export const AnswerCreateForm = ({
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }) => {
 	const [answerContent, setAnswerContent] = useState<string>('')
-
+	const { userDetails } = useContext(UserDetailsContext)
 	return (
 		<>
 			<Typography
@@ -78,6 +82,7 @@ export const AnswerCreateForm = ({
 						answerContent: answerContent,
 						setAnswerContent: setAnswerContent,
 						setQuestionData: setQuestionData,
+						userDetails: userDetails,
 					})
 				}>
 				Ответить

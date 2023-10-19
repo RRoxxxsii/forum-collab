@@ -1,3 +1,5 @@
+'use client'
+import { DeleteContent } from '@/shared/api/deleteContent'
 import { IQuestion, IUser } from '@/types/types'
 import {
 	Bookmark,
@@ -19,58 +21,8 @@ import {
 	Typography,
 } from '@mui/material'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
-import { toast } from 'react-toastify'
-
-async function deleteQuestion({ question_id }: { question_id: number }) {
-	if (!question_id) return null
-	const questionToast = toast.loading('Удаление вопроса...')
-	try {
-		const response = await fetch('/api/forum/delete-question', {
-			method: 'POST',
-			body: JSON.stringify({
-				id: question_id,
-			}),
-			headers: { 'Content-Type': 'application/json' },
-		})
-
-		const result = await response.json()
-
-		if (!response.ok) {
-			let errorMessage = ''
-			if (result?.code) {
-				errorMessage +=
-					'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
-			}
-
-			toast.update(questionToast, {
-				render:
-					errorMessage.length > 0
-						? errorMessage
-						: 'Разорвана связь с сервером, проверьте подключение',
-				type: 'error',
-				isLoading: false,
-				autoClose: 3000,
-			})
-			return null
-		}
-		toast.update(questionToast, {
-			render: result.message,
-			type: 'success',
-			isLoading: false,
-			autoClose: 3000,
-		})
-		redirect('/')
-	} catch (error: any | unknown) {
-		toast.update(questionToast, {
-			render: 'Разорвана связь с сервером, проверьте подключение',
-			type: 'error',
-			isLoading: false,
-			autoClose: 3000,
-		})
-	}
-}
 
 export const QuestionActionsMenu = ({
 	questionData,
@@ -87,6 +39,13 @@ export const QuestionActionsMenu = ({
 	}
 	const handleClose = () => {
 		setMoreButtonEl(null)
+	}
+	const router = useRouter()
+	const handleDelete = () => {
+		DeleteContent({
+			id: questionData.id,
+			model: 'question',
+		}).then(() => router.push('/'))
 	}
 
 	return (
@@ -114,30 +73,28 @@ export const QuestionActionsMenu = ({
 				anchorEl={moreButtonEl}
 				open={moreDropdownOpen}
 				onClose={handleClose}>
-				{questionData.user.id === profileData?.id && (
-					<>
-						<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-							<Link
-								href={{
-									pathname: `/ask/edit`,
-									query: {
-										id: questionData.id,
-									},
-								}}
-								className='flex'>
-								<Edit sx={{ mr: 1 }} />
-								<Typography>Редактировать</Typography>
-							</Link>
-						</MenuItem>
-						<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-							<FormControlLabel
-								onClick={() => deleteQuestion({ question_id: questionData.id })}
-								control={<Delete sx={{ mx: 1.2 }} />}
-								label='Удалить'
-							/>
-						</MenuItem>
-					</>
-				)}
+				{questionData.user.id === profileData?.id && [
+					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+						<Link
+							href={{
+								pathname: `/ask/edit`,
+								query: {
+									id: questionData.id,
+								},
+							}}
+							className='flex'>
+							<Edit sx={{ mr: 1 }} />
+							<Typography>Редактировать</Typography>
+						</Link>
+					</MenuItem>,
+					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+						<FormControlLabel
+							onClick={handleDelete}
+							control={<Delete sx={{ mx: 1.2 }} />}
+							label='Удалить'
+						/>
+					</MenuItem>,
+				]}
 				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
 					<FormControlLabel
 						control={<Report sx={{ mx: 1.2 }} />}
