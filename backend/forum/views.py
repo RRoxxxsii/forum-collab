@@ -22,7 +22,8 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
-                               CommentSerializer, DetailQuestionSerializer,
+                               BaseQuestionSerializer, CommentSerializer,
+                               DetailQuestionSerializer,
                                ListQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
@@ -34,6 +35,8 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_classes = {
         'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer
     }
+    serializer_class = BaseQuestionSerializer
+
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
@@ -78,14 +81,8 @@ class AskQuestionAPIView(GenericAPIView):
         question.tags.add(*tag_ids)
         question.save()
 
-        data = {
-            'question': question.id,
-            'title': question.title,
-            'content': question.content,
-            'user': str(question.user)
-        }
-
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        serializer = BaseQuestionSerializer(instance=question)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.request.method)

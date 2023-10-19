@@ -143,6 +143,18 @@ class QuestionRelatedAnswersAmountSerializer(serializers.Serializer):
         return instance.question_answers.all().count()
 
 
+class BaseQuestionSerializer(serializers.ModelSerializer):
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
+    user = serializers.SerializerMethodField(read_only=True)
+    question = serializers.IntegerField(source='id', read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ('question', 'title', 'content', 'user', 'tags')
+
+    def get_user(self, instance):
+        return instance.user.user_name
+
 class ListQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
     rating = QuestionRatingSerializer(read_only=True)
     tags = BaseTagFieldSerializer(read_only=True, many=True)
