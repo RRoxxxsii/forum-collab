@@ -1,9 +1,8 @@
 'use client'
-import {
-	UserDetailsContext,
-	UserDetailsProvider,
-} from '@/providers/UserDetailsProvider'
-import { Dislike, Like } from '@/shared/api/changeRating'
+import { ChangeRatingProps } from '@/features/QuestionItemRating/QuestionItemRating'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
+import { ChangeRating } from '@/shared/api/changeRating'
+import { DeleteContent } from '@/shared/api/deleteContent'
 import { IAnswer, IComment, IQuestion } from '@/types/types'
 import {
 	ArrowDownward,
@@ -11,7 +10,10 @@ import {
 	ArrowUpward,
 	ArrowUpwardOutlined,
 	Comment,
+	Delete,
+	Edit,
 	MoreHoriz,
+	Report,
 } from '@mui/icons-material'
 import {
 	Avatar,
@@ -21,6 +23,8 @@ import {
 	Divider,
 	FormControlLabel,
 	IconButton,
+	Menu,
+	MenuItem,
 	Typography,
 } from '@mui/material'
 import { green } from '@mui/material/colors'
@@ -28,7 +32,9 @@ import dayjs from 'dayjs'
 import { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
-import { LikeFunctionProps } from '@/features/QuestionItemRating/QuestionItemRating'
+import { TiptapEditor } from '../TiptapEditor'
+import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
+import { AskAnswerFormSubmit } from '@/features/AskAnswerFormSubmit'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
@@ -42,7 +48,7 @@ export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 function AnswerCard({ answerData }: { answerData: IAnswer }) {
 	const [isCommenting, setIsCommenting] = useState<boolean>(false)
 
-	const { setUserDetails, userDetails } = useContext(UserDetailsContext)
+	const { userDetails } = useContext(UserDetailsContext)
 
 	const handleSolved = async () => {
 		const solveToast = toast.loading('Обработка ответа...')
@@ -82,31 +88,32 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 			})
 		}
 	}
-	const [userLike, setUserLike] = useState(0)
+	const [clientRating, setClientRating] = useState(0)
 	const [checked, setChecked] = useState<null | number>(null)
 
-	const handleUserLike = ({ id, model, checked }: LikeFunctionProps) => {
-		Like({ id: id, model: model })
+	const handleRating = ({ id, model, action, checked }: ChangeRatingProps) => {
+		ChangeRating({ id: id, model: model, action: action })
 		if (checked) {
-			setUserLike((userLike) => (userLike = 1))
-			setChecked(0)
+			setClientRating(action === 'like' ? 1 : -1)
+			setChecked(action === 'like' ? 0 : 1)
 		} else {
-			setUserLike((userLike) => (userLike = 0))
+			setClientRating((clientRating) => (clientRating = 0))
 			setChecked(null)
 		}
 	}
 
-	const handleUserDislike = ({ id, model, checked }: LikeFunctionProps) => {
-		Dislike({ id: id, model: model })
-		if (checked) {
-			setUserLike((userLike) => (userLike = -1))
-			setChecked(1)
-		} else {
-			setUserLike((userLike) => (userLike = 0))
-			setChecked(null)
-		}
+	const [moreButtonEl, setMoreButtonEl] = useState<HTMLElement | null>(null)
+
+	const moreDropdownOpen = Boolean(moreButtonEl)
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setMoreButtonEl(event.currentTarget)
+	}
+	const handleClose = () => {
+		setMoreButtonEl(null)
 	}
 
+	const [isEditing, setIsEditing] = useState(false)
+	const [newContent, setNewContent] = useState<string>(answerData.answer)
 	return (
 		<>
 			<Box sx={{ px: 3, py: 2, width: '100%' }}>
@@ -149,12 +156,29 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
 							</Typography>
 						</Box>
-						<Typography
-							className='comment'
-							sx={{ ml: 1 }}
-							dangerouslySetInnerHTML={{ __html: answerData?.answer }}
-							variant='body1'
-						/>
+						{isEditing && (
+							<>
+								<TiptapEditor
+									setContent={setNewContent}
+									content={newContent}
+									contentOnEdit={answerData.answer}
+									type='answer'
+								/>
+								<AskAnswerFormSubmit
+									answerContent={answerData.answer}
+									images={[]}
+								/>
+							</>
+						)}
+						{!isEditing && (
+							<Typography
+								className='comment'
+								sx={{ ml: 1 }}
+								dangerouslySetInnerHTML={{ __html: answerData?.answer }}
+								variant='body1'
+							/>
+						)}
+
 						<Box
 							sx={{
 								display: 'flex',
@@ -168,25 +192,27 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 									icon={<ArrowUpwardOutlined />}
 									checkedIcon={<ArrowUpward />}
 									onChange={(e) =>
-										handleUserLike({
+										handleRating({
 											id: answerData.id,
 											model: 'answer',
+											action: 'like',
 											checked: e.target.checked,
 										})
 									}
 								/>
 								{answerData.rating.like_amount -
 									answerData.rating.dislike_amount +
-									userLike}
+									clientRating}
 								<Checkbox
 									disabled={answerData?.user?.id === userDetails?.id}
 									checked={checked === 1}
 									icon={<ArrowDownwardOutlined />}
 									checkedIcon={<ArrowDownward />}
 									onChange={(e) =>
-										handleUserDislike({
+										handleRating({
 											id: answerData.id,
 											model: 'answer',
+											action: 'dislike',
 											checked: e.target.checked,
 										})
 									}
@@ -203,9 +229,65 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 									}
 									label='Ответить'
 								/>
-								<IconButton>
+								<IconButton
+									id='more'
+									aria-controls={moreDropdownOpen ? 'more options' : undefined}
+									aria-haspopup='true'
+									aria-expanded={moreDropdownOpen ? 'true' : undefined}
+									onClick={handleClick}>
 									<MoreHoriz sx={{ width: 16, height: 16 }} />
 								</IconButton>
+								<Menu
+									id='more options'
+									anchorEl={moreButtonEl}
+									open={moreDropdownOpen}
+									onClose={handleClose}>
+									{answerData?.user?.id === userDetails?.id && (
+										<>
+											<MenuItem
+												onClick={handleClose}
+												sx={{ width: '100%', height: 36 }}>
+												<Box
+													onClick={() => setIsEditing(true)}
+													className='flex'>
+													<Edit sx={{ mr: 1 }} />
+													<Typography>Редактировать</Typography>
+												</Box>
+											</MenuItem>
+											<MenuItem
+												onClick={handleClose}
+												sx={{ width: '100%', height: 36 }}>
+												<FormControlLabel
+													onClick={() =>
+														DeleteContent({
+															id: answerData.id,
+															model: 'answer',
+														})
+													}
+													control={<Delete sx={{ mx: 1.2 }} />}
+													label='Удалить'
+												/>
+											</MenuItem>
+										</>
+									)}
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
+										<FormControlLabel
+											control={<Report sx={{ mx: 1.2 }} />}
+											label='Пожаловаться'
+										/>
+									</MenuItem>
+									<Divider />
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
+										<FormControlLabel
+											control={<Checkbox />}
+											label='Включить уведомления'
+										/>
+									</MenuItem>
+								</Menu>
 							</Box>
 							<Box sx={{ display: 'flex', alignItems: 'center' }}>
 								<Button onClick={handleSolved} size='small' variant='outlined'>

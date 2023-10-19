@@ -77,3 +77,5 @@ export interface CustomFile {
 	file: File
 	preview: string
 }
+
+export type Model = 'question' | 'answer' | 'comment'

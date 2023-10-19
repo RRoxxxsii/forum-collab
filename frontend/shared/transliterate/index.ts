@@ -67,11 +67,18 @@ const converter: { [key: string]: string } = {
 	ю: 'yu',
 }
 
-export function transliterate(word: string): string {
+export function Transliterate(word: string): string {
 	return word
 		.split('')
 		.map(function (char) {
-			return converter[char] || char
+			if (converter[char] !== undefined) {
+				return converter[char]
+			} else if (char === 'ь' || char === 'ъ') {
+				return ''
+			} else {
+				return char
+			}
 		})
 		.join('')
+		.replaceAll(/ /g, '_')
 }

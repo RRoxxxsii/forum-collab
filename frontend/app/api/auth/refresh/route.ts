@@ -6,7 +6,7 @@ export async function GET() {
 	const refreshTokenCookie = cookies().get('refresh_token')?.value
 
 	if (!refreshTokenCookie) {
-		return NextResponse.json({ message: 'Вы не авторизованы' }, { status: 500 })
+		return NextResponse.json({ message: 'Вы не авторизованы' }, { status: 403 })
 	}
 
 	try {

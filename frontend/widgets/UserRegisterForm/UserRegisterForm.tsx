@@ -53,7 +53,7 @@ export const UserRegisterForm = () => {
 				isLoading: false,
 				autoClose: 3000,
 			})
-			// router.push('/login')
+			router.push('/login')
 		}
 	}
 

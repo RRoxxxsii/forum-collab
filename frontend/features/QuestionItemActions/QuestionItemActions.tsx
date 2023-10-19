@@ -1,16 +1,10 @@
 'use client'
 
-import theme from '@/shared/theme/theme'
+import { Transliterate } from '@/shared/transliterate'
 import { IQuestion } from '@/types/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
-import {
-	Box,
-	CardActions,
-	Chip,
-	IconButton,
-	Typography,
-	styled,
-} from '@mui/material'
+import { Box, Chip, Typography, styled } from '@mui/material'
+import Link from 'next/link'
 
 const ListItem = styled('li')(({ theme }) => ({
 	margin: theme.spacing(0.5),
@@ -22,7 +16,14 @@ export const QuestionItemActions = ({
 	questionData: IQuestion
 }) => {
 	return (
-		<CardActions sx={{ width: '100%', justifyContent: 'space-between', p: 0 }}>
+		<Box
+			sx={{
+				display: 'flex',
+				width: '100%',
+				justifyContent: 'space-between',
+				p: 0,
+				alignItems: 'center',
+			}}>
 			<Box
 				sx={{
 					display: 'flex',
@@ -36,19 +37,37 @@ export const QuestionItemActions = ({
 				{questionData?.tags.map((tag) => {
 					return (
 						<ListItem
-							sx={{ p: 0, mr: 1, cursor: 'pointer', flexWrap: 'nowrap' }}
+							sx={{
+								p: 0,
+								mr: 1,
+								cursor: 'pointer',
+								flexWrap: 'nowrap',
+							}}
 							key={tag.tag_name}>
-							<Chip key={tag.tag_name} label={tag.tag_name} />
+							<Chip
+								key={tag.tag_name}
+								label={tag.tag_name}
+								sx={{
+									background: '#292929',
+									color: '#e1e1e1',
+									'&:hover': { transition: 0.3, background: '#363636' },
+								}}
+							/>
+							<Link href={`/questions/?tags=${Transliterate(tag?.tag_name)}`} />
 						</ListItem>
 					)
 				})}
 			</Box>
-			<Box sx={{ display: 'flex', flex: '50%', justifyContent: 'flex-end' }}>
-				<IconButton aria-label='comments'>
-					<Typography sx={{ mr: 1 }}>{questionData?.answers_amount}</Typography>
-					<TextsmsIcon />
-				</IconButton>
+			<Box
+				sx={{
+					display: 'flex',
+					flex: '50%',
+					justifyContent: 'flex-end',
+					alignItems: 'center',
+				}}>
+				<Typography sx={{}}>{questionData?.answers_amount}</Typography>
+				<TextsmsIcon sx={{ m: 1 }} />
 			</Box>
-		</CardActions>
+		</Box>
 	)
 }

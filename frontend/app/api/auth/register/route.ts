@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 		}
 		const { email, user_name, password } = await req.json()
 
-		const res = await fetch(`${BASE_URL}/account/create-account/`, {
+		const response = await fetch(`${BASE_URL}/account/create-account/`, {
 			method: 'POST',
 			body: JSON.stringify({
 				email: email,
@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
 			headers: { 'Content-Type': 'application/json' },
 		})
 
-		const data = await res.json()
+		const data = await response.json()
 
-		if (!res.ok) {
+		if (!response.ok) {
 			let errorMessage = ''
 			if (data?.email) {
 				data?.email.forEach((error: string) => {
@@ -42,13 +42,13 @@ export async function POST(req: NextRequest) {
 				{
 					message: errorMessage,
 				},
-				{ status: res.status }
+				{ status: response.status }
 			)
 		}
 
 		return NextResponse.json(
 			{ message: 'Вы успешно зарегистрировались!' },
-			{ status: 200 }
+			{ status: response.status }
 		)
 	} catch (error) {
 		return

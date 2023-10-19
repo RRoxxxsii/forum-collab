@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 		const session = cookies().get('access_token')?.value
 
 		if (!req.body) {
-			return 
+			return
 		}
 		const { tags, title, content, uploaded_images } = await req.json()
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 				{ status: res.status }
 			)
 		}
-		return NextResponse.json({ ...data }, { status: 200 })
+		return NextResponse.json({ ...data }, { status: res.status })
 	} catch (error: any | unknown) {
 		return NextResponse.json({ message: error.message }, { status: 500 })
 	}
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
 				{ status: res.status }
 			)
 		}
-		return NextResponse.json({ data }, { status: 200 })
+		return NextResponse.json({ data }, { status: res.status })
 	} catch (error: any | unknown) {
 		return NextResponse.json({ message: error.message }, { status: 500 })
 	}

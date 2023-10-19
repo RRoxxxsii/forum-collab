@@ -3,7 +3,7 @@ import { AnswerCreateForm } from '@/features/AnswerCreateForm'
 import { QuestionActionsMenu } from '@/features/QuestionActionsMenu'
 import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { QuestionContent } from '@/shared/QuestionContent'
-import { Dislike, Like } from '@/shared/api/changeRating'
+import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IQuestion, IUser } from '@/types/types'
 import { AnswerList } from '@/widgets/AnswerList'
@@ -36,11 +36,11 @@ export default function QuestionPage() {
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
 									<QuestionItemRating
+										setQuestionData={setQuestionData}
 										model='question'
 										questionData={questionData}
 										profileData={profileData}
-										setDislike={Dislike}
-										setLike={Like}
+										setRating={ChangeRating}
 									/>
 								</Box>
 								<Box sx={{ padding: 1.5 }}>

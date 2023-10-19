@@ -2,15 +2,12 @@ import { CategoryType } from '@/providers/CategoryProvider'
 import { IQuestion, IUser } from '@/types/types'
 import { NextResponse } from 'next/server'
 import { Dispatch, SetStateAction } from 'react'
+import { BASE_URL } from '../constants'
 
-export async function fetchQuestions({
-	category,
-}: {
-	category: CategoryType
-}): Promise<any | IQuestion[]> {
+export async function fetchQuestions({ category }: { category: CategoryType }) {
 	try {
 		const response = await fetch(
-			`/api/forum/questions/?limit=10&sort=${category}`,
+			`${BASE_URL}/forum/questions/?limit=10&sort=${category}`,
 			{
 				method: 'GET',
 				headers: {
@@ -19,13 +16,13 @@ export async function fetchQuestions({
 			}
 		)
 
-		const result: IQuestion[] = await response.json()
+		const result = await response.json()
 
 		if (!response.ok || !Array.isArray(result)) {
 			throw new Error('Failed to fetch questions')
 		}
 
-		NextResponse.json({ ...result })
+		return result
 	} catch (error) {
 		console.log(error)
 	}

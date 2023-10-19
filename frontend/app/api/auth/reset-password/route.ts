@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 		}
 		const { email } = await req.json()
 
-		const res = await fetch(`${BASE_URL}/account/password_reset/`, {
+		const response = await fetch(`${BASE_URL}/account/password_reset/`, {
 			method: 'POST',
 			body: JSON.stringify({
 				email: email,
@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
 			headers: { 'Content-Type': 'application/json' },
 		})
 
-		const data = await res.json()
+		const data = await response.json()
 
-		if (!res.ok) {
+		if (!response.ok) {
 			return NextResponse.json(
 				{
 					...data,
 				},
-				{ status: res.status }
+				{ status: response.status }
 			)
 		}
-		return NextResponse.json({ ...data }, { status: 200 })
+		return NextResponse.json({ ...data }, { status: response.status })
 	} catch (error: any | unknown) {
 		return NextResponse.json(
 			{ message: error?.message },
