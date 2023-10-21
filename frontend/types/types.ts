@@ -1,5 +1,3 @@
-import { JSDocImplementsTag } from 'typescript'
-
 export interface LinkType {
 	text: string
 	href: string
@@ -39,6 +37,10 @@ export interface IAnswer {
 	images: string[]
 	comments: IComment[]
 	uploaded_images: string[]
+}
+
+export interface ErrorRes {
+	error: string
 }
 
 export interface IComment {

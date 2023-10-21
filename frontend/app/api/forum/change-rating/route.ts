@@ -13,7 +13,10 @@ export async function POST(req: NextRequest) {
 	const access_token = cookies().get('access_token')?.value
 
 	if (!id || !model) {
-		return NextResponse.json({ error: 'ID or Model was not provided' })
+		return NextResponse.json(
+			{ error: 'ID или Модель неизвестны' },
+			{ status: 422 }
+		)
 	}
 	const response = await fetch(
 		`${BASE_URL}/forum/likes/${id}/${action}/?model=${model}`,
@@ -27,7 +30,7 @@ export async function POST(req: NextRequest) {
 	const result = await response.json()
 
 	if (response.ok) {
-		return NextResponse.json({ message: result })
+		return NextResponse.json({ ...result }, { status: response.status })
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

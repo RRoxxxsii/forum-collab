@@ -7,7 +7,10 @@ export async function POST(req: NextRequest) {
 	const { id, model }: { id: number; model: Model } = await req.json()
 
 	if (!id || !model) {
-		return NextResponse.json({ error: 'Айди или модель не были переданы' })
+		return NextResponse.json(
+			{ error: 'ID или Модель неизвестны' },
+			{ status: 422 }
+		)
 	}
 	const access_token = cookies().get('access_token')?.value
 
@@ -22,11 +25,11 @@ export async function POST(req: NextRequest) {
 		const result = await response.json()
 
 		if (response.ok) {
-			return NextResponse.json({ ...result })
-		} else {
 			return NextResponse.json({ ...result }, { status: response.status })
+		} else {
+			return NextResponse.json({ error: result }, { status: response.status })
 		}
 	} catch (error) {
-		return NextResponse.json({ error })
+		return NextResponse.json({ error: error })
 	}
 }

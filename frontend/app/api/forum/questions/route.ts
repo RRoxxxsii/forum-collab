@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
 	const access_token = cookies().get('access_token')?.value
 
 	if (!page_id) {
-		return NextResponse.json({ error: 'Айди поста не было передано' })
+		return NextResponse.json(
+			{ error: 'ID вопроса неизвестны' },
+			{ status: 422 }
+		)
 	}
 
 	const response = await fetch(`${BASE_URL}/forum/questions/${page_id}/`, {

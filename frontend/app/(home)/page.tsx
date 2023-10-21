@@ -1,8 +1,9 @@
+import { EmailAlert } from '@/features/EmailAlert'
 import { CategoryTabs } from '@/widgets/CategoryTabs'
 import { QuestionList } from '@/widgets/QuestionList'
 import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
 
-import { Alert, AlertTitle, Box, Typography } from '@mui/material'
+import { Alert, AlertTitle, Box } from '@mui/material'
 
 export default async function HomePage() {
 	return (
@@ -11,10 +12,7 @@ export default async function HomePage() {
 				<CategoryTabs />
 				<Box sx={HomeContainer}>
 					<Box sx={desktopList}>
-						<Alert variant='outlined' severity='warning' sx={{ mb: 2 }}>
-							<AlertTitle>По дтвердите почту</AlertTitle>
-							Эта надпись исчезнет, когда вы подтведите свою почту
-						</Alert>
+						<EmailAlert />
 						<QuestionListAskFast />
 						<QuestionList />
 					</Box>

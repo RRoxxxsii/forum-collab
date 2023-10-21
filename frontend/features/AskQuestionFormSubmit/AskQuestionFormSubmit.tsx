@@ -25,6 +25,7 @@ export const AskQuestionFormSubmit = ({
 
 	async function createSubmit() {
 		const questionToast = toast.loading('Открытие вопроса...')
+
 		try {
 			const response = await fetch('/api/forum/ask-question', {
 				method: 'POST',
@@ -40,28 +41,8 @@ export const AskQuestionFormSubmit = ({
 			const result = await response.json()
 
 			if (!response.ok) {
-				let errorMessage = ''
-				if (result?.code) {
-					errorMessage +=
-						'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
-				}
-				if (result?.tags) {
-					errorMessage += 'Теги: '
-					result.tags.forEach((error: string) => {
-						errorMessage += error + ' '
-					})
-				}
-				if (result?.title) {
-					errorMessage += '\nЗаголовок: '
-					result.tags.forEach((error: string) => {
-						errorMessage += error + ' '
-					})
-				}
 				toast.update(questionToast, {
-					render:
-						errorMessage.length > 0
-							? errorMessage
-							: 'Разорвана связь с сервером, проверьте подключение',
+					render: result.error,
 					type: 'error',
 					isLoading: false,
 					autoClose: 3000,
@@ -69,7 +50,7 @@ export const AskQuestionFormSubmit = ({
 				return null
 			}
 			toast.update(questionToast, {
-				render: result.message,
+				render: result,
 				type: 'success',
 				isLoading: false,
 				autoClose: 3000,
@@ -89,7 +70,9 @@ export const AskQuestionFormSubmit = ({
 
 	async function editSubmit() {
 		if (!questionId || !userId) return null
+
 		const questionToast = toast.loading('Обновление вопроса...')
+
 		try {
 			const response = await fetch('/api/forum/update-question', {
 				method: 'POST',
@@ -106,17 +89,17 @@ export const AskQuestionFormSubmit = ({
 
 			if (!response.ok) {
 				let errorMessage = ''
-				if (result?.code) {
+				if (result?.error.code) {
 					errorMessage +=
 						'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
 				}
-				if (result?.tags) {
+				if (result?.error.tags) {
 					errorMessage += 'Теги: '
 					result.tags.forEach((error: string) => {
 						errorMessage += error + ' '
 					})
 				}
-				if (result?.title) {
+				if (result?.error.title) {
 					errorMessage += '\nЗаголовок: '
 					result.tags.forEach((error: string) => {
 						errorMessage += error + ' '
@@ -134,7 +117,7 @@ export const AskQuestionFormSubmit = ({
 				return null
 			}
 			toast.update(questionToast, {
-				render: result.message,
+				render: 'Вопрос успешно обновлен',
 				type: 'success',
 				isLoading: false,
 				autoClose: 3000,

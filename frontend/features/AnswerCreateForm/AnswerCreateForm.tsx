@@ -1,10 +1,10 @@
 'use client'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
-import { BASE_URL } from '@/shared/constants'
-import { IAnswer, IQuestion, IUser } from '@/types/types'
+import { ErrorRes, IAnswer, IQuestion, IUser } from '@/types/types'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import { Button, Typography } from '@mui/material'
 import { Dispatch, SetStateAction, useContext, useState } from 'react'
+import { toast } from 'react-toastify'
 
 async function addAnswer({
 	questionData,
@@ -28,10 +28,21 @@ async function addAnswer({
 				answer_content: answerContent,
 			}),
 		})
-		if (!response.ok) {
-			throw new Error(response.statusText)
+
+		const data: IAnswer | ErrorRes = await response.json()
+
+		if ('error' in data) {
+			return toast.error(data.error, {
+				position: 'bottom-center',
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+				theme: 'dark',
+			})
 		}
-		const data: IAnswer = await response.json()
 
 		setAnswerContent('')
 		setQuestionData((questionData) => {
