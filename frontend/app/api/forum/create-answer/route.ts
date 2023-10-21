@@ -3,13 +3,27 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-	const { question_id, answer_content } = await req.json()
+	const {
+		question_id,
+		answer_content,
+	}: { question_id: number; answer_content: string } = await req.json()
 
 	const access_token = cookies().get('access_token')?.value
 
 	if (!question_id || !answer_content) {
-		return NextResponse.json({ error: 'Id или сам ответ не был предоставлен' })
+		return NextResponse.json(
+			{ error: 'ID или ответ неизвестен' },
+			{ status: 422 }
+		)
 	}
+
+	if (answer_content.length < 10) {
+		return NextResponse.json(
+			{ error: 'Ответ слишком короткий' },
+			{ status: 400 }
+		)
+	}
+
 	const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
 		method: 'POST',
 		headers: {
@@ -26,6 +40,6 @@ export async function POST(req: NextRequest) {
 	if (response.ok) {
 		return NextResponse.json({ ...result }, { status: response.status })
 	} else {
-		return NextResponse.json({ ...result }, { status: response.status })
+		return NextResponse.json({ error: result }, { status: response.status })
 	}
 }

@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
 	const access_token = cookies().get('access_token')?.value
 
 	if (!question_answer_id) {
-		return NextResponse.json({ error: 'Айди вопроса не было передано' })
+		return NextResponse.json(
+			{ error: 'ID вопроса неизвестно' },
+			{ status: 422 }
+		)
 	}
 	const response = await fetch(
 		`${BASE_URL}/forum/mark-answer-solving/${question_answer_id}/`,
@@ -24,7 +27,7 @@ export async function POST(req: NextRequest) {
 	console.log(result)
 
 	if (response.ok) {
-		return NextResponse.json({ ...result })
+		return NextResponse.json({ ...result }, { status: response.status })
 	} else {
 		return NextResponse.json(
 			{ error: result.detail },

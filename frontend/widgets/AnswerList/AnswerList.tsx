@@ -1,4 +1,5 @@
 'use client'
+import { AskAnswerFormSubmit } from '@/features/AskAnswerFormSubmit'
 import { ChangeRatingProps } from '@/features/QuestionItemRating/QuestionItemRating'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { ChangeRating } from '@/shared/api/changeRating'
@@ -33,12 +34,10 @@ import { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AddComment } from '../AddComment'
 import { TiptapEditor } from '../TiptapEditor'
-import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
-import { AskAnswerFormSubmit } from '@/features/AskAnswerFormSubmit'
 export const AnswerList = ({ questionData }: { questionData: IQuestion }) => {
 	return (
 		<>
-			{questionData.answers.map((answer) => (
+			{questionData?.answers?.map((answer) => (
 				<AnswerCard key={answer.id} answerData={answer} />
 			))}
 		</>
@@ -200,9 +199,9 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 										})
 									}
 								/>
-								{answerData.rating.like_amount -
-									answerData.rating.dislike_amount +
-									clientRating}
+								{answerData?.rating?.like_amount -
+									answerData?.rating?.dislike_amount +
+									clientRating || 0}
 								<Checkbox
 									disabled={answerData?.user?.id === userDetails?.id}
 									checked={checked === 1}

@@ -8,8 +8,19 @@ export async function POST(req: NextRequest) {
 	const access_token = cookies().get('access_token')?.value
 
 	if (!comment || !question_answer) {
-		return NextResponse.json({ error: 'ID or Model was not provided' })
+		return NextResponse.json(
+			{ error: 'ID или Модель неизвестны' },
+			{ status: 422 }
+		)
 	}
+
+	if (question_answer.length < 1) {
+		return NextResponse.json(
+			{ error: 'Коммент слишком короткое' },
+			{ status: 422 }
+		)
+	}
+
 	const response = await fetch(`${BASE_URL}/forum/create-comment/`, {
 		method: 'POST',
 		headers: {
@@ -24,7 +35,7 @@ export async function POST(req: NextRequest) {
 	const result = await response.json()
 
 	if (response.ok) {
-		return NextResponse.json({ message: result })
+		return NextResponse.json({ ...result }, { status: response.status })
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

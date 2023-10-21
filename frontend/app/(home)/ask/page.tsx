@@ -22,8 +22,8 @@ export default async function AskPage() {
 						minHeight: '400px',
 						alignItems: 'center',
 					}}>
-					<AskTabs />
-					<AskQuestionForm type='create'/>
+					{/* <AskTabs /> */}
+					<AskQuestionForm type='create' />
 				</Paper>
 			</Box>
 		</Box>

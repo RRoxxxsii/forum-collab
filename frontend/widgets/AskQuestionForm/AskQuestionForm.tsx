@@ -4,7 +4,7 @@ import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { AskFastContext } from '@/providers/AskFastProvider'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IQuestion, ITag, IUser } from '@/types/types'
-import { Box, Skeleton, TextField, Typography } from '@mui/material'
+import { Box, Divider, TextField, Typography } from '@mui/material'
 import { useSearchParams } from 'next/navigation'
 import {
 	Dispatch,
@@ -86,6 +86,12 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 
 	return (
 		<>
+			<Typography
+				variant='h1'
+				sx={{ fontSize: 24, fontWeight: 500, mb: 2, color: '#b4b4b4' }}>
+				{type === 'create' ? 'Создание вопроса' : 'Редактирование вопроса'}
+			</Typography>
+			<Divider sx={{ mb: 2 }} />
 			<TextField
 				type='text'
 				autoFocus
