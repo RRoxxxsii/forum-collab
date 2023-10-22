@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
 		if (content.length < 10) {
 			return NextResponse.json(
-				{ error: 'Ответ слишком короткий' },
+				{ error: 'Описание вопроса слишком короткое' },
 				{ status: 400 }
 			)
 		}
@@ -32,9 +32,26 @@ export async function POST(req: NextRequest) {
 		const data = await res.json()
 
 		if (!res.ok) {
+			let errorMessage = ''
+			if (data?.code) {
+				errorMessage +=
+					'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
+			}
+			if (data?.tags) {
+				errorMessage += 'Теги: '
+				data.tags.forEach((error: string) => {
+					errorMessage += error + ' '
+				})
+			}
+			if (data?.title) {
+				errorMessage += '\nЗаголовок: '
+				data.tags.forEach((error: string) => {
+					errorMessage += error + ' '
+				})
+			}
 			return NextResponse.json(
 				{
-					error: { ...data },
+					error: errorMessage,
 				},
 				{ status: res.status }
 			)
@@ -52,7 +69,7 @@ export async function GET(req: NextRequest) {
 		const { searchParams } = new URL(req.url ?? '')
 		const q = searchParams.get('q')
 
-		const response = await fetch(`${BASE_URL}/forum/ask-question/?q=${q}`, {
+		const res = await fetch(`${BASE_URL}/forum/ask-question/?q=${q}`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -60,35 +77,17 @@ export async function GET(req: NextRequest) {
 			},
 		})
 
-		const data = await response.json()
-		if (!response.ok) {
-			let errorMessage = ''
-			if (data?.error.code) {
-				errorMessage +=
-					'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
-			}
-			if (data?.error.tags) {
-				errorMessage += 'Теги: '
-				data.tags.forEach((error: string) => {
-					errorMessage += error + ' '
-				})
-			}
-			if (data?.error.title) {
-				errorMessage += '\nЗаголовок: '
-				data.tags.forEach((error: string) => {
-					errorMessage += error + ' '
-				})
-			}
-
+		const data = await res.json()
+		if (!res.ok) {
 			return NextResponse.json(
 				{
-					error: { errorMessage },
+					...data,
 				},
-				{ status: response.status }
+				{ status: res.status }
 			)
 		}
-		return NextResponse.json({ ...data }, { status: response.status })
+		return NextResponse.json({ data }, { status: res.status })
 	} catch (error: any | unknown) {
-		return NextResponse.json({ error: error.message }, { status: 500 })
+		return NextResponse.json({ message: error.message }, { status: 500 })
 	}
 }

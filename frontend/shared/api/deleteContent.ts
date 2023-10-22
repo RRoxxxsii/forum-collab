@@ -40,13 +40,12 @@ export async function DeleteContent({
 		const result = await response.json()
 
 		if (!response.ok) {
-			toast.update(toastID, {
-				render: `${result.detail}`,
+			return toast.update(toastID, {
+				render: `${result.error.detail}`,
 				type: 'error',
 				isLoading: false,
 				autoClose: 3000,
 			})
-			return
 		}
 
 		toast.update(toastID, {

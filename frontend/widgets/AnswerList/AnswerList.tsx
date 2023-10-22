@@ -63,13 +63,12 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 			const result = await response.json()
 
 			if (!response.ok) {
-				toast.update(solveToast, {
+				return toast.update(solveToast, {
 					render: result.error,
 					type: 'error',
 					isLoading: false,
 					autoClose: 3000,
 				})
-				return null
 			}
 
 			toast.update(solveToast, {
@@ -113,6 +112,7 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 
 	const [isEditing, setIsEditing] = useState(false)
 	const [newContent, setNewContent] = useState<string>(answerData.answer)
+
 	return (
 		<>
 			<Box sx={{ px: 3, py: 2, width: '100%' }}>
@@ -160,11 +160,12 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 								<TiptapEditor
 									setContent={setNewContent}
 									content={newContent}
-									contentOnEdit={answerData.answer}
+									contentOnEdit={newContent}
 									type='answer'
 								/>
 								<AskAnswerFormSubmit
 									answerContent={answerData.answer}
+									questionId={answerData.question}
 									images={[]}
 								/>
 							</>
@@ -313,6 +314,22 @@ function AnswerCard({ answerData }: { answerData: IAnswer }) {
 }
 
 const CommentCard = ({ comment }: { comment: IComment }) => {
+	const [isCommenting, setIsCommenting] = useState<boolean>(false)
+
+	const { userDetails } = useContext(UserDetailsContext)
+
+	const [moreButtonEl, setMoreButtonEl] = useState<HTMLElement | null>(null)
+
+	const moreDropdownOpen = Boolean(moreButtonEl)
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setMoreButtonEl(event.currentTarget)
+	}
+	const handleClose = () => {
+		setMoreButtonEl(null)
+	}
+
+	const [isEditing, setIsEditing] = useState(false)
+
 	return (
 		<>
 			<Box sx={{ display: 'flex' }}>
@@ -353,9 +370,13 @@ const CommentCard = ({ comment }: { comment: IComment }) => {
 									{dayjs(comment?.creation_date).format('DD-MM-YYYY')}
 								</Typography>
 							</Box>
-							<Typography className='comment' sx={{}} variant='body1'>
-								{comment.comment}
-							</Typography>
+							{setIsEditing ? (
+								<AddComment />
+							) : (
+								<Typography className='comment' sx={{}} variant='body1'>
+									{comment.comment}
+								</Typography>
+							)}
 							<Box
 								sx={{
 									display: 'flex',
@@ -370,9 +391,65 @@ const CommentCard = ({ comment }: { comment: IComment }) => {
 									}
 									label='Ответить'
 								/>
-								<IconButton>
-									<MoreHoriz sx={{ width: 12, height: 12 }} />
+								<IconButton
+									id='more'
+									aria-controls={moreDropdownOpen ? 'more options' : undefined}
+									aria-haspopup='true'
+									aria-expanded={moreDropdownOpen ? 'true' : undefined}
+									onClick={handleClick}>
+									<MoreHoriz sx={{ width: 16, height: 16 }} />
 								</IconButton>
+								<Menu
+									id='more options'
+									anchorEl={moreButtonEl}
+									open={moreDropdownOpen}
+									onClose={handleClose}>
+									{comment?.user?.id === userDetails?.id && (
+										<>
+											<MenuItem
+												onClick={handleClose}
+												sx={{ width: '100%', height: 36 }}>
+												<Box
+													onClick={() => setIsEditing(true)}
+													className='flex'>
+													<Edit sx={{ mr: 1 }} />
+													<Typography>Редактировать</Typography>
+												</Box>
+											</MenuItem>
+											<MenuItem
+												onClick={handleClose}
+												sx={{ width: '100%', height: 36 }}>
+												<FormControlLabel
+													onClick={() =>
+														DeleteContent({
+															id: comment.id,
+															model: 'comment',
+														})
+													}
+													control={<Delete sx={{ mx: 1.2 }} />}
+													label='Удалить'
+												/>
+											</MenuItem>
+										</>
+									)}
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
+										<FormControlLabel
+											control={<Report sx={{ mx: 1.2 }} />}
+											label='Пожаловаться'
+										/>
+									</MenuItem>
+									<Divider />
+									<MenuItem
+										onClick={handleClose}
+										sx={{ width: '100%', height: 36 }}>
+										<FormControlLabel
+											control={<Checkbox />}
+											label='Включить уведомления'
+										/>
+									</MenuItem>
+								</Menu>
 							</Box>
 						</Box>
 					</Box>

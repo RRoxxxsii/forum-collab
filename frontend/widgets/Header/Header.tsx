@@ -67,7 +67,7 @@ export const HeaderDesktop = async ({
 }: {
 	children: React.ReactNode
 }) => {
-	const session = cookies().has('access_token')
+	const session = cookies().has('refresh_token')
 
 	return (
 		<>

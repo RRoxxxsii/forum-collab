@@ -1,8 +1,18 @@
 'use client'
 import { Transliterate } from '@/shared/transliterate'
+import { ErrorRes, IQuestion, ITag } from '@/types/types'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
+
+interface SubmitResponse {
+	content: string
+	question: number
+	title: string
+	user: string
+	tags?: ITag[]
+	error?: any
+}
 
 export const AskQuestionFormSubmit = ({
 	titleValue,
@@ -38,27 +48,38 @@ export const AskQuestionFormSubmit = ({
 				headers: { 'Content-Type': 'application/json' },
 			})
 
-			const result = await response.json()
+			const result: SubmitResponse = await response.json()
 
-			if (!response.ok) {
-				toast.update(questionToast, {
-					render: result.error,
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-				return null
+			if (!response.ok || 'error' in result) {
+				if ('error' in result) {
+					return toast.update(questionToast, {
+						render: result.error,
+						type: 'error',
+						isLoading: false,
+						autoClose: 3000,
+					})
+				} else {
+					return toast.update(questionToast, {
+						render: 'Неизвестная ошибка',
+						type: 'error',
+						isLoading: false,
+						autoClose: 3000,
+					})
+				}
 			}
 			toast.update(questionToast, {
-				render: result,
+				render: 'Вопрос создан',
 				type: 'success',
 				isLoading: false,
 				autoClose: 3000,
 			})
 			router.push(
-				`/question/${result.question}/${result.title}?tags=${result.tags}`
+				`/question/${result?.question}/${Transliterate(
+					result?.title
+				)}?tags=${result?.tags?.map((tag) => Transliterate(tag.tag_name))}`
 			)
 		} catch (error: any | unknown) {
+			console.log(error)
 			toast.update(questionToast, {
 				render: 'Разорвана связь с сервером, проверьте подключение',
 				type: 'error',
@@ -85,47 +106,35 @@ export const AskQuestionFormSubmit = ({
 				headers: { 'Content-Type': 'application/json' },
 			})
 
-			const result = await response.json()
+			const result: IQuestion | ErrorRes = await response.json()
 
-			if (!response.ok) {
-				let errorMessage = ''
-				if (result?.error.code) {
-					errorMessage +=
-						'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
-				}
-				if (result?.error.tags) {
-					errorMessage += 'Теги: '
-					result.tags.forEach((error: string) => {
-						errorMessage += error + ' '
+			if (!response.ok || 'error' in result) {
+				if ('error' in result) {
+					return toast.update(questionToast, {
+						render: result.error,
+						type: 'error',
+						isLoading: false,
+						autoClose: 3000,
+					})
+				} else {
+					return toast.update(questionToast, {
+						render: 'Неизвестная ошибка',
+						type: 'error',
+						isLoading: false,
+						autoClose: 3000,
 					})
 				}
-				if (result?.error.title) {
-					errorMessage += '\nЗаголовок: '
-					result.tags.forEach((error: string) => {
-						errorMessage += error + ' '
-					})
-				}
-				toast.update(questionToast, {
-					render:
-						errorMessage.length > 0
-							? errorMessage
-							: 'Разорвана связь с сервером, проверьте подключение',
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-				return null
 			}
 			toast.update(questionToast, {
-				render: 'Вопрос успешно обновлен',
+				render: 'Вопрос изменён',
 				type: 'success',
 				isLoading: false,
 				autoClose: 3000,
 			})
 			router.push(
-				`/question/${result.id}/${Transliterate(
-					result.title
-				)}?tags=${Transliterate(result.tags)}`
+				`/question/${result?.id}/${Transliterate(
+					result?.title
+				)}?tags=${result?.tags?.map((tag) => Transliterate(tag.tag_name))}`
 			)
 		} catch (error: any | unknown) {
 			toast.update(questionToast, {
