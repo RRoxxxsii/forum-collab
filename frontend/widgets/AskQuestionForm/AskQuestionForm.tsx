@@ -25,17 +25,14 @@ const fetchTagsOnQuery = async ({
 		const response = await fetch(`/api/forum/ask-question?q=${tagQuery}`, {
 			method: 'GET',
 		})
+		const dataObject = await response.json()
 		if (response.ok) {
-			const dataObject = await response.json()
 			const tagsToDisplayData: ITag[] = dataObject.data
 			setTagsToDisplay(tagsToDisplayData)
 		} else {
-			const error = await response.json()
-			console.log(error)
+			throw new Error(dataObject.error)
 		}
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }
 
 export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {

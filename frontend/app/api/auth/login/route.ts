@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 		})
 
 		return NextResponse.json(
-			{ message: 'Вы успешно авторизовались!' },
+			{ message: 'Вы успешно авторизовались! Переадресация...' },
 			{ status: response.status }
 		)
 	} catch (error) {
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 				? error.message
 				: 'An error occured. Please check username and password.'
 		return NextResponse.json(
-			{ message: errorMessage, ok: false },
+			{ error: errorMessage, ok: false },
 			{ status: 503 }
 		)
 	}
