@@ -8,15 +8,16 @@ import PlaceholderExtension, {
 import TypographyExtension, {
 	TypographyOptions,
 } from '@tiptap/extension-typography'
-import { Extension, Mark } from '@tiptap/react'
+import { Extension, Mark, Node } from '@tiptap/react'
 import StarterKit, { StarterKitOptions } from '@tiptap/starter-kit'
-
+import ImageExtension, { ImageOptions } from '@tiptap/extension-image'
 export const EditorExtensions: (
 	| Extension<StarterKitOptions, any>
 	| Mark<HighlightOptions, any>
 	| Mark<LinkOptions, any>
 	| Extension<PlaceholderOptions, any>
 	| Extension<TypographyOptions, any>
+	| Node<ImageOptions, any>
 )[] = [
 	StarterKit.configure({
 		bulletList: {
@@ -36,4 +37,5 @@ export const EditorExtensions: (
 	PlaceholderExtension.configure({
 		placeholder: 'Вы сейчас здесь',
 	}),
+	ImageExtension,
 ]

@@ -6,10 +6,7 @@ export async function GET() {
 	const refreshTokenCookie = cookies().get('refresh_token')?.value
 
 	if (!refreshTokenCookie) {
-		return NextResponse.json(
-			{ message: 'No refresh token found' },
-			{ status: 500 }
-		)
+		return NextResponse.json({ message: 'Вы не авторизованы' }, { status: 403 })
 	}
 
 	try {
@@ -29,7 +26,7 @@ export async function GET() {
 
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
 
-		return NextResponse.json({ messgae: 'token refershed' })
+		return response
 	} catch (error) {
 		console.log(error)
 	}

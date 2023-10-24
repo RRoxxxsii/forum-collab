@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
 	try {
 		if (!req.body) {
-			return null
+			return
 		}
 		const { email, password } = await req.json()
 
-		const res = await fetch(`${BASE_URL}/account/token/`, {
+		const response = await fetch(`${BASE_URL}/account/token/`, {
 			method: 'POST',
 			body: JSON.stringify({
 				email: email,
@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
 			headers: { 'Content-Type': 'application/json' },
 		})
 
-		const data = await res.json()
+		const data = await response.json()
 
-		if (!res.ok) {
+		if (!response.ok) {
 			return NextResponse.json(
 				{
 					...data,
 				},
-				{ status: res.status }
+				{ status: response.status }
 			)
 		}
 
@@ -44,9 +44,16 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(
 			{ message: 'Вы успешно авторизовались!' },
-			{ status: 200 }
+			{ status: response.status }
 		)
 	} catch (error) {
-		return null
+		const errorMessage =
+			error instanceof Error
+				? error.message
+				: 'An error occured. Please check username and password.'
+		return NextResponse.json(
+			{ message: errorMessage, ok: false },
+			{ status: 503 }
+		)
 	}
 }

@@ -1,88 +1,134 @@
+'use client'
 import { QuestionItemContent } from '@/entities/QuestionItemContent'
 import { QuestionItemActions } from '@/features/QuestionItemActions'
 import { QuestionItemRating } from '@/features/QuestionItemRating/QuestionItemRating'
-import { QuestionItemWrapper } from '@/shared/QuestionItemWrapper'
-import { IQuestionItem } from '@/types/types'
-import { Box } from '@mui/material'
+import { CategoryContext } from '@/providers/CategoryProvider'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
+import { ChangeRating } from '@/shared/api/changeRating'
+import { fetchQuestions } from '@/shared/api/fetchData'
+import { Transliterate } from '@/shared/transliterate'
+
+import { IQuestion, ITag } from '@/types/types'
+import { Error } from '@mui/icons-material'
+import { Box, Divider, Skeleton, Typography } from '@mui/material'
+import Link from 'next/link'
+import { useContext, useEffect, useState } from 'react'
 
 export const QuestionList = () => {
-	const questions: IQuestionItem[] = [
-		{
-			id: '0',
-			user: {
-				id: '0',
-				avatar: '',
-				email: 'example@example.com',
-				username: 'example',
-			},
-			chips: [
-				{ is_relevant: false, is_user_tag: true, tag: 'js', use_count: '224' },
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'html',
-					use_count: '123',
-				},
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'css',
-					use_count: '12124',
-				},
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'react',
-					use_count: '21',
-				},
-			],
-			description: 'test description',
-			title: 'test title',
-		},
-		{
-			id: '1',
-			user: {
-				id: '1',
-				avatar: '',
-				email: 'example@example.com',
-				username: 'example',
-			},
-			chips: [
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'php',
-					use_count: '123',
-				},
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'laravel',
-					use_count: '12124',
-				},
-				{
-					is_relevant: true,
-					is_user_tag: false,
-					tag: 'vue',
-					use_count: '21',
-				},
-			],
-			description: 'test description',
-			title: 'test title',
-		},
-	]
+	const [questions, setQuestions] = useState<IQuestion[]>([])
+	const [listLoadingState, setListLoadingState] = useState<
+		'loading' | 'success' | 'error'
+	>()
+	const { category } = useContext(CategoryContext)
+
+	const fetchQuestionList = async () => {
+		setQuestions([])
+		setListLoadingState('loading')
+		try {
+			const response = await fetchQuestions({ category: category })
+
+			if (Array.isArray(response)) {
+				setQuestions(response)
+				setListLoadingState('success')
+			} else {
+				setListLoadingState('error')
+			}
+		} catch (error) {
+			setListLoadingState('error')
+		}
+	}
+
+	useEffect(() => {
+		fetchQuestionList()
+	}, [category])
+
+	if (listLoadingState === 'error') {
+		return (
+			<>
+				<Typography sx={{ fontSize: 24, textAlign: 'center' }}>
+					При получении списка вопросов возникла ошибка. Попробуйте попытку
+					позже
+				</Typography>
+				<Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+					<Error sx={{ width: 36, height: 36 }} />
+				</Box>
+			</>
+		)
+	}
 
 	return (
 		<>
-			{questions.map((question) => (
-				<QuestionItemWrapper href={`question/${question.id}`} key={question.id}>
-					<QuestionItemRating />
+			{questions.length !== 0 ? (
+				questions.map((questionData: IQuestion) => (
+					<QuestionCard key={questionData.id} questionData={questionData} />
+				))
+			) : (
+				<>
+					{Array.from({ length: 10 }).map((_, index) => (
+						<Skeleton
+							sx={{ mb: 2, borderRadius: 1 }}
+							variant='rectangular'
+							width={'100%'}
+							height={210}
+							key={index}
+						/>
+					))}
+				</>
+			)}
+		</>
+	)
+}
+
+const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
+	const { userDetails } = useContext(UserDetailsContext)
+	const [questionCardData, setQuestionCardData] = useState<IQuestion | null>(
+		null
+	)
+
+	useEffect(() => {
+		setQuestionCardData(questionData)
+	})
+	return (
+		<>
+			<Box
+				key={questionData.id}
+				sx={{
+					borderRadius: '12px',
+					width: 'clamp(300px, 100%, 1200px)',
+					transition: 'border-color 0.3s ease-in-out',
+					'&:hover': { transition: 0.3, background: '#1b1b1b' },
+					cursor: 'pointer',
+					mb: 2,
+					textDecoration: 'none',
+					p: 0.8,
+				}}>
+				<Link
+					href={`/question/${questionData.id}/${Transliterate(
+						questionData.title
+					)}/?tags=${questionData.tags.map((tag: ITag) =>
+						Transliterate(tag.tag_name)
+					)}`}
+					className='flex hover:no-underline'>
+					<QuestionItemRating
+						model='question'
+						questionData={questionCardData}
+						setQuestionData={setQuestionCardData}
+						profileData={userDetails}
+						setRating={() =>
+							ChangeRating({
+								id: questionData.id,
+								model: 'question',
+								action: 'like',
+							})
+						}
+					/>
 					<Box sx={{ width: '100%', ml: 1 }}>
-						<QuestionItemContent questionData={question} />
-						<QuestionItemActions chips={question.chips} />
+						<QuestionItemContent questionData={questionData} />
+						<QuestionItemActions questionData={questionData} />
 					</Box>
-				</QuestionItemWrapper>
-			))}
+				</Link>
+			</Box>
+			<Divider sx={{ mb: 2 }} />
 		</>
 	)
 }

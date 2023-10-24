@@ -1,14 +1,28 @@
-import { IQuestionItem } from '@/types/types'
-
+import { IQuestion } from '@/types/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Avatar, Box, CardContent, IconButton, Typography } from '@mui/material'
+import { green } from '@mui/material/colors'
+import dayjs from 'dayjs'
+import ru from 'dayjs/locale/ru'
+import relativeTime from 'dayjs/plugin/relativeTime'
 export const QuestionItemContent = ({
 	questionData,
 }: {
-	questionData: Omit<IQuestionItem, 'chips'>
+	questionData: IQuestion
 }) => {
-	const { description, id, title, user } = questionData
-
+	const {
+		answers,
+		content,
+		creation_date,
+		id,
+		images,
+		is_solved,
+		rating,
+		title,
+		user,
+	} = questionData
+	dayjs.locale(ru)
+	dayjs.extend(relativeTime)
 	return (
 		<>
 			<Box sx={{ display: 'flex', width: '100%' }}>
@@ -36,19 +50,32 @@ export const QuestionItemContent = ({
 							}}>
 							<Box
 								sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-								<Avatar sx={{ width: 16, height: 16, mr: 1 }}></Avatar>
+								<Avatar
+									sx={{
+										width: 20,
+										height: 20,
+										fontSize: 16,
+										bgcolor: green[400],
+										marginRight: 1,
+									}}
+									aria-label='recipe'
+									src={questionData?.user?.profile_image ?? ''}>
+									{!questionData?.user?.profile_image &&
+										questionData?.user?.user_name[0].toUpperCase()}
+								</Avatar>
+
 								<Typography
 									variant='body2'
 									fontSize={12}
 									color='text.secondary'>
-									Отправлено: {user.username}{' '}
+									Отправлено: {user.user_name ?? 'Гость'}
 								</Typography>
 								<Typography
 									variant='body2'
 									sx={{ ml: 1 }}
 									color='gray'
 									fontSize={12}>
-									4 Дня назад
+									{dayjs(creation_date).toNow(true) + ' назад'}
 								</Typography>
 							</Box>
 							<Box>
@@ -58,14 +85,15 @@ export const QuestionItemContent = ({
 							</Box>
 						</Box>
 					</Box>
-					<CardContent sx={{ p: 0, ':last-child': { pb: 0 } }}>
+					<Box sx={{ p: 0, ':last-child': { pb: 0 } }}>
 						<Typography fontWeight={700} variant='body1' color='text.primary'>
 							{title}
 						</Typography>
-						<Typography variant='body1' color='text.secondary'>
-							{description}
-						</Typography>
-					</CardContent>
+						<Typography
+							dangerouslySetInnerHTML={{ __html: content }}
+							variant='body1'
+							color='text.secondary'></Typography>
+					</Box>
 				</Box>
 			</Box>
 		</>

@@ -67,3 +67,39 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
         data["access"] = str(refresh.access_token)
 
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NewUser
+        fields = ('id', 'email', 'user_name', 'about', 'profile_image',
+                  'is_active', 'is_banned', 'email_confirmed', 'created')
+        extra_kwargs = {'created': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('id', 'email', 'user_name', 'is_active', 'is_banned',
+                            'email_confirmed', 'created')
+
+
+class UserRatingSerializer(UserSerializer):
+    amount_solved = serializers.SerializerMethodField()
+    best_tags = serializers.SerializerMethodField()
+    karma = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = UserSerializer.Meta.fields + ('amount_solved', 'best_tags', 'karma')
+        model = UserSerializer.Meta.model
+
+    def get_amount_solved(self, instance: NewUser):
+        count = instance.get_amount_question_solved()
+        return count
+
+    def get_best_tags(self, instance: NewUser):
+        from forum.serializers import BaseTagFieldSerializer
+        best_tags = instance.get_top_expert_tags()
+
+        serializer = BaseTagFieldSerializer(data=best_tags, many=True)
+        serializer.is_valid(raise_exception=False)
+        return serializer.data
+
+    def get_karma(self, instance: NewUser):
+        return self.instance.count_karma()

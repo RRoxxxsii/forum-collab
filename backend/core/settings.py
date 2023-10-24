@@ -13,8 +13,6 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from celery.schedules import crontab
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-0=+c(yz10ia4nk5!y_u+@$timuz#_6azhoywi@!6#qf05@#fv(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     # Third Party Libraries
     'rest_framework',
@@ -52,6 +51,9 @@ INSTALLED_APPS = [
     # Custom applications
     'accounts',
     'forum',
+    'notifications',
+    'favourites',
+    'search',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +69,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # Кастомный middleware для запрета доступа забененному юзеру на веб-сайт
-    'accounts.middleware.ActiveUserMiddleware',
+    'middleware.ActiveUserMiddleware',
 
 ]
 
@@ -76,7 +78,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -173,6 +175,16 @@ REST_FRAMEWORK = {
     )
 }
 
+if not DEBUG:
+    REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ]
+    REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+        'anon': '20/minute',
+        'user': '50/minute',
+    }
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
@@ -219,7 +231,18 @@ SIMPLE_JWT = {
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# Redis
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+        "OPTIONS": {
+            "db": "1",
+        },
+
+    }
+}
 
 # Cors
 CORS_ALLOWED_ORIGINS = [
@@ -228,3 +251,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+DJANGO_NOTIFICATIONS_CONFIG = {'USE_JSONFIELD': True}
+
+# CONSTANTS FOR CACHING
+ANSWER_DISLIKE_NAME = 'answer_dislike_amount'
+ANSWER_LIKE_NAME = 'answer_like_amount'
+QUESTION_DISLIKE_NAME = 'question_dislike_amount'
+QUESTION_LIKE_NAME = 'question_like_amount'
+
+QUESTION_SOLVED_NAME = 'questions_solved_amount'
+EXPERT_TAGS_NAME = 'expert_tags'

@@ -1,17 +1,22 @@
+from django.template.loader import get_template
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .helpers import BaseEmailConfirmAPIView
-from .models import EmailConfirmationToken
+from .helpers import (BaseEmailConfirmAPIView, BaseUserMixin,
+                      BaseUserUpdateProfileMixin)
+from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
-                          RegisterUserSerializer, UserEmailSerializer)
-from .utils import (email_exists, get_current_site,
-                    send_confirmation_email)
+                          RegisterUserSerializer, UserEmailSerializer,
+                          UserRatingSerializer, UserSerializer)
+from .tasks import send_confirmation_email
+from .utils import email_exists, get_current_site
 
 
 class CustomUserRegisterAPIView(GenericAPIView):
@@ -29,8 +34,8 @@ class CustomUserRegisterAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         if user:
-            return Response(data=self.success_message, status=status.HTTP_201_CREATED)
-        return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
+        return Response(data={"message": self.error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestEmailToConfirmAPIView(GenericAPIView):
@@ -51,10 +56,13 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
 
         # Создание токена (будет частью url-адреса) для того, чтобы в дальнейшем подтвердить эл. почту.
         token = EmailConfirmationToken.objects.create(user=user)
-        send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url,
-                                email=user.email, token_id=token.id, user_id=user.id)
 
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+        send_confirmation_email.delay(
+            template_name='email/confirm_email.txt', current_url=current_url,
+            email=user.email, token_id=token.id, user_id=user.id
+        )
+
+        return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
 class ConfirmEmailAPIView(BaseEmailConfirmAPIView):
@@ -87,7 +95,8 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         user = request.user
         # Проверка на то, существует ли такой адрес в БД.
         if email_exists(email):
-            return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.error_message},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
         current_url = get_current_site(request, path='new-email-confirmation-result')   # Часть url для подтверждения
@@ -95,10 +104,12 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         # Создаем новый токен
         token = EmailConfirmationToken.objects.create(user=user)
 
-        send_confirmation_email(template_name='email/confirm_email.txt', current_url=current_url, email=email,
-                                token_id=token.id, user_id=user.id)
+        send_confirmation_email.delay(
+            template_name='email/confirm_email.txt', current_url=current_url, email=email,
+            token_id=token.id, user_id=user.id
+        )
 
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+        return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
 class ConfirmNewEmailAPIView(BaseEmailConfirmAPIView):
@@ -131,7 +142,7 @@ class DeleteAccountAPIView(GenericAPIView):
         user.time_deleted = timezone.now()
         user.save()
 
-        return Response(data=self.success_message, status=status.HTTP_200_OK)
+        return Response(data={"message": self.success_message}, status=status.HTTP_200_OK)
 
 
 class RestoreAccountAPIView(GenericAPIView):
@@ -151,15 +162,18 @@ class RestoreAccountAPIView(GenericAPIView):
         user = request.user
         # Проверка на то, существует ли такой адрес в БД и активен ли пользователь.
         if not email_exists(email) or user.is_active:
-            return Response(data=self.error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": self.error_message},
+                            status=status.HTTP_400_BAD_REQUEST)
         elif user.email == email:
             # Создаем новый токен
             token = EmailConfirmationToken.objects.create(user=user)
             current_url = get_current_site(request=request, path='restore-account-email-confirm')
-            send_confirmation_email(template_name='email/restore_account.txt', email=email, user_id=user.id,
-                                    current_url=current_url, token_id=token.id)
+            send_confirmation_email.delay(
+                template_name='email/restore_account.txt', email=email, user_id=user.id,
+                current_url=current_url, token_id=token.id
+            )
 
-            return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+            return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         # В случае, если что-то пошло не так
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -183,3 +197,36 @@ class EmailTokenObtainPairView(TokenObtainPairView):
     На вход принимает пароль и почтовый адрес пользователя. Возвращает access и refresh_token.
     """
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class UserViewSet(ModelViewSet):
+    queryset = NewUser.objects.all()
+    http_method_names = ('get', )
+    serializer_classes = {
+        'retrieve': UserRatingSerializer,
+        'list': UserSerializer
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action)
+
+
+class UserPersonalProfilePageAPIView(BaseUserMixin, RetrieveAPIView):
+    """
+    Получение своего профиля.
+    """
+    serializer_class = UserRatingSerializer
+
+
+class UploadProfileImageAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление картинки профиля пользователя.
+    """
+    pass
+
+
+class UploadProfileAboutAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
+    """
+    Обновление информации профиля пользователя.
+    """
+    pass

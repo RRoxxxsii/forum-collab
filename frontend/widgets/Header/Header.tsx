@@ -1,15 +1,14 @@
+import { BurgerMenu } from '@/features/BurgerMenu'
 import { Navlink } from '@/features/Navlink'
+import { LinkType } from '@/types/types'
 import { Login } from '@mui/icons-material'
 import AccountBoxIcon from '@mui/icons-material/AccountBox'
 import HomeIcon from '@mui/icons-material/Home'
 import LiveHelpIcon from '@mui/icons-material/LiveHelp'
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import SupportIcon from '@mui/icons-material/Support'
-
-import { BurgerMenu } from '@/features/BurgerMenu'
-import { LinkType } from '@/types/types'
 import Logo from '@mui/icons-material/NotListedLocation'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
+import SettingsIcon from '@mui/icons-material/Settings'
 import {
 	AppBar,
 	Box,
@@ -36,14 +35,14 @@ const LINKS: LinkType[] = [
 ]
 
 const PUBLIC_USER_LINKS: LinkType[] = [
-	{ text: 'Настройки', icon: NotificationsIcon, href: '/notifications' },
-	{ text: 'Уведомления', icon: SupportIcon, href: '/support' },
+	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
+	{ text: 'Уведомления', icon: NotificationsIcon, href: '/notifications' },
 	{ text: 'Войти', icon: Login, href: '/login' },
 ]
 
 const PRIVATE_USER_LINKS: LinkType[] = [
-	{ text: 'Настройки', icon: NotificationsIcon, href: '/notifications' },
-	{ text: 'Уведомления', icon: SupportIcon, href: '/support' },
+	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
+	{ text: 'Уведомления', icon: NotificationsIcon, href: '/notifications' },
 	{
 		text: 'Профиль',
 		icon: AccountBoxIcon,
@@ -138,7 +137,7 @@ export const HeaderDesktop = async ({
 					bgcolor: 'background.default',
 					ml: `${DRAWER_WIDTH}px`,
 					mt: ['48px', '56px', '64px'],
-					p: 3,
+					p: 'md:3',
 				}}>
 				{children}
 			</Box>

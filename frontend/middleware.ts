@@ -3,24 +3,9 @@ import { NextResponse } from 'next/server'
 import { BASE_URL } from './shared/constants'
 
 export async function middleware(request: NextRequest) {
-	const accessTokenCookie = request.cookies.get('access_token')
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()
-	//if user's access token is valid then get a response
-	if (accessTokenCookie?.value) {
-		return response
-	}
-	//if user access token AND refresh token is not valid return null
-	if (!accessTokenCookie && !refreshTokenCookie) {
-		return null
-	}
-	//if user has an acсess token but the refresh token is already expired
-	if (!refreshTokenCookie) {
-		response.cookies.delete('access_token')
-		return response
-	}
-	//the situation when user doesn't have an access token, but has a refresh one.
-	//create new access token
+
 	try {
 		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
 			method: 'POST',
@@ -34,9 +19,6 @@ export async function middleware(request: NextRequest) {
 		const newAccessToken = data.access
 
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
-		console.log('token refreshed!')
 		return response
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }

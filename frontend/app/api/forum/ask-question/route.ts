@@ -6,23 +6,23 @@ export async function POST(req: NextRequest) {
 	try {
 		const session = cookies().get('access_token')?.value
 
-		if (!req.body) {
-			return null
-		}
 		const { tags, title, content, uploaded_images } = await req.json()
 
-		// const token = await fetch('http://localhost:3000/api/auth/refresh', {
-		// 	method: 'GET',
-		// })
+		if (content.length < 10) {
+			return NextResponse.json(
+				{ error: 'Ответ слишком короткий' },
+				{ status: 400 }
+			)
+		}
 
 		const res = await fetch(`${BASE_URL}/forum/ask-question/`, {
+			method: 'POST',
 			body: JSON.stringify({
 				tags,
 				title,
 				content,
 				uploaded_images,
 			}),
-			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${session}`,
@@ -31,18 +31,64 @@ export async function POST(req: NextRequest) {
 
 		const data = await res.json()
 
-		console.log(data)
-
 		if (!res.ok) {
 			return NextResponse.json(
 				{
-					...data,
+					error: { ...data },
 				},
 				{ status: res.status }
 			)
 		}
-		return NextResponse.json({ ...data }, { status: 200 })
+		return NextResponse.json({ ...data }, { status: res.status })
 	} catch (error: any | unknown) {
-		return NextResponse.json({ message: error.message }, { status: 500 })
+		return NextResponse.json({ error: error.message }, { status: 500 })
+	}
+}
+
+export async function GET(req: NextRequest) {
+	try {
+		const session = cookies().get('access_token')?.value
+
+		const { searchParams } = new URL(req.url ?? '')
+		const q = searchParams.get('q')
+
+		const response = await fetch(`${BASE_URL}/forum/ask-question/?q=${q}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${session}`,
+			},
+		})
+
+		const data = await response.json()
+		if (!response.ok) {
+			let errorMessage = ''
+			if (data?.error.code) {
+				errorMessage +=
+					'Ваша текущая сессия истекла, попробуйте перезагрузить страницу '
+			}
+			if (data?.error.tags) {
+				errorMessage += 'Теги: '
+				data.tags.forEach((error: string) => {
+					errorMessage += error + ' '
+				})
+			}
+			if (data?.error.title) {
+				errorMessage += '\nЗаголовок: '
+				data.tags.forEach((error: string) => {
+					errorMessage += error + ' '
+				})
+			}
+
+			return NextResponse.json(
+				{
+					error: { errorMessage },
+				},
+				{ status: response.status }
+			)
+		}
+		return NextResponse.json({ ...data }, { status: response.status })
+	} catch (error: any | unknown) {
+		return NextResponse.json({ error: error.message }, { status: 500 })
 	}
 }

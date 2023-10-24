@@ -5,37 +5,38 @@
 	@apply flex shadow bg-gray-800 rounded-sm overflow-hidden border border-slate-600 box-border w-fit;
 }
 .editor {
-	min-height: 220px;
-	@apply border  border-gray-700 p-3 mb-4;
+	height: 100%;
+	@apply border border-gray-700 p-3;
 }
 .ProseMirror {
+	height: 100%;
+}
+.prose-text-field {
+	display: block;
+	height: inherit;
+}
+.tiptap,
+.ProseMirror {
+	p {
+		margin: 2px 0;
+	}
+	img {
+		margin: 20px 0;
+	}
+}
+.prose-text-field--question {
 	min-height: 220px;
 }
-
+.prose-text-field--answer {
+	min-height: 120px;
+}
+.prose-text-field--reply {
+	min-height: 80px;
+}
 .ProseMirror {
 	p.is-empty::before {
 		@apply text-slate-400 float-left h-0 pointer-events-none absolute ml-[2px];
-
 		content: attr(data-placeholder);
-	}
-
-	ol {
-		margin-left: 24px;
-		list-style: decimal;
-	}
-	ul {
-		margin-left: 24px;
-		list-style: disc;
-	}
-
-	code,
-	pre {
-		background-color: rgb(22, 22, 22);
-		@apply text-blue-200;
-	}
-
-	a {
-		@apply text-cyan-300;
 	}
 
 	.media-node-view {

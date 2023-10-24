@@ -1,7 +1,12 @@
 import { Header } from '@/widgets/Header'
+import { Metadata } from 'next'
 
 interface QuestionsLayoutProps {
 	children: React.ReactNode
+}
+export const metadata: Metadata = {
+	title: 'Вопросы',
+	description: 'Список вопросов',
 }
 
 export default async function QuestionsLayout({

@@ -1,29 +1,44 @@
-from accounts.models import NewUser
+from datetime import timedelta
+
+from django.contrib.auth.models import AnonymousUser
+from django.db.models import Count, ExpressionWrapper, F, IntegerField
+from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import (CreateAPIView, GenericAPIView,
+                                     RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from accounts.models import NewUser
+from accounts.serializers import DummySerializer
 from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import add_image, create_return_tags, get_tags_or_error
+from forum.logic import (add_image, create_return_tags, get_tags_or_error,
+                         parse_comment, vote_answer_solving)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
-from forum.serializers import (AnswerQuestionSerializer, AskQuestionSerializer,
-                               CreateCommentSerializer, TagFieldSerializer,
+from forum.permissions import IsQuestionOwner
+from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
+                               BaseQuestionSerializer, CommentSerializer,
+                               DetailQuestionSerializer,
+                               ListQuestionSerializer,
+                               TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
-                               UpdateQuestionAnswerSerializer,
-                               UpdateQuestionSerializer, RetrieveQuestionSerializer)
+                               UpdateQuestionSerializer)
+from notifications.utils import notify
 
 
 class AskQuestionAPIView(GenericAPIView):
-    serializer_classes = {'POST': AskQuestionSerializer, 'GET': TagFieldSerializer}
+    serializer_classes = {
+        'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer
+    }
+    serializer_class = BaseQuestionSerializer
+
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
-    success_message = 'Вопрос успешно опубликован.'
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -46,7 +61,8 @@ class AskQuestionAPIView(GenericAPIView):
         Создание вопроса. Поле user заполняется автоматически.
         Возвращает сообщение о результатах запроса.
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         title = serializer.data.get('title')
         content = serializer.data.get('content')
@@ -65,8 +81,8 @@ class AskQuestionAPIView(GenericAPIView):
         question.tags.add(*tag_ids)
         question.save()
 
-        serialized_question = RetrieveQuestionSerializer(question)
-        return Response(data=serialized_question.data, status=status.HTTP_201_CREATED)
+        serializer = BaseQuestionSerializer(instance=question)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.request.method)
@@ -80,38 +96,48 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     serializer_class = UpdateQuestionSerializer
 
 
-class AnswerQuestionAPIView(GenericAPIView):
+class AnswerQuestionAPIView(CreateAPIView):
     """
     Оставить ответ на вопрос. Возвращается сообщение о результатах вопроса.
     """
-    serializer_class = AnswerQuestionSerializer
-    success_message = 'Ответ на вопрос успешно опубликован.'
+    serializer_class = AnswerSerializer
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         images = serializer.data.get('uploaded_images')
-        question = serializer.data.get('question')
-        answer = serializer.data.get('answer')
+        question_id = serializer.data.get('question')
+        question = Question.objects.get(id=question_id)
+        question_user = question.user  # автор вопроса
         user = request.user
+        answer = serializer.data.get('answer')
         question_answer = QuestionAnswer.objects.create(
-            question_id=question,
+            question_id=question_id,
             answer=answer,
         )
+
         if isinstance(user, NewUser):
-            question_answer.user = request.user
+            question_answer.user = user
             question_answer.save()
+
+        notify(
+            sender=user, receiver=question_user,
+            text='ответил на ваш вопрос', action_obj=question_answer,
+            target=question
+        )
 
         if images:
             add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
-        return Response(data=self.success_message, status=status.HTTP_201_CREATED)
+
+        serializer = self.serializer_class(instance=question_answer, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
-    serializer_class = UpdateQuestionAnswerSerializer
+    serializer_class = AnswerSerializer
     queryset = QuestionAnswer.objects.all()
 
 
@@ -119,7 +145,48 @@ class CommentAPIView(CreateAPIView):
     """
     Комментарий к ответу. Создание.
     """
-    serializer_class = CreateCommentSerializer
+    serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            comment = serializer.data.get('comment')
+            answer_id = serializer.data.get('question_answer')
+            answer = QuestionAnswer.objects.get(id=answer_id)
+            parsed_user_list = parse_comment(comment=comment)
+            current_user = request.user
+            parent_id = serializer.data.get('parent')
+
+            if isinstance(current_user, AnonymousUser):
+                current_user = None
+
+            comment = AnswerComment.objects.create(
+                comment=comment, question_answer=answer,
+                user=current_user, parent_id=parent_id
+            )
+
+            if parent_id:
+                parent = AnswerComment.objects.get(id=parent_id)
+
+                for parsed_user in parsed_user_list:
+                    notify(
+                        sender=current_user, receiver=parsed_user,
+                        text='ответил на ваш комментарий',
+                        action_obj=comment,
+                        target=parent
+                    )
+
+            if answer.user:
+                notify(
+                    sender=current_user, receiver=answer.user,
+                    text='прокомментировал ваш ответ на вопрос',
+                    target=answer, action_obj=comment
+                )
+
+            serializer = self.serializer_class(instance=comment)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
@@ -151,7 +218,8 @@ class LikeDislikeViewSet(GenericViewSet):
         user = request.user
 
         if instance.user == user:
-            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+            return Response(data='Вы не можете голосовать за свою собственную запись.',
+                            status=status.HTTP_403_FORBIDDEN)
         instance.like(user=user)
 
         return Response(data='Лайк поставлен успешно')
@@ -163,7 +231,8 @@ class LikeDislikeViewSet(GenericViewSet):
         user = request.user
 
         if instance.user == user:
-            return Response(data='Вы не можете голосовать за свою собственную запись.', status=status.HTTP_403_FORBIDDEN)
+            return Response(data='Вы не можете голосовать за свою собственную запись.',
+                            status=status.HTTP_403_FORBIDDEN)
         instance.dislike(user=user)
 
         return Response(data='Дизлайк поставленен успешно')
@@ -176,3 +245,124 @@ class LikeDislikeViewSet(GenericViewSet):
             elif model_name == 'answer':
                 return QuestionAnswer.objects.get(pk=pk)
         raise ValueError('Параметр запроса несуществует или указан неверно.')
+
+
+class QuestionViewSet(ModelViewSet):
+    """
+    Листинг вопросов и вопроса со всеми его ответами и комментариями.
+    Параметр запроса - limit, определяющий кол-во возвращаемых записей.
+    Параметр sort - best/latest/closed/opened.
+    """
+    http_method_names = ('get',)
+    serializer_classes = {
+        'list': ListQuestionSerializer,
+        'retrieve': DetailQuestionSerializer,
+    }
+
+    limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
+                              description="кол-во возвращаемых записей",
+                              type=openapi.TYPE_STRING, required=True)
+
+    sort = openapi.Parameter(name='sort', in_=openapi.IN_QUERY,
+                             description="сортировка от большего к меньшему best/latest/closed/opened",
+                             type=openapi.TYPE_STRING, required=False)
+
+    @swagger_auto_schema(manual_parameters=[limit, sort])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action)
+
+    def get_queryset(self):
+        query_params = self.request.query_params
+        limit = query_params.get('limit')
+        if limit:
+            limit = int(limit)
+
+        sort = query_params.get('sort')
+        if not sort and (not limit or not self.action == 'list'):
+            return Question.objects.all().order_by('-creation_date')
+        elif sort == 'closed' and limit:
+            return Question.objects.filter(is_solved=True).order_by('-creation_date')[:limit]
+        elif sort == 'opened' and limit:
+            return Question.objects.filter(is_solved=False).order_by('-creation_date')[:limit]
+        elif sort == 'best' and limit:
+
+            month_ago = timezone.now() - timedelta(days=30)
+            amount_of_questions = 100
+
+            questions = Question.objects.annotate(
+                answer_count=Count('question_answers'),
+                comment_count=Count('question_answers__answer_comments'),
+                like_count=Count('rating__users_liked'),
+                dislike_count=Count('rating__users_disliked'),
+                score=ExpressionWrapper(
+                    F('like_count') + F('answer_count') * 2 +
+                    F('comment_count') - F('dislike_count') * 0.5,
+                    output_field=IntegerField()
+                )
+            ).filter(creation_date__gte=month_ago).order_by('-score', '-creation_date')[:amount_of_questions]
+            return questions
+
+        return Question.objects.all()[:limit]
+
+
+class AnswerViewSet(ModelViewSet):
+    """
+    Возвращение списка ответов / ответ по id.
+    """
+    queryset = QuestionAnswer.objects.all()
+    serializer_class = AnswerSerializer
+    http_method_names = ('get',)
+
+
+class RetrieveCommentAPIView(RetrieveAPIView):
+    """
+    Возвращение комментария по id.
+    """
+    queryset = AnswerComment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class MarkAnswerSolving(RetrieveAPIView):
+    """
+    Отмечает ответ на вопрос, как решающий проблему.
+    """
+    queryset = QuestionAnswer.objects.all()
+    permission_classes = [IsAuthenticated, IsQuestionOwner]
+    serializer_class = None
+
+    def get(self, request, *args, **kwargs):
+        answer = self.get_object()
+        related_question = answer.question
+
+        vote_answer_solving(answer=answer, related_question=related_question)
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class ComplainAPIView(GenericAPIView):
+    """
+    Пожаловаться на comment, answer, question. Доступно для
+    аутентифицированных пользователей. content_type=question/answer/comment/.
+    """
+    serializer_class = DummySerializer
+    permission_classes = [IsAuthenticated, ]
+    http_method_names = ['patch', ]
+
+    def patch(self, request, content_type, content_id):
+        obj = None
+        if content_type == 'question':
+            obj = Question.objects.get(id=content_id)
+        elif content_type == 'answer':
+            obj = QuestionAnswer.objects.get(id=content_id)
+        elif content_type == 'comment':
+            obj = AnswerComment.objects.get(id=content_id)
+        else:
+            return Response(data={'message': 'content_type не корректен'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        obj.rating.users_complained.add(request.user)
+        return Response(status=status.HTTP_200_OK)
+

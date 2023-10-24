@@ -14,7 +14,9 @@ services:
   backend:
     build:
       context: ./backend
-    command: bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn -b 0.0.0.0:8000 core.wsgi:application —log-level debug"
+    command:
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && 
+      gunicorn -b 0.0.0.0:8000 core.wsgi:application —log-level debug"
     ports:
       - '8000:8000'
     depends_on:
@@ -78,23 +80,23 @@ services:
     env_file:
       - backend/web.env
 
-  celery-beat:
-    restart: always
-    build:
-      context: ./backend
-    entrypoint: /bin/sh
-    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app beat --loglevel=info"
-    volumes:
-      - .:/backend
-    container_name: celery-beat
-    depends_on:
-      - db
-      - redis
-      - backend
-    links:
-      - redis
-    env_file:
-      - backend/web.env
+#  celery-beat:
+#    restart: always
+#    build:
+#      context: ./backend
+#    entrypoint: /bin/sh
+#    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app beat --loglevel=info"
+#    volumes:
+#      - .:/backend
+#    container_name: celery-beat
+#    depends_on:
+#      - db
+#      - redis
+#      - backend
+#    links:
+#      - redis
+#    env_file:
+#      - backend/web.env
 
   # Flower
   flower:
