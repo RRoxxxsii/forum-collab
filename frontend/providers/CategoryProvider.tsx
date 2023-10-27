@@ -1,7 +1,6 @@
 'use client'
+import { CategoryType } from '@/types'
 import React, { Dispatch, createContext, useState } from 'react'
-
-export type CategoryType = 'best' | 'closed' | 'opened'
 
 const initialState: CategoryType = 'opened'
 

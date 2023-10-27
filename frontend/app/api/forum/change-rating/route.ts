@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 	const result = await response.json()
 
 	if (response.ok) {
-		return NextResponse.json({ ...result }, { status: response.status })
+		return NextResponse.json({ result }, { status: response.status })
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

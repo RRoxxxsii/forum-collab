@@ -1,5 +1,5 @@
 import { BASE_URL } from '@/shared/constants'
-import { Model } from '@/types/types'
+import { Model } from '@/types'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 

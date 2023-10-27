@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-	const { comment, question_answer } = await req.json()
+	const { comment, question_answer, parent } = await req.json()
 
 	const access_token = cookies().get('access_token')?.value
 
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 		body: JSON.stringify({
 			comment: comment,
 			question_answer: question_answer,
+			parent: parent,
 		}),
 	})
 	const result = await response.json()

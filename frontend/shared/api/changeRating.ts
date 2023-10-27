@@ -21,7 +21,5 @@ export async function ChangeRating({
 			throw new Error(data)
 		}
 		return data
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }

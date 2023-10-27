@@ -1,4 +1,4 @@
-import { Model } from '@/types/types'
+import { Model } from '@/types'
 import { toast } from 'react-toastify'
 
 export async function DeleteContent({

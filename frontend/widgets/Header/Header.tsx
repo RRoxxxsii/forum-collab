@@ -1,6 +1,6 @@
 import { BurgerMenu } from '@/features/BurgerMenu'
 import { Navlink } from '@/features/Navlink'
-import { LinkType } from '@/types/types'
+import { LinkType } from '@/types'
 import { Login } from '@mui/icons-material'
 import AccountBoxIcon from '@mui/icons-material/AccountBox'
 import HomeIcon from '@mui/icons-material/Home'

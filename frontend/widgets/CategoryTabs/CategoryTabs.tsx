@@ -25,6 +25,7 @@ export const CategoryTabs = () => {
 
 	return (
 		<Box sx={tabsContainer}>
+			{/* pc view (side navigation) */}
 			<Tabs
 				sx={desktopTabs}
 				orientation='vertical'
@@ -35,6 +36,7 @@ export const CategoryTabs = () => {
 				<Tab value={'closed'} icon={<Verified />} label='ЗАКРЫТЫЕ' />
 				<Tab value={'best'} icon={<WhatshotIcon />} label='ПОПУЛЯРНЫЕ' />
 			</Tabs>
+			{/* mobile view (bottom navigation) */}
 			<BottomNavigation
 				showLabels
 				sx={mobileTabs}

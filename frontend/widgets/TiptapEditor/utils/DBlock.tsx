@@ -1,11 +1,8 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 
+import { DBlockOptions } from '@/types'
 import { DBlockNodeView } from './DBlockNodeView'
-
-export interface DBlockOptions {
-	HTMLAttributes: Record<string, any>
-}
 
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {

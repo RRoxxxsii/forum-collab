@@ -1,8 +1,7 @@
 'use client'
-import { Transliterate } from '@/shared/transliterate'
-import { ErrorRes, IAnswer } from '@/types/types'
+import { ErrorRes, IAnswer } from '@/types'
 import { Button } from '@mui/material'
-import { useRouter } from 'next/navigation'
+import { Dispatch, SetStateAction } from 'react'
 import { toast } from 'react-toastify'
 
 export const AskAnswerFormSubmit = ({
@@ -10,11 +9,13 @@ export const AskAnswerFormSubmit = ({
 	images,
 	userId,
 	questionId,
+	setIsEditing,
 }: {
 	answerContent: string
 	images: string[]
 	userId?: number | null
 	questionId?: number | null
+	setIsEditing: Dispatch<SetStateAction<boolean>>
 }) => {
 	async function editSubmit() {
 		const questionToast = toast.loading('Открытие вопроса...')
@@ -55,7 +56,6 @@ export const AskAnswerFormSubmit = ({
 				autoClose: 3000,
 			})
 		} catch (error: any) {
-			console.log(error)
 			toast.update(questionToast, {
 				render: 'Разорвана связь с сервером, проверьте подключение',
 				type: 'error',
@@ -66,8 +66,19 @@ export const AskAnswerFormSubmit = ({
 	}
 
 	return (
-		<Button variant='outlined' onClick={editSubmit} sx={{ height: 50, mt: 1 }}>
-			Обновить вопрос
-		</Button>
+		<>
+			<Button
+				variant='outlined'
+				onClick={editSubmit}
+				sx={{ height: 50, mt: 1, mr: 1 }}>
+				Обновить вопрос
+			</Button>
+			<Button
+				variant='text'
+				onClick={() => setIsEditing(false)}
+				sx={{ height: 50, mt: 1, background: '#2b2b2b', color: '#6e6e6e' }}>
+				Отменить
+			</Button>
+		</>
 	)
 }

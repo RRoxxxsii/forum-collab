@@ -27,7 +27,5 @@ export async function GET() {
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
 
 		return response
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }

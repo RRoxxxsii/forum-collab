@@ -5,7 +5,7 @@ import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { QuestionContent } from '@/shared/QuestionContent'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
-import { IQuestion, IUser } from '@/types/types'
+import { IQuestion, IUser } from '@/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
@@ -53,6 +53,7 @@ export default function QuestionPage() {
 							</Box>
 						</Box>
 						<Divider />
+						{/* Ответы */}
 						<Typography
 							variant='h6'
 							sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>
@@ -69,7 +70,10 @@ export default function QuestionPage() {
 								questionData={questionData}
 								setQuestionData={setQuestionData}
 							/>
-							<AnswerList questionData={questionData} />
+							<AnswerList
+								setQuestionData={setQuestionData}
+								questionData={questionData}
+							/>
 						</Box>
 					</Paper>
 				)}

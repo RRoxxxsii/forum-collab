@@ -1,6 +1,6 @@
 'use client'
 import { fetchMe } from '@/shared/api/fetchData'
-import { IUser } from '@/types/types'
+import { IUser, UserDetailsType } from '@/types'
 import React, {
 	Dispatch,
 	SetStateAction,
@@ -9,8 +9,6 @@ import React, {
 	useState,
 } from 'react'
 
-export type UserDetailsType = IUser | null
-
 const initialState: UserDetailsType = null
 
 interface UserDetailsProviderProps {
@@ -18,10 +16,7 @@ interface UserDetailsProviderProps {
 	setUserDetails: Dispatch<SetStateAction<IUser | null>>
 }
 
-export const UserDetailsContext = createContext<{
-	userDetails: UserDetailsType
-	setUserDetails: Dispatch<SetStateAction<IUser | null>>
-}>({
+export const UserDetailsContext = createContext<UserDetailsProviderProps>({
 	userDetails: initialState,
 	setUserDetails: () => {},
 })

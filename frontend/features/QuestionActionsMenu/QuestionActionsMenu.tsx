@@ -1,6 +1,6 @@
 'use client'
 import { DeleteContent } from '@/shared/api/deleteContent'
-import { IQuestion, IUser } from '@/types/types'
+import { IQuestion, IUser } from '@/types'
 import {
 	Bookmark,
 	BookmarkOutlined,
