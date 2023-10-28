@@ -3,16 +3,16 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-	const { question, answer } = await req.json()
+	const { answerContent, questionId, answerId } = await req.json()
 
-	if (!question || !answer) {
+	if (!questionId || !answerId || !answerContent) {
 		return NextResponse.json(
 			{ error: 'ID вопроса или ответа неизвестны' },
 			{ status: 422 }
 		)
 	}
 
-	if (answer.length < 10) {
+	if (answerContent.length < 10) {
 		return NextResponse.json(
 			{ error: 'Ответ слишком короткий' },
 			{ status: 400 }
@@ -21,11 +21,11 @@ export async function POST(req: NextRequest) {
 
 	const access_token = cookies().get('access_token')?.value
 
-	const response = await fetch(`${BASE_URL}/forum/update-answer/${question}/`, {
+	const response = await fetch(`${BASE_URL}/forum/update-answer/${answerId}/`, {
 		method: 'PUT',
 		body: JSON.stringify({
-			question: question,
-			answer: answer,
+			answer: answerContent,
+			question: questionId,
 		}),
 		headers: {
 			'Content-Type': 'application/json',

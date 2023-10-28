@@ -1,6 +1,6 @@
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { ChangeRating } from '@/shared/api/changeRating'
-import { IAnswer, IQuestion, Model } from '@/types'
+import { IAnswer, IChangeRating, IModelType, IQuestion } from '@/types'
 import { AddComment } from '@/widgets/AddComment'
 import {
 	ArrowDownward,
@@ -36,12 +36,12 @@ import React, {
 } from 'react'
 import { CommentCard } from '../CommentCard'
 import { EditingBox } from '../EditingBox'
-import { ChangeRatingProps } from '../QuestionItemRating/QuestionItemRating'
+import {} from '../QuestionItemRating/QuestionItemRating'
 
 interface AnswerCardProps {
 	answerData: IAnswer
 	handleSolve: ({ answerId }: { answerId: number }) => void
-	handleDelete: ({ id, model }: { id: number; model: Model }) => void
+	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }
 
@@ -56,7 +56,7 @@ export function AnswerCard({
 	const [clientRating, setClientRating] = useState(0)
 	const [checked, setChecked] = useState<null | number>(null)
 
-	const handleRating = ({ id, model, action, checked }: ChangeRatingProps) => {
+	const handleRating = ({ id, model, action, checked }: IChangeRating) => {
 		ChangeRating({ id: id, model: model, action: action })
 		if (checked) {
 			setClientRating(
@@ -92,15 +92,9 @@ export function AnswerCard({
 		}
 	}, [])
 
-	const submitEdit = ({
-		model,
-		id,
-		content,
-	}: {
-		model: Model
-		id: number
-		content: string
-	}) => {}
+	const [editingContent, setEditingContent] = useState<string>(
+		answerData.answer
+	)
 
 	return (
 		<>
@@ -145,9 +139,18 @@ export function AnswerCard({
 						</Box>
 						{isEditing ? (
 							<EditingBox
+								newContent={editingContent}
+								setNewContent={setEditingContent}
 								isEditing={isEditing}
 								setIsEditing={setIsEditing}
 								answerData={answerData}
+							/>
+						) : editingContent ? (
+							<Typography
+								className='comment'
+								sx={{ ml: 1 }}
+								dangerouslySetInnerHTML={{ __html: editingContent }}
+								variant='body1'
 							/>
 						) : (
 							<Typography

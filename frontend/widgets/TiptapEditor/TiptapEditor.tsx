@@ -94,7 +94,7 @@ export const TiptapEditor = ({
 	}, [content, editor])
 
 	useEffect(() => {
-		if (contentOnEdit) {
+		if (contentOnEdit && type === 'question') {
 			editor?.commands.setContent(contentOnEdit)
 		}
 	}, [contentOnEdit])

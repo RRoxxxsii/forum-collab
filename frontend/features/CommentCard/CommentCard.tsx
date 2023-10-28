@@ -1,5 +1,5 @@
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
-import { IAnswer, IComment, Model } from '@/types'
+import { IAnswer, IComment, IModelType } from '@/types'
 import { AddComment } from '@/widgets/AddComment'
 import { Comment, Delete, Edit, MoreHoriz, Report } from '@mui/icons-material'
 import {
@@ -22,7 +22,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 interface CommentCardProps {
 	comment: IComment
 	answerData: IAnswer
-	handleDelete: ({ id, model }: { id: number; model: Model }) => void
+	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
 }
 
 export function CommentCard({

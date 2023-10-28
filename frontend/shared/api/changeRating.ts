@@ -1,12 +1,6 @@
-export async function ChangeRating({
-	id,
-	model,
-	action,
-}: {
-	id: number
-	model: 'question' | 'answer'
-	action: 'like' | 'dislike'
-}) {
+import { IChangeRating, IModelType } from '@/types'
+
+export async function ChangeRating({ id, model, action }: IChangeRating) {
 	try {
 		const response = await fetch(`/api/forum/change-rating`, {
 			method: 'POST',
