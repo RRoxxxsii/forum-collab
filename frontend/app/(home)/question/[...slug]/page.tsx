@@ -27,6 +27,8 @@ export default function QuestionPage() {
 		fetchMe({ setProfileData: setProfileData })
 	}, [])
 
+	const handleQuestionRating = () => {}
+
 	return (
 		<Suspense fallback={<QuestionLoading />}>
 			<Box sx={{ minHeight: '80vh' }}>
@@ -36,11 +38,10 @@ export default function QuestionPage() {
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
 									<QuestionItemRating
-										setQuestionData={setQuestionData}
 										model='question'
 										questionData={questionData}
+										handleRating={handleQuestionRating}
 										profileData={profileData}
-										setRating={ChangeRating}
 									/>
 								</Box>
 								<Box sx={{ padding: 1.5 }}>

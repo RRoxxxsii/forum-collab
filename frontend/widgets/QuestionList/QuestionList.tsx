@@ -14,6 +14,7 @@ export const QuestionList = () => {
 	const { category } = useContext(CategoryContext)
 
 	const fetchQuestionList = async () => {
+		//reset the questions array on refetch
 		setQuestions([])
 		setListLoadingState('loading')
 		try {
