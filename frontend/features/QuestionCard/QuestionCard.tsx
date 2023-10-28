@@ -18,7 +18,14 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 		setQuestionCardData(questionData)
 	})
 
-	const handleRating = ({ model, id, action, checked }: IChangeRating) => {}
+	const handleQuestionRating = ({
+		model,
+		id,
+		action,
+		checked,
+	}: IChangeRating) => {
+
+	}
 
 	return (
 		<>
@@ -45,7 +52,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 						model='question'
 						questionData={questionCardData}
 						profileData={userDetails}
-						handleRating={handleRating}
+						handleRating={handleQuestionRating}
 					/>
 					<Box sx={{ width: '100%', ml: 1 }}>
 						<QuestionItemContent questionData={questionData} />
