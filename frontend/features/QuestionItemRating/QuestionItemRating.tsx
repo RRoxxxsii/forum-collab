@@ -1,5 +1,5 @@
 'use client'
-import { IQuestion, IUser } from '@/types/types'
+import { IChangeRating, IModelType, IQuestion, UserDetailsType } from '@/types'
 import {
 	ArrowDownward,
 	ArrowDownwardOutlined,
@@ -7,67 +7,23 @@ import {
 	ArrowUpwardOutlined,
 } from '@mui/icons-material'
 import { Box, Checkbox, Typography } from '@mui/material'
-import { Dispatch, SetStateAction, useState } from 'react'
-
-export type Model = 'question' | 'answer'
-
-export interface ChangeRatingProps {
-	id: number
-	model: Model
-	action: 'like' | 'dislike'
-	checked?: boolean
-}
+import { useState } from 'react'
 
 interface QuestionItemRatingProps {
 	questionData: IQuestion | null
-	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
-	profileData: IUser | null
-	model: Model
-	setRating: ({
-		id,
-		model,
-		action,
-	}: ChangeRatingProps) => Promise<null | undefined>
+	handleRating: ({ model, id, action, checked }: IChangeRating) => void
+	profileData: UserDetailsType
+	model: IModelType
 }
 
 export const QuestionItemRating = ({
 	questionData,
-	setQuestionData,
+	handleRating,
 	profileData,
 	model,
-	setRating,
 }: QuestionItemRatingProps) => {
+	const [clientRating, setClientRating] = useState(0)
 	const [checked, setChecked] = useState<null | number>(null)
-
-	const handleRating = ({ id, model, action, checked }: ChangeRatingProps) => {
-		setRating({ id: id, model: model, action: action })
-		setQuestionData((prevData) => {
-			if (prevData === null) {
-				return prevData
-			}
-
-			const updatedRating = { ...prevData.rating }
-
-			if (action === 'like') {
-				updatedRating.is_liked = true
-				updatedRating.is_disliked = false
-				updatedRating.like_amount = checked
-					? updatedRating.like_amount + 1
-					: updatedRating.like_amount - 1
-			} else if (action === 'dislike') {
-				updatedRating.is_liked = false
-				updatedRating.is_disliked = true
-				updatedRating.dislike_amount = checked
-					? updatedRating.dislike_amount + 1
-					: updatedRating.dislike_amount - 1
-			}
-
-			return {
-				...prevData,
-				rating: updatedRating,
-			}
-		})
-	}
 
 	if (!questionData) {
 		return
@@ -82,9 +38,8 @@ export const QuestionItemRating = ({
 				color: 'white',
 			}}>
 			<Checkbox
-				defaultChecked={questionData.rating.is_liked}
 				disabled={questionData.user?.id === profileData?.id}
-				checked={questionData.rating.is_liked}
+				checked={checked === 0}
 				icon={<ArrowUpwardOutlined />}
 				checkedIcon={<ArrowUpward />}
 				onChange={(e) =>
@@ -92,15 +47,16 @@ export const QuestionItemRating = ({
 						id: questionData.id,
 						model: model,
 						action: 'like',
-						checked: e.target.checked,
+						checked: questionData.rating.is_liked,
 					})
 				}
 			/>
 			<Typography fontWeight={700}>
-				{questionData.rating?.like_amount - questionData.rating?.dislike_amount}
+				{questionData.rating?.like_amount -
+					questionData.rating?.dislike_amount +
+					clientRating || 0}
 			</Typography>
 			<Checkbox
-				defaultChecked={questionData.rating.is_disliked}
 				disabled={questionData.user?.id === profileData?.id}
 				checked={checked === 1}
 				icon={<ArrowDownwardOutlined />}
@@ -110,7 +66,7 @@ export const QuestionItemRating = ({
 						id: questionData.id,
 						model: model,
 						action: 'dislike',
-						checked: e.target.checked,
+						checked: questionData.rating.is_disliked,
 					})
 				}
 			/>

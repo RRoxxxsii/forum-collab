@@ -2,8 +2,7 @@ import { EmailAlert } from '@/features/EmailAlert'
 import { CategoryTabs } from '@/widgets/CategoryTabs'
 import { QuestionList } from '@/widgets/QuestionList'
 import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
-
-import { Alert, AlertTitle, Box } from '@mui/material'
+import { Box } from '@mui/material'
 
 export default async function HomePage() {
 	return (
@@ -17,10 +16,7 @@ export default async function HomePage() {
 						<QuestionList />
 					</Box>
 					<Box sx={mobileList}>
-						<Alert variant='outlined' severity='warning' sx={{ mb: 2 }}>
-							<AlertTitle>Подтвердите почту</AlertTitle>
-							Эта надпись исчезнет, когда вы подтведите свою почту
-						</Alert>
+						<EmailAlert />
 						<QuestionListAskFast />
 						<QuestionList />
 					</Box>

@@ -1,6 +1,6 @@
 'use client'
 import { Transliterate } from '@/shared/transliterate'
-import { ErrorRes, IQuestion, ITag } from '@/types/types'
+import { ErrorRes, IQuestion, ITag } from '@/types'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
@@ -79,7 +79,6 @@ export const AskQuestionFormSubmit = ({
 				)}?tags=${result?.tags?.map((tag) => Transliterate(tag.tag_name))}`
 			)
 		} catch (error: any | unknown) {
-			console.log(error)
 			toast.update(questionToast, {
 				render: 'Разорвана связь с сервером, проверьте подключение',
 				type: 'error',

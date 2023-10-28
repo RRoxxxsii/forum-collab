@@ -1,22 +1,24 @@
 'use client'
-import { Box, TextField, InputAdornment, IconButton } from '@mui/material'
-import Link from 'next/link'
-import React, { ChangeEventHandler, FormEvent, useContext } from 'react'
+import { AskFastContext } from '@/providers/AskFastProvider'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import { AskFastContext } from '@/providers/AskFastProvider'
-import { redirect, useRouter } from 'next/navigation'
+import { Box, IconButton, InputAdornment, TextField } from '@mui/material'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { FormEvent, useContext } from 'react'
 
 export const QuestionListAskFast = () => {
-	const { askFastValue, setAskFastValue } = useContext(AskFastContext)
 	const router = useRouter()
-	const handleAskInput = (value: string) => {
-		setAskFastValue(value)
-	}
+
+	const { askFastValue, setAskFastValue } = useContext(AskFastContext)
 
 	const handleAsk = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		router.push('/ask')
+	}
+
+	const handleAskFastInput = (value: string) => {
+		setAskFastValue(value)
 	}
 
 	return (
@@ -37,7 +39,7 @@ export const QuestionListAskFast = () => {
 						variant='outlined'
 						label='Задайте вопрос'
 						value={askFastValue}
-						onChange={(e) => handleAskInput(e.target.value)}
+						onChange={(e) => handleAskFastInput(e.target.value)}
 						InputProps={{
 							startAdornment: (
 								<InputAdornment position='start'>

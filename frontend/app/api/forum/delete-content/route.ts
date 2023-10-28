@@ -1,10 +1,11 @@
 import { BASE_URL } from '@/shared/constants'
-import { Model } from '@/types/types'
+import { IModelType } from '@/types'
+
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-	const { id, model }: { id: number; model: Model } = await req.json()
+	const { id, model }: { id: number; model: IModelType } = await req.json()
 
 	if (!id || !model) {
 		return NextResponse.json(

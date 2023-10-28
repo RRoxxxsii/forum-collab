@@ -1,6 +1,4 @@
-import { CategoryType } from '@/providers/CategoryProvider'
-import { IQuestion, IUser } from '@/types/types'
-import { NextResponse } from 'next/server'
+import { CategoryType, IQuestion, IUser } from '@/types'
 import { Dispatch, SetStateAction } from 'react'
 import { BASE_URL } from '../constants'
 
@@ -24,7 +22,7 @@ export async function fetchQuestions({ category }: { category: CategoryType }) {
 
 		return result
 	} catch (error) {
-		console.log(error)
+		return error
 	}
 }
 
@@ -55,9 +53,7 @@ export async function fetchQuestion({
 		if (typeof result === 'object' && 'id' in result) {
 			setQuestionData(result)
 		}
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }
 
 export async function fetchMe({
@@ -76,7 +72,5 @@ export async function fetchMe({
 		}
 
 		setProfileData(result)
-	} catch (error) {
-		console.log(error)
-	}
+	} catch (error) {}
 }

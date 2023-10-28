@@ -1,6 +1,6 @@
 'use client'
 import { ModalComponent } from '@/shared/Modal'
-import { CustomFile } from '@/types/types'
+import { CustomFile } from '@/types'
 import { Delete, OpenInFull, UploadFile } from '@mui/icons-material'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import Link from 'next/link'
@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import './styles.scss'
-
 
 export default function UploadImagePage() {
 	const router = useRouter()

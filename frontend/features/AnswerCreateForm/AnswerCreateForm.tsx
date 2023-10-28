@@ -1,6 +1,6 @@
 'use client'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
-import { ErrorRes, IAnswer, IQuestion, IUser } from '@/types/types'
+import { ErrorRes, IAnswer, IQuestion, IUser } from '@/types'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
 import { Button, Typography } from '@mui/material'
 import { Dispatch, SetStateAction, useContext, useState } from 'react'
@@ -68,6 +68,7 @@ export const AnswerCreateForm = ({
 }) => {
 	const [answerContent, setAnswerContent] = useState<string>('')
 	const { userDetails } = useContext(UserDetailsContext)
+
 	return (
 		<>
 			<Typography

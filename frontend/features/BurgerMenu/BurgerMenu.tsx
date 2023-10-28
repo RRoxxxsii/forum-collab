@@ -1,6 +1,6 @@
 'use client'
 
-import { LinkType } from '@/types/types'
+import { LinkType } from '@/types'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import MenuIcon from '@mui/icons-material/Menu'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'

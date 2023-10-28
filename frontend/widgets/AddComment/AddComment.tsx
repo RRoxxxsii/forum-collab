@@ -1,22 +1,18 @@
 'use client'
-import { IAnswer, IComment, IUser } from '@/types/types'
+import { IAnswer, IComment, IUser } from '@/types'
 import { TextareaAutosize } from '@mui/base/TextareaAutosize'
 import { Box, Button, Typography } from '@mui/material'
-import React, {
-	Dispatch,
-	MouseEventHandler,
-	SetStateAction,
-	useEffect,
-	useRef,
-} from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 
 export const AddComment = ({
 	answerData,
+	parentComment = null,
 	profileData,
 	isCommenting,
 	setIsCommenting,
 }: {
 	isCommenting: boolean
+	parentComment?: null | IComment
 	setIsCommenting: Dispatch<SetStateAction<boolean>>
 	answerData: IAnswer
 	profileData: IUser | null
@@ -31,6 +27,7 @@ export const AddComment = ({
 					user: profileData,
 					comment: commentContent,
 					question_answer: answerData.id,
+					parent: parentComment?.id,
 				}),
 			})
 
@@ -73,6 +70,12 @@ export const AddComment = ({
 		}
 	}, [isCommenting])
 
+	useEffect(() => {
+		if (parentComment) {
+			setCommentContent(`@${parentComment?.user.user_name},`)
+		}
+	}, [parentComment])
+
 	return (
 		<Box
 			ref={commentBoxRef}
@@ -85,7 +88,10 @@ export const AddComment = ({
 			}}>
 			<Typography variant='caption' color={'GrayText'}>
 				Вы отвечаете пользователю{' '}
-				{'@' + (answerData?.user?.user_name ?? 'Гость')}
+				{'@' +
+					((parentComment
+						? parentComment.user.user_name
+						: answerData?.user?.user_name) ?? 'Гость')}
 			</Typography>
 
 			<TextareaAutosize

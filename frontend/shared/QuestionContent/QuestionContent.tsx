@@ -1,7 +1,6 @@
-import { IQuestion } from '@/types/types'
+import { IQuestion } from '@/types'
 import { Box, Chip, Typography } from '@mui/material'
 import { UserInformation } from '../UserInformation'
-import { useSearchParams } from 'next/navigation'
 
 export const QuestionContent = ({
 	questionData,

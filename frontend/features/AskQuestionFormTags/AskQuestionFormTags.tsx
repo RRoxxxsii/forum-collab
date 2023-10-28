@@ -1,6 +1,6 @@
 'use client'
 
-import { ITag } from '@/types/types'
+import { ITag } from '@/types'
 import { Box, Chip, TextField } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { Dispatch, SetStateAction, useState } from 'react'

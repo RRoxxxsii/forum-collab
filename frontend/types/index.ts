@@ -1,4 +1,4 @@
-export interface LinkType {
+export interface ILinkType {
 	text: string
 	href: string
 	icon: any
@@ -13,7 +13,7 @@ export interface IQuestion {
 	answers: IAnswer[]
 	creation_date: string
 	updated_date: string
-	images: string[] // Assuming these are image URLs
+	images: string[]
 	rating: IRating
 	tags: ITag[]
 	answers_amount: number
@@ -39,7 +39,7 @@ export interface IAnswer {
 	uploaded_images: string[]
 }
 
-export interface ErrorRes {
+export interface IErrorRes {
 	error: string
 }
 
@@ -72,12 +72,28 @@ export interface IRating {
 	question: number
 	users_liked: number[]
 	users_disliked: number[]
-	// Add other properties for rating as needed
 }
 
-export interface CustomFile {
+export interface ICustomFile {
 	file: File
 	preview: string
 }
 
-export type Model = 'question' | 'answer' | 'comment'
+export interface IChangeRating {
+	id: number
+	model: IModelType
+	action: 'like' | 'dislike'
+	checked?: boolean
+}
+
+export interface DBlockOptions {
+	HTMLAttributes: Record<string, any>
+}
+
+export type IModelType = 'question' | 'answer' | 'comment'
+
+export type CategoryType = 'best' | 'closed' | 'opened'
+
+export type FetchStatusType = 'loading' | 'success' | 'error'
+
+export type UserDetailsType = IUser | null

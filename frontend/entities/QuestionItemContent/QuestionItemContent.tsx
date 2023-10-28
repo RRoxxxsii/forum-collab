@@ -1,6 +1,6 @@
-import { IQuestion } from '@/types/types'
+import { IQuestion } from '@/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Avatar, Box, CardContent, IconButton, Typography } from '@mui/material'
+import { Avatar, Box, IconButton, Typography } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'

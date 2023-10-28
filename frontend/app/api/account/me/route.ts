@@ -1,5 +1,5 @@
 import { BASE_URL } from '@/shared/constants'
-import { IUser } from '@/types/types'
+import { IUser } from '@/types'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 

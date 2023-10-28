@@ -1,7 +1,7 @@
 'use client'
 
 import { Transliterate } from '@/shared/transliterate'
-import { IQuestion } from '@/types/types'
+import { IQuestion } from '@/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import { Box, Chip, Typography, styled } from '@mui/material'
 import Link from 'next/link'
@@ -28,10 +28,11 @@ export const QuestionItemActions = ({
 				sx={{
 					display: 'flex',
 					justifyContent: 'flex-start',
-					flexWrap: 'nowrap',
+					flexWrap: 'wrap',
 					listStyle: 'none',
 					m: 0,
-					flex: '50%',
+					flex: '90%',
+					width: '100%',
 				}}
 				component='ul'>
 				{questionData?.tags.map((tag) => {
@@ -45,7 +46,6 @@ export const QuestionItemActions = ({
 							}}
 							key={tag.tag_name}>
 							<Chip
-								key={tag.tag_name}
 								label={tag.tag_name}
 								sx={{
 									background: '#292929',
@@ -61,7 +61,7 @@ export const QuestionItemActions = ({
 			<Box
 				sx={{
 					display: 'flex',
-					flex: '50%',
+					flex: '10%',
 					justifyContent: 'flex-end',
 					alignItems: 'center',
 				}}>

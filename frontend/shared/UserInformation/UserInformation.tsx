@@ -1,8 +1,7 @@
-import { IQuestion } from '@/types/types'
-import { Box, Avatar, Typography } from '@mui/material'
-import { green, red } from '@mui/material/colors'
+import { IQuestion } from '@/types'
+import { Avatar, Box, Typography } from '@mui/material'
+import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
-import React from 'react'
 
 export const UserInformation = ({
 	questionData,

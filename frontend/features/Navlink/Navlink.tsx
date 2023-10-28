@@ -1,6 +1,6 @@
 'use client'
 
-import { LinkType } from '@/types/types'
+import { LinkType } from '@/types'
 import {
 	ListItem,
 	ListItemButton,

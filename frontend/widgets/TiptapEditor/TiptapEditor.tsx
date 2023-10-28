@@ -24,6 +24,9 @@ export const TiptapEditor = ({
 }) => {
 	const editor = useEditor({
 		extensions: EditorExtensions,
+		// onUpdate({ editor }) {
+		// 	setContent(editor.getHTML())
+		// },
 		editorProps: {
 			attributes: {
 				class: `prose-text-field ${
@@ -76,7 +79,7 @@ export const TiptapEditor = ({
 				return false // not handled, use default behavior
 			},
 		},
-		content: EditorContentValue,
+		content: content,
 	})
 
 	if (editor) {
@@ -84,11 +87,18 @@ export const TiptapEditor = ({
 	}
 
 	useEffect(() => {
-		if (contentOnEdit) {
+		//editor?.commands.setContent(content)
+		if (content === '') {
+			editor?.commands.clearContent(true)
+		}
+	}, [content, editor])
+
+	useEffect(() => {
+		if (contentOnEdit && type === 'question') {
 			editor?.commands.setContent(contentOnEdit)
-			setContent(contentOnEdit)
 		}
 	}, [contentOnEdit])
+
 	if (!editor) {
 		return <Skeleton variant='rectangular' height={288} />
 	}
@@ -118,8 +128,6 @@ export const TiptapEditor = ({
 
 			<EditorContent
 				style={{ height: '100%' }}
-				onChange={(e) => setContent}
-				value={content}
 				className='editor'
 				editor={editor}
 			/>

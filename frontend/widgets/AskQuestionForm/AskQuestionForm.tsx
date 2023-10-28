@@ -3,7 +3,7 @@ import { AskQuestionFormSubmit } from '@/features/AskQuestionFormSubmit'
 import { AskQuestionFormTags } from '@/features/AskQuestionFormTags'
 import { AskFastContext } from '@/providers/AskFastProvider'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
-import { IQuestion, ITag, IUser } from '@/types/types'
+import { IQuestion, ITag, IUser } from '@/types'
 import { Box, Divider, TextField, Typography } from '@mui/material'
 import { useSearchParams } from 'next/navigation'
 import {

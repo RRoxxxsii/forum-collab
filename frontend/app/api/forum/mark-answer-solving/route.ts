@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
 			{ status: 422 }
 		)
 	}
+
 	const response = await fetch(
 		`${BASE_URL}/forum/mark-answer-solving/${question_answer_id}/`,
 		{
@@ -24,14 +25,13 @@ export async function POST(req: NextRequest) {
 		}
 	)
 	const result = await response.json()
-	console.log(result)
 
 	if (response.ok) {
-		return NextResponse.json({ ...result }, { status: response.status })
-	} else {
 		return NextResponse.json(
-			{ error: result.detail },
+			{ message: 'Ответ успешно отмечен решенным' },
 			{ status: response.status }
 		)
+	} else {
+		return NextResponse.json({ error: result }, { status: response.status })
 	}
 }
