@@ -10,6 +10,7 @@ from faker import Faker
 from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
+from forum.tests.test_serializers import generate_photo_file
 from notifications.utils import notify
 
 
@@ -71,9 +72,11 @@ class QuestionHelper(BaseAnswerQuestionHelperMixin):
     def _create_question_images(self, question):
         for _ in range(random.randint(0, 3)):
             flag = random.randint(0, 1)
+            image = generate_photo_file(file_name=self.fake.file_name)
+
             question_image = QuestionImages.objects.create(
                 parent=question,
-                image=self.fake.file_name(category='image', extension='jpeg')
+                image=image
             )
             if flag:
                 question_image.alt = self.fake.text(max_nb_chars=200)
@@ -119,9 +122,11 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
     def _create_answer_images(self, answer):
         generate_image = random.randint(0, 1)
         if generate_image:
+
+            image = generate_photo_file(file_name=self.fake.file_name)
             QuestionAnswerImages.objects.create(
                 parent=answer,
-                image=self.fake.file_name(category='image', extension='jpeg')
+                image=image
             )
 
 
@@ -162,7 +167,8 @@ class Helper(AnswerHelper, QuestionHelper):
             is_about = random.randint(0, 1)
 
             if is_profile_img:
-                user.profile_image = fake.file_name(category='image', extension='jpeg')
+                image = generate_photo_file(file_name=fake.file_name)
+                user.profile_image = image
 
             if is_about:
                 user.about = fake.paragraph()

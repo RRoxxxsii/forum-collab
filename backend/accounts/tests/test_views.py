@@ -3,12 +3,13 @@ import re
 
 from django.core import mail
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, ThemeTag
-from forum.tests.test_serializers import generate_photo_file
+from forum.tests.test_serializers import generate_photo_file, reformat
 
 
 class TestRegistrationAPI(APITestCase):
@@ -365,7 +366,9 @@ class TestUserViewSet(APITestCase):
     Тестрование ViewSet для пользователя.
     """
     def setUp(self) -> None:
-        image = generate_photo_file()
+        fake = Faker()
+
+        image = generate_photo_file(fake.unique.file_name)
         self.user = NewUser.objects.create_user(email='email@email.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', profile_image=image)
 
@@ -384,7 +387,9 @@ class TestUserViewSet(APITestCase):
 class TestUpdateProfileImage(APITestCase):
 
     def setUp(self) -> None:
-        self.img_to_update = generate_photo_file()
+        fake = Faker()
+
+        self.img_to_update = generate_photo_file(fake.unique.file_name)
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True)
         self.url = reverse('update-image')
@@ -399,7 +404,7 @@ class TestUpdateProfileImage(APITestCase):
         self.client.patch(self.url, data={'profile_image': self.img_to_update})
 
         self.user.refresh_from_db()
-        self.assertEqual(self.user.profile_image, self.img_to_update)
+        self.assertEqual(self.user.profile_image, reformat(self.img_to_update))
 
     def test_update_profile_img_not_authenticated(self):
         response = self.client.patch(self.url, data={'profile_image': self.img_to_update})
@@ -409,7 +414,9 @@ class TestUpdateProfileImage(APITestCase):
 class TestUpdateProfileAbout(APITestCase):
 
     def setUp(self) -> None:
-        self.img_to_update = generate_photo_file()
+        fake = Faker()
+
+        self.img_to_update = generate_photo_file(fake.unique.file_name)
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True)
         self.url = reverse('update-about')
@@ -435,7 +442,9 @@ class TestUpdateProfileAbout(APITestCase):
 class TestGetPersonalProfile(APITestCase):
 
     def setUp(self) -> None:
-        img = generate_photo_file()
+        fake = Faker()
+
+        img = generate_photo_file(fake.unique.file_name)
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True,
                                                 profile_image=img)

@@ -1,4 +1,5 @@
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -12,6 +13,8 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
     Обновление вопроса.
     """
     def setUp(self) -> None:
+        fake = Faker()
+
         self.tag1 = ThemeTag.objects.create(tag_name='django')
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
@@ -24,8 +27,8 @@ class TestUpdateDestroyQuestionAPIView(APITestCase):
 
         self.question2 = Question.objects.create(title='Заголовок', content='Контент', user=self.user2)
         self.question2.tags.add(self.tag1.id)
-        image = generate_photo_file()
-        image2 = generate_photo_file()
+        image = generate_photo_file(fake.unique.file_name)
+        image2 = generate_photo_file(fake.unique.file_name)
         QuestionImages.objects.create(image=image, parent=self.question2)
         QuestionImages.objects.create(image=image2, parent=self.question2)
 
