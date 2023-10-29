@@ -33,6 +33,8 @@ import {
 } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
+import ru from 'dayjs/locale/ru'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import React, {
 	Dispatch,
 	SetStateAction,
@@ -105,17 +107,21 @@ export function AnswerCard({
 	const [editingContent, setEditingContent] = useState<string>(
 		answerData.answer
 	)
+	dayjs.locale(ru)
+	dayjs.extend(relativeTime)
 
 	const answerRef = useRef<null | HTMLElement>(null)
 
-	const answerHeight = answerRef.current?.offsetHeight
+	const [answerHeight, setAnswerHeight] = useState<number | undefined>(0)
+	useEffect(() => {
+		setAnswerHeight(answerRef.current?.offsetHeight)
+	}, [answerRef.current?.offsetHeight])
 
 	return (
 		<>
 			<Box
 				sx={{
-					px: 3,
-
+					p: 1,
 					width: '100%',
 					background: solved ? '#252525' : 'transparent',
 					borderRadius: 4,
@@ -134,7 +140,6 @@ export function AnswerCard({
 						<Divider sx={{ mb: 1 }} />
 					</>
 				)}
-
 				<Box
 					ref={answerRef}
 					sx={{
@@ -149,7 +154,7 @@ export function AnswerCard({
 							flexDirection: 'column',
 							alignItems: 'center',
 							mr: 1,
-							height: answerHeight ? answerHeight - 28 : 0,
+							height: answerHeight ? answerHeight - 36 : 0,
 						}}>
 						<Avatar
 							sx={{
@@ -157,14 +162,16 @@ export function AnswerCard({
 								height: 20,
 								fontSize: 16,
 								bgcolor: green[400],
-								mb: 1,
+								mb: 2,
 							}}
 							aria-label='recipe'
 							src={answerData?.user?.profile_image ?? ''}>
 							{!answerData?.user?.profile_image &&
 								answerData?.user?.user_name[0].toUpperCase()}
 						</Avatar>
-						<Divider orientation='vertical'></Divider>
+						<Divider
+							orientation='vertical'
+							sx={{ height: answerHeight ? answerHeight - 36 : 0 }}></Divider>
 					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
@@ -172,7 +179,7 @@ export function AnswerCard({
 								{answerData?.user?.user_name ?? 'Гость'}
 							</Typography>
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
-								{dayjs(answerData?.creation_date).format('DD-MM-YYYY')}
+								{dayjs(answerData?.creation_date).toNow(true) + ' назад'}
 							</Typography>
 						</Box>
 						{isEditing ? (
@@ -281,14 +288,16 @@ export function AnswerCard({
 											/>
 										</MenuItem>,
 									]}
-									<MenuItem
-										onClick={handleClose}
-										sx={{ width: '100%', height: 36 }}>
-										<FormControlLabel
-											control={<Report sx={{ mx: 1.2 }} />}
-											label='Пожаловаться'
-										/>
-									</MenuItem>
+									{answerData.user.id !== userDetails?.id && (
+										<MenuItem
+											onClick={handleClose}
+											sx={{ width: '100%', height: 36 }}>
+											<FormControlLabel
+												control={<Report sx={{ mx: 1.2 }} />}
+												label='Пожаловаться'
+											/>
+										</MenuItem>
+									)}
 									<Divider />
 									<MenuItem
 										onClick={handleClose}
@@ -315,12 +324,23 @@ export function AnswerCard({
 					</Box>
 				</Box>
 				{isCommenting && (
-					<AddComment
-						isCommenting={isCommenting}
-						setIsCommenting={setIsCommenting}
-						profileData={userDetails}
-						answerData={answerData}
-					/>
+					<Box sx={{ display: 'flex', alignItems: 'center' }}>
+						<Divider
+							orientation='vertical'
+							sx={{
+								ml: 1.2,
+								height: answerHeight ? answerHeight : 0,
+							}}
+						/>
+						<Box sx={{ flex: '0 1 100%' }}>
+							<AddComment
+								isCommenting={isCommenting}
+								setIsCommenting={setIsCommenting}
+								profileData={userDetails}
+								answerData={answerData}
+							/>
+						</Box>
+					</Box>
 				)}
 				{answerData.comments.map((comment) => (
 					<CommentCard

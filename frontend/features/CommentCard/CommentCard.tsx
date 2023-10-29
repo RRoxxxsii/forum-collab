@@ -17,6 +17,8 @@ import {
 } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
+import ru from 'dayjs/locale/ru'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
 interface CommentCardProps {
@@ -77,8 +79,19 @@ export function CommentCard({
 
 	const commentRef = useRef<null | HTMLElement>(null)
 
-	const commentHeightOffset = commentRef.current?.offsetHeight
-	const commentHeightClient = commentRef.current?.clientHeight
+	const [commentHeightOffset, setCommentHeightOffset] = useState<
+		number | undefined
+	>(0)
+	const [commentHeightClient, setCommentHeightClient] = useState<
+		number | undefined
+	>(0)
+	useEffect(() => {
+		setCommentHeightOffset(commentRef.current?.offsetHeight)
+		setCommentHeightClient(commentRef.current?.offsetHeight)
+	}, [commentRef?.current?.offsetHeight])
+
+	dayjs.locale(ru)
+	dayjs.extend(relativeTime)
 
 	return (
 		<>
@@ -142,8 +155,9 @@ export function CommentCard({
 								<Typography sx={{ marginRight: 1 }} variant='caption'>
 									{comment?.user?.user_name ?? 'Гость'}
 								</Typography>
+
 								<Typography sx={{ color: 'GrayText' }} variant='caption'>
-									{dayjs(comment?.creation_date).format('DD-MM-YYYY')}
+									{dayjs(comment?.creation_date).toNow(true) + ' назад'}
 								</Typography>
 							</Box>
 							{isEditing ? (
@@ -235,14 +249,16 @@ export function CommentCard({
 											/>
 										</MenuItem>,
 									]}
-									<MenuItem
-										onClick={handleClose}
-										sx={{ width: '100%', height: 36 }}>
-										<FormControlLabel
-											control={<Report sx={{ mx: 1.2 }} />}
-											label='Пожаловаться'
-										/>
-									</MenuItem>
+									{comment.user.id !== userDetails?.id && (
+										<MenuItem
+											onClick={handleClose}
+											sx={{ width: '100%', height: 36 }}>
+											<FormControlLabel
+												control={<Report sx={{ mx: 1.2 }} />}
+												label='Пожаловаться'
+											/>
+										</MenuItem>
+									)}
 									<Divider />
 									<MenuItem
 										onClick={handleClose}

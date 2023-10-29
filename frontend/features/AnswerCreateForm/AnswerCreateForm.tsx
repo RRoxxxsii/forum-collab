@@ -1,8 +1,8 @@
 'use client'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
-import { ErrorRes, IAnswer, IQuestion, IUser } from '@/types'
+import { IAnswer, IErrorRes, IQuestion, IUser } from '@/types'
 import { TiptapEditor } from '@/widgets/TiptapEditor'
-import { Button, Typography } from '@mui/material'
+import { Button, Divider, Typography } from '@mui/material'
 import { Dispatch, SetStateAction, useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -29,7 +29,7 @@ async function addAnswer({
 			}),
 		})
 
-		const data: IAnswer | ErrorRes = await response.json()
+		const data: IAnswer | IErrorRes = await response.json()
 
 		if ('error' in data) {
 			return toast.error(data.error, {

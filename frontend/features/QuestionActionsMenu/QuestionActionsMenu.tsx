@@ -95,12 +95,14 @@ export const QuestionActionsMenu = ({
 						/>
 					</MenuItem>,
 				]}
-				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-					<FormControlLabel
-						control={<Report sx={{ mx: 1.2 }} />}
-						label='Пожаловаться'
-					/>
-				</MenuItem>
+				{questionData.id !== profileData?.id && (
+					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+						<FormControlLabel
+							control={<Report sx={{ mx: 1.2 }} />}
+							label='Пожаловаться'
+						/>
+					</MenuItem>
+				)}
 				<Divider />
 				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
 					<FormControlLabel
