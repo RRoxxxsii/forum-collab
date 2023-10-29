@@ -14,7 +14,7 @@ from .models import EmailConfirmationToken, NewUser
 from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
-                          UserRatingSerializer, UserSerializer)
+                          UserWithRatingSerializer, UserSerializer)
 from .tasks import send_confirmation_email
 from .utils import email_exists, get_current_site
 
@@ -203,7 +203,7 @@ class UserViewSet(ModelViewSet):
     queryset = NewUser.objects.all()
     http_method_names = ('get', )
     serializer_classes = {
-        'retrieve': UserRatingSerializer,
+        'retrieve': UserWithRatingSerializer,
         'list': UserSerializer
     }
 
@@ -215,7 +215,7 @@ class UserPersonalProfilePageAPIView(BaseUserMixin, RetrieveAPIView):
     """
     Получение своего профиля.
     """
-    serializer_class = UserRatingSerializer
+    serializer_class = UserWithRatingSerializer
 
 
 class UploadProfileImageAPIView(BaseUserUpdateProfileMixin, UpdateAPIView):
