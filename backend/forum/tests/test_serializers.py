@@ -15,14 +15,14 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 from forum.serializers import DetailQuestionSerializer
 
 
-def generate_photo_file():
+def generate_photo_file(file_name: str):
     # Create an in-memory image
     image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
 
     # Save the image to a BytesIO buffer
     file = io.BytesIO()
     image.save(file, 'png')
-    file.name = f'test{random.randint(1, 1000000)}.png'
+    file.name = f'{file_name}.png'
 
     # Create a SimpleUploadedFile object from the BytesIO buffer
     uploaded_file = SimpleUploadedFile(file.name, file.getvalue())
