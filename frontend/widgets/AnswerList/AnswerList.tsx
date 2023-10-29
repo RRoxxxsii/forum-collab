@@ -1,8 +1,9 @@
 'use client'
 import { AnswerCard } from '@/features/AnswerCard'
+import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { DeleteContent } from '@/shared/api/deleteContent'
-import { IQuestion, Model } from '@/types'
-import { Dispatch, SetStateAction } from 'react'
+import { IAnswer, IQuestion, IModelType } from '@/types'
+import { Dispatch, SetStateAction, useContext } from 'react'
 import { toast } from 'react-toastify'
 
 export const AnswerList = ({
@@ -12,6 +13,8 @@ export const AnswerList = ({
 	questionData: IQuestion
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }) => {
+	const { userDetails } = useContext(UserDetailsContext)
+
 	const handleSolve = async ({ answerId }: { answerId: number }) => {
 		const solveToast = toast.loading('Обработка ответа...')
 		try {
@@ -26,13 +29,7 @@ export const AnswerList = ({
 			const result = await response.json()
 
 			if (!response.ok) {
-				toast.update(solveToast, {
-					render: result.error.detail,
-					type: 'error',
-					isLoading: false,
-					autoClose: 3000,
-				})
-				throw new Error(result.error)
+				throw new Error(result.error.detail)
 			}
 
 			toast.update(solveToast, {
@@ -51,7 +48,7 @@ export const AnswerList = ({
 		}
 	}
 
-	const handleDelete = ({ id, model }: { id: number; model: Model }) => {
+	const handleDelete = ({ id, model }: { id: number; model: IModelType }) => {
 		DeleteContent({
 			id: id,
 			model: model,
@@ -79,18 +76,20 @@ export const AnswerList = ({
 			setQuestionData(updatedQuestionData)
 		}
 	}
-
-	return (
-		<>
-			{questionData?.answers?.map((answer) => (
-				<AnswerCard
-					key={answer.id}
-					answerData={answer}
-					setQuestionData={setQuestionData}
-					handleSolve={handleSolve}
-					handleDelete={handleDelete}
-				/>
-			))}
-		</>
+	const sortedAnswers = questionData.answers.sort((a, b) =>
+		a.is_solving ? -1 : 1
 	)
+
+	return sortedAnswers.map((answer: IAnswer) => (
+		<AnswerCard
+			key={answer.id}
+			solved={answer.is_solving}
+			answerData={answer}
+			questionData={questionData}
+			userDetails={userDetails}
+			setQuestionData={setQuestionData}
+			handleSolve={handleSolve}
+			handleDelete={handleDelete}
+		/>
+	))
 }

@@ -23,9 +23,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 		id,
 		action,
 		checked,
-	}: IChangeRating) => {
-
-	}
+	}: IChangeRating) => {}
 
 	return (
 		<>
@@ -40,6 +38,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 					mb: 2,
 					textDecoration: 'none',
 					p: 0.8,
+					filter: questionData.is_solved ? 'brightness(70%)' : 'none',
 				}}>
 				<Link
 					href={`/question/${questionData.id}/${Transliterate(
@@ -56,7 +55,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 					/>
 					<Box sx={{ width: '100%', ml: 1 }}>
 						<QuestionItemContent questionData={questionData} />
-						<QuestionItemActions questionData={questionData} />
+						<QuestionItemActions questionData={questionData}  />
 					</Box>
 				</Link>
 			</Box>

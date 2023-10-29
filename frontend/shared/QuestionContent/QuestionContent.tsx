@@ -10,7 +10,7 @@ export const QuestionContent = ({
 	return (
 		<Box sx={{ mb: 2, ml: 1 }}>
 			<UserInformation questionData={questionData} />
-			<Typography variant='h6'>{questionData?.title}</Typography>
+			<Typography sx={{ fontSize: 16 }}>{questionData?.title}</Typography>
 			<Typography
 				sx={{ mb: 2 }}
 				variant='body1'
