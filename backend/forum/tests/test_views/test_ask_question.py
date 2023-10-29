@@ -1,6 +1,7 @@
 import json
 
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -14,6 +15,9 @@ class TestUserAskQuestionPost(APITestCase):
     Тестирует AskQuestionAPIView; создание вопроса. Отправка post-запроса.
     """
     def setUp(self) -> None:
+
+        fake = Faker()
+
         self.url = reverse('ask-question')
 
         ThemeTag.objects.create(tag_name='django')
@@ -23,10 +27,10 @@ class TestUserAskQuestionPost(APITestCase):
         ThemeTag.objects.create(tag_name='C#')
         ThemeTag.objects.create(tag_name='Java')
 
-        photo = generate_photo_file()
-        photo2 = generate_photo_file()
-        photo3 = generate_photo_file()
-        photo4 = generate_photo_file()
+        photo = generate_photo_file(fake.unique.file_name)
+        photo2 = generate_photo_file(fake.unique.file_name)
+        photo3 = generate_photo_file(fake.unique.file_name)
+        photo4 = generate_photo_file(fake.unique.file_name)
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')

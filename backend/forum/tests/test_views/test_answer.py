@@ -1,4 +1,5 @@
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -11,6 +12,8 @@ from forum.tests.test_serializers import generate_photo_file
 class TestLeaveAnswerAPIView(APITestCase):
 
     def setUp(self) -> None:
+        fake = Faker()
+
         self.url = reverse('answer-question')
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
@@ -20,8 +23,8 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
 
-        photo = generate_photo_file()
-        photo2 = generate_photo_file()
+        photo = generate_photo_file(fake.unique.file_name)
+        photo2 = generate_photo_file(fake.unique.file_name)
 
         self.question.tags.add(self.tag)
         self.answer_data = {'answer': 'Ответ...', 'question': self.question.id}
