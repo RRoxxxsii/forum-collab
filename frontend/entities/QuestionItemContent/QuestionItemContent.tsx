@@ -1,6 +1,6 @@
 import { IQuestion } from '@/types'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Avatar, Box, IconButton, Typography } from '@mui/material'
+import { Avatar, Box, IconButton, Typography, Tooltip } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
@@ -70,13 +70,29 @@ export const QuestionItemContent = ({
 									color='text.secondary'>
 									Отправлено: {user.user_name ?? 'Гость'}
 								</Typography>
-								<Typography
-									variant='body2'
-									sx={{ ml: 1 }}
-									color='gray'
-									fontSize={12}>
-									{dayjs(creation_date).toNow(true) + ' назад'}
-								</Typography>
+								<Tooltip
+									placement='top'
+									title={`${
+										questionData.updated_date
+											? `Изменён ${
+													dayjs(questionData.updated_date).toNow(true) +
+													' назад'
+											  }`
+											: ''
+									}`}>
+									<Typography
+										variant='body2'
+										sx={{ ml: 1 }}
+										color='gray'
+										fontSize={12}>
+										{dayjs(creation_date).toNow(true) + ' назад'}
+									</Typography>
+								</Tooltip>
+								{questionData.is_solved && (
+									<Typography sx={{ ml: 1, fontSize: 14, color: 'gray' }}>
+										(Закрыт)
+									</Typography>
+								)}
 							</Box>
 							<Box>
 								<IconButton>

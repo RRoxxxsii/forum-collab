@@ -75,36 +75,67 @@ export function CommentCard({
 		}
 	}, [isEditing])
 
+	const commentRef = useRef<null | HTMLElement>(null)
+
+	const commentHeightOffset = commentRef.current?.offsetHeight
+	const commentHeightClient = commentRef.current?.clientHeight
+
 	return (
 		<>
-			<Box sx={{ display: 'flex' }}>
-				<Box sx={{ px: 8, py: 1, width: '100%' }}>
+			<Box
+				sx={{
+					display: 'flex',
+					height: '100%',
+					'&:hover': { borderColor: 'gray' },
+				}}>
+				<Divider
+					orientation='vertical'
+					sx={{
+						height: commentHeightOffset,
+						pl: 1.3,
+					}}
+				/>
+				<Box sx={{ px: 4.5, width: '100%' }}>
 					<Box
+						ref={commentRef}
 						sx={{
 							display: 'flex',
 							alignItems: 'flex-start',
 							postion: 'relative',
 						}}>
+						<Divider
+							orientation='vertical'
+							sx={{
+								mr: 3,
+								height: commentHeightClient ? commentHeightClient : 0,
+							}}
+						/>
 						<Box
 							sx={{
 								display: 'flex',
 								flexDirection: 'column',
 								height: '100%',
 							}}>
-							<Avatar
+							<Box
 								sx={{
-									width: 20,
-									height: 20,
-									fontSize: 16,
-									bgcolor: green[400],
-									marginRight: 1,
-								}}
-								aria-label='recipe'
-								src={comment?.user?.profile_image ?? ''}>
-								{comment?.user?.profile_image
-									? ''
-									: comment?.user?.user_name[0].toUpperCase()}
-							</Avatar>
+									height: commentHeightOffset ? commentHeightOffset - 20 : 0,
+									mr: 1,
+								}}>
+								<Avatar
+									sx={{
+										width: 20,
+										height: 20,
+										fontSize: 16,
+										bgcolor: green[400],
+										mb: 1,
+									}}
+									aria-label='recipe'
+									src={comment?.user?.profile_image ?? ''}>
+									{comment?.user?.profile_image
+										? ''
+										: comment?.user?.user_name[0].toUpperCase()}
+								</Avatar>
+							</Box>
 						</Box>
 						<Box sx={{ width: '100%' }}>
 							<Box sx={{ display: 'flex' }}>
@@ -226,13 +257,31 @@ export function CommentCard({
 						</Box>
 					</Box>
 					{isCommenting && (
-						<AddComment
-							parentComment={comment}
-							answerData={answerData}
-							isCommenting={isCommenting}
-							setIsCommenting={setIsCommenting}
-							profileData={userDetails}
-						/>
+						<Box sx={{ display: 'flex', width: '100%', position: 'relative' }}>
+							<Divider
+								orientation='vertical'
+								sx={{
+									height: commentHeightOffset ? commentHeightOffset + 62 : 0,
+									position: 'absolute',
+									left: -37,
+								}}
+							/>
+							<Divider
+								orientation='vertical'
+								sx={{
+									height: commentHeightOffset ? commentHeightOffset + 62 : 0,
+								}}
+							/>
+							<Box sx={{ flex: '0 1 100%' }}>
+								<AddComment
+									parentComment={comment}
+									answerData={answerData}
+									isCommenting={isCommenting}
+									setIsCommenting={setIsCommenting}
+									profileData={userDetails}
+								/>
+							</Box>
+						</Box>
 					)}
 				</Box>
 			</Box>

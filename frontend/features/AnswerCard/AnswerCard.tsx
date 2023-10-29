@@ -1,6 +1,11 @@
-import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { ChangeRating } from '@/shared/api/changeRating'
-import { IAnswer, IChangeRating, IModelType, IQuestion } from '@/types'
+import {
+	IAnswer,
+	IChangeRating,
+	IModelType,
+	IQuestion,
+	UserDetailsType,
+} from '@/types'
 import { AddComment } from '@/widgets/AddComment'
 import {
 	ArrowDownward,
@@ -12,6 +17,7 @@ import {
 	Edit,
 	MoreHoriz,
 	Report,
+	Star,
 } from '@mui/icons-material'
 import {
 	Avatar,
@@ -30,8 +36,8 @@ import dayjs from 'dayjs'
 import React, {
 	Dispatch,
 	SetStateAction,
-	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from 'react'
 import { CommentCard } from '../CommentCard'
@@ -40,19 +46,23 @@ import {} from '../QuestionItemRating/QuestionItemRating'
 
 interface AnswerCardProps {
 	answerData: IAnswer
+	questionData: IQuestion
+	userDetails: UserDetailsType
 	handleSolve: ({ answerId }: { answerId: number }) => void
 	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
+	solved: boolean
 }
 
 export function AnswerCard({
 	answerData,
+	questionData,
+	userDetails,
 	handleSolve,
 	handleDelete,
 	setQuestionData,
+	solved,
 }: AnswerCardProps) {
-	const { userDetails } = useContext(UserDetailsContext)
-
 	const [clientRating, setClientRating] = useState(0)
 	const [checked, setChecked] = useState<null | number>(null)
 
@@ -96,22 +106,50 @@ export function AnswerCard({
 		answerData.answer
 	)
 
+	const answerRef = useRef<null | HTMLElement>(null)
+
+	const answerHeight = answerRef.current?.offsetHeight
+
 	return (
 		<>
-			<Box sx={{ px: 3, py: 2, width: '100%' }}>
+			<Box
+				sx={{
+					px: 3,
+
+					width: '100%',
+					background: solved ? '#252525' : 'transparent',
+					borderRadius: 4,
+				}}>
+				{solved && (
+					<>
+						<Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+							<Star sx={{ mr: 1 }} />
+							<Typography
+								sx={{
+									fontSize: 20,
+								}}>
+								Лучший ответ
+							</Typography>
+						</Box>
+						<Divider sx={{ mb: 1 }} />
+					</>
+				)}
+
 				<Box
+					ref={answerRef}
 					sx={{
 						display: 'flex',
 						alignItems: 'flex-start',
 						position: 'relative',
+						'&:hover': { borderColor: 'gray' },
 					}}>
 					<Box
 						sx={{
 							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'center',
-							height: '80px',
 							mr: 1,
+							height: answerHeight ? answerHeight - 28 : 0,
 						}}>
 						<Avatar
 							sx={{
@@ -262,14 +300,17 @@ export function AnswerCard({
 									</MenuItem>
 								</Menu>
 							</Box>
-							<Box sx={{ display: 'flex', alignItems: 'center' }}>
-								<Button
-									onClick={() => handleSolve({ answerId: answerData.id })}
-									size='small'
-									variant='outlined'>
-									Отметить решающим
-								</Button>
-							</Box>
+							{!questionData.is_solved &&
+								questionData.user.id === userDetails?.id && (
+									<Box sx={{ display: 'flex', alignItems: 'center' }}>
+										<Button
+											onClick={() => handleSolve({ answerId: answerData.id })}
+											size='small'
+											variant='outlined'>
+											Отметить решающим
+										</Button>
+									</Box>
+								)}
 						</Box>
 					</Box>
 				</Box>
