@@ -1,6 +1,7 @@
 import json
 
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -13,21 +14,22 @@ from forum.tests.test_serializers import generate_photo_file
 class TestQuestionViewSet(APITestCase):
 
     def setUp(self) -> None:
+        fake = Faker()
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.question2 = Question.objects.create(title='Заголовок2', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
-        question_image = generate_photo_file()
-        question_image2 = generate_photo_file()
+        question_image = generate_photo_file(file_name=fake.unique.file_name)
+        question_image2 = generate_photo_file(file_name=fake.unique.file_name)
         question_image_obj = QuestionImages.objects.create(image=question_image, parent=self.question)
         question_image_obj2 = QuestionImages.objects.create(image=question_image2, parent=self.question)
         self.question.tags.add(self.tag)
         self.question.question_images.add(question_image_obj, question_image_obj2)
         self.answer = QuestionAnswer.objects.create(user=self.user, question=self.question,
                                                     answer='Изначальный ответ...')
-        answer_image = generate_photo_file()
+        answer_image = generate_photo_file(file_name=fake.unique.file_name)
         answer_image_obj = QuestionAnswerImages.objects.create(image=answer_image, parent=self.answer)
         self.answer.answer_images.add(answer_image_obj)
 
@@ -75,6 +77,9 @@ class TestQuestionViewSet(APITestCase):
 class TestQuestionQueryParams(APITestCase):
 
     def setUp(self) -> None:
+
+        fake = Faker()
+
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
@@ -105,8 +110,8 @@ class TestQuestionQueryParams(APITestCase):
         self.comment = AnswerComment.objects.create(question_answer=self.answer1, user=self.user, comment='Коммент')
 
         self.tag = ThemeTag.objects.create(tag_name='django')
-        question_image = generate_photo_file()
-        question_image2 = generate_photo_file()
+        question_image = generate_photo_file(fake.unique.file_name)
+        question_image2 = generate_photo_file(fake.unique.file_name)
         question_image_obj = QuestionImages.objects.create(image=question_image, parent=self.question)
         question_image_obj2 = QuestionImages.objects.create(image=question_image2, parent=self.question)
         self.question.tags.add(self.tag)

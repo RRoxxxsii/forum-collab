@@ -80,7 +80,7 @@ class UserSerializer(serializers.ModelSerializer):
                             'email_confirmed', 'created')
 
 
-class UserRatingSerializer(UserSerializer):
+class UserWithRatingSerializer(UserSerializer):
     amount_solved = serializers.SerializerMethodField()
     best_tags = serializers.SerializerMethodField()
     karma = serializers.SerializerMethodField()

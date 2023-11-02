@@ -7,6 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from PIL import Image
+from faker import Faker
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
@@ -15,14 +16,19 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 from forum.serializers import DetailQuestionSerializer
 
 
-def generate_photo_file():
+def reformat(obj):
+    obj = str(obj).replace(' ', '_').strip('<').replace('>', '')
+    return obj
+
+
+def generate_photo_file(file_name: str):
     # Create an in-memory image
     image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
 
     # Save the image to a BytesIO buffer
     file = io.BytesIO()
     image.save(file, 'png')
-    file.name = f'test{random.randint(1, 1000000)}.png'
+    file.name = f'{file_name}.png'
 
     # Create a SimpleUploadedFile object from the BytesIO buffer
     uploaded_file = SimpleUploadedFile(file.name, file.getvalue())
@@ -36,12 +42,14 @@ class TestQuestionDetailAPITestCase(APITestCase):
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
 
+        fake = Faker()
+
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
-        question_image = generate_photo_file()
-        question_image2 = generate_photo_file()
+        question_image = generate_photo_file(file_name=fake.unique.file_name)
+        question_image2 = generate_photo_file(file_name=fake.unique.file_name)
         question_image_obj = QuestionImages.objects.create(image=question_image, parent=self.question)
         question_image_obj2 = QuestionImages.objects.create(image=question_image2, parent=self.question)
         self.question.tags.add(self.tag)
@@ -50,7 +58,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
                                                     answer='Изначальный ответ...')
         self.answer2 = QuestionAnswer.objects.create(user=self.user, question=self.question,
                                                      answer='Изначальный ответ2...')
-        answer_image = generate_photo_file()
+        answer_image = generate_photo_file(file_name=fake.unique.file_name)
         answer_image_obj = QuestionAnswerImages.objects.create(image=answer_image, parent=self.answer)
         self.answer.answer_images.add(answer_image_obj)
 
@@ -85,8 +93,16 @@ class TestQuestionDetailAPITestCase(APITestCase):
             "creation_date": current_datetime,
             "updated_date": current_datetime,
             "images": [
-                "http://testserver/api/v1/forum/questions/1/",
-                "http://testserver/api/v1/forum/questions/2/"
+                {
+                    "id": question_image_obj.id,
+                    "image": f"http://testserver/media/{reformat(question_image2)}",
+                    "alt_text": question_image_obj2.alt_text
+                },
+                {
+                    "id": question_image_obj2.id,
+                    "image": f"http://testserver/media/{reformat(question_image2)}",
+                    "alt_text": question_image_obj2.alt_text
+                }
             ],
             "rating": {
                 "id": 1,
@@ -128,7 +144,11 @@ class TestQuestionDetailAPITestCase(APITestCase):
                         "users_disliked": []
                     },
                     "images": [
-                        "http://testserver/api/v1/forum/answers/1/"
+                        {
+                            "id": answer_image_obj.id,
+                            "image": f"http://testserver/media/{reformat(answer_image)}",
+                            "alt_text": answer_image_obj.alt_text
+                        }
                     ],
                     "comments": [
                         {
@@ -216,7 +236,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
 
     def test_ok(self):
         """
-        Тест может падать из-за различия в одну секунду.
+        Тест может падать из-за различия в одну секунду или
+        небольших различиях в названии файлов, которые в рамках теста НЕКРИТИЧНЫ.
         В таком случае тест необходимо перезапустить отдельно.
         Или сравнить вручную.
         """

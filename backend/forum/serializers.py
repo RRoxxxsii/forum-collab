@@ -10,6 +10,20 @@ from forum.validators import (validate_answer_related_obj_amount,
                               validate_tags_amount)
 
 
+class ImageSerializer(serializers.Serializer):
+    id = serializers.IntegerField(min_value=0)
+    image = serializers.SerializerMethodField()
+    alt_text = serializers.CharField(max_length=255)
+
+    class Meta:
+        fields = '__all__'
+
+    def get_image(self, instance):
+        request = self.context.get('request')
+        image_url = instance.image.url
+        return request.build_absolute_uri(image_url)
+
+
 class BaseTagFieldSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -116,8 +130,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class AnswerSerializer(serializers.ModelSerializer):
     rating = AnswerRatingSerializer(read_only=True)
-    images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='answer-detail',
-                                                 source='answer_images')
+    images = serializers.SerializerMethodField()
     comments = CommentSerializer(read_only=True, many=True, source='answer_comments')
 
     uploaded_images = serializers.ListField(
@@ -135,12 +148,31 @@ class AnswerSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'updated_date', 'rating',
                             'images', 'comments')
 
+    def get_images(self, instance):
+        serializer_context = {'request': self.context.get('request')}
+        qs = instance.answer_images.all()
+        serializer = ImageSerializer(qs, many=True, context=serializer_context)
+        return serializer.data
+
 
 class QuestionRelatedAnswersAmountSerializer(serializers.Serializer):
     answers_amount = serializers.SerializerMethodField()
 
     def get_answers_amount(self, instance: Question):
         return instance.question_answers.all().count()
+
+
+class BaseQuestionSerializer(serializers.ModelSerializer):
+    tags = BaseTagFieldSerializer(read_only=True, many=True)
+    user = serializers.SerializerMethodField(read_only=True)
+    question = serializers.IntegerField(source='id', read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ('question', 'title', 'content', 'user', 'tags')
+
+    def get_user(self, instance):
+        return instance.user.user_name
 
 
 class ListQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serializers.ModelSerializer):
@@ -160,8 +192,7 @@ class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serialize
 
     rating = QuestionRatingSerializer(read_only=True)
     answers = AnswerSerializer(read_only=True, many=True, source='question_answers')
-    images = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='question-detail',
-                                                 source='question_images')
+    images = serializers.SerializerMethodField()
     tags = BaseTagFieldSerializer(read_only=True, many=True)
     user = UserSerializer(read_only=True)
 
@@ -171,6 +202,12 @@ class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serialize
                   'images', 'rating', 'answers', 'tags')
         extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
                         'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+
+    def get_images(self, instance):
+        serializer_context = {'request': self.context.get('request')}
+        qs = instance.question_images.all()
+        serializer = ImageSerializer(qs, many=True, context=serializer_context)
+        return serializer.data
 
 
 class GenericObjNotificationRelatedField(serializers.RelatedField):

@@ -22,7 +22,8 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
-                               CommentSerializer, DetailQuestionSerializer,
+                               BaseQuestionSerializer, CommentSerializer,
+                               DetailQuestionSerializer,
                                ListQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
@@ -34,6 +35,8 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_classes = {
         'POST': AskQuestionSerializer, 'GET': TagFieldWithCountSerializer
     }
+    serializer_class = BaseQuestionSerializer
+
     permission_classes = [IsAuthenticated, ]
     queryset = Question.objects.all()
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
@@ -78,14 +81,8 @@ class AskQuestionAPIView(GenericAPIView):
         question.tags.add(*tag_ids)
         question.save()
 
-        data = {
-            'question': question.id,
-            'title': question.title,
-            'content': question.content,
-            'user': str(question.user)
-        }
-
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        serializer = BaseQuestionSerializer(instance=question)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.request.method)
@@ -108,20 +105,18 @@ class AnswerQuestionAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        images = serializer.data.get('uploaded_images')
-        question_id = serializer.data.get('question')
-        question = Question.objects.get(id=question_id)
+        images = serializer.validated_data.get('uploaded_images')
+        question = serializer.validated_data.get('question')
         question_user = question.user  # автор вопроса
         user = request.user
-        answer = serializer.data.get('answer')
+        answer = serializer.validated_data.get('answer')
         question_answer = QuestionAnswer.objects.create(
-            question_id=question_id,
+            question_id=question.id,
             answer=answer,
-        )
+            user=user if isinstance(user, NewUser) else None,
 
-        if isinstance(user, NewUser):
-            question_answer.user = user
-            question_answer.save()
+        )
+        question_answer.save()
 
         notify(
             sender=user, receiver=question_user,
@@ -310,6 +305,11 @@ class QuestionViewSet(ModelViewSet):
 
         return Question.objects.all()[:limit]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+
 
 class AnswerViewSet(ModelViewSet):
     """
@@ -318,6 +318,7 @@ class AnswerViewSet(ModelViewSet):
     queryset = QuestionAnswer.objects.all()
     serializer_class = AnswerSerializer
     http_method_names = ('get',)
+
 
 
 class RetrieveCommentAPIView(RetrieveAPIView):
