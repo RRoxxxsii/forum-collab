@@ -98,6 +98,7 @@ class TestQuestionQueryParams(APITestCase):
         self.question9 = Question.objects.create(title='Заголовок9', content='Контент', user=self.user, is_solved=True)
         self.question10 = Question.objects.create(title='Заголовок10', content='Контент', user=self.user)
         self.question11 = Question.objects.create(title='Заголовок11', content='Контент', user=self.user)
+        self.question12 = Question.objects.create(title='Заголовок12', content='Контент', user=self.user)
 
         self.question2.like(self.user2)
         self.question2.like(self.user3)
@@ -119,15 +120,15 @@ class TestQuestionQueryParams(APITestCase):
 
         self.url = reverse('question-list')
 
-    def test_limit_1(self):
+    def test_page_0(self):
         """
-        Тестирование количества возвращенных вопросов при лимите равном 1.
+        Тестирование количества возвращенных вопросов при странице 0.
         """
-        response = self.client.get(f'{self.url}?limit=1')
+        response = self.client.get(f'{self.url}?page=0')
         content = json.loads(response.content.decode())
-        self.assertEqual(len(content), 1)
+        self.assertEqual(len(content), 10)
 
-    def test_limit_without_query_params(self):
+    def test_page_without_query_params(self):
         """
         Тестируем без передачи параметров запроса.
         """
@@ -139,7 +140,7 @@ class TestQuestionQueryParams(APITestCase):
         """
         Параметр запроса sort = closed.
         """
-        response = self.client.get(f'{self.url}?sort=closed&limit=10')
+        response = self.client.get(f'{self.url}?sort=closed&page=1')
         content = json.loads(response.content.decode())
         for question in content:
             self.assertTrue(question.get('is_solved'))
@@ -148,7 +149,7 @@ class TestQuestionQueryParams(APITestCase):
         """
         Параметр запроса sort = closed.
         """
-        response = self.client.get(f'{self.url}?sort=opened&limit=10')
+        response = self.client.get(f'{self.url}?sort=opened&page=1')
         content = json.loads(response.content.decode())
         for question in content:
             self.assertFalse(question.get('is_solved'))
@@ -157,7 +158,7 @@ class TestQuestionQueryParams(APITestCase):
         """
         Параметр запроса sort = closed.
         """
-        response = self.client.get(f'{self.url}?sort=best&limit=10')
+        response = self.client.get(f'{self.url}?sort=best&page=1')
         # content = json.loads(response.content.decode())
         # content = json.dumps(content, indent=4, ensure_ascii=False)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
