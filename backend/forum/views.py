@@ -257,8 +257,8 @@ class QuestionViewSet(ModelViewSet):
         'retrieve': DetailQuestionSerializer,
     }
 
-    limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
-                              description="кол-во возвращаемых записей",
+    limit = openapi.Parameter(name='page', in_=openapi.IN_QUERY,
+                              description="страница, min=0",
                               type=openapi.TYPE_STRING, required=True)
 
     sort = openapi.Parameter(name='sort', in_=openapi.IN_QUERY,
@@ -274,18 +274,20 @@ class QuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         query_params = self.request.query_params
-        limit = query_params.get('limit')
-        if limit:
-            limit = int(limit)
+        page = query_params.get('page')
+        if page:
+            page = int(page)
+            offset = page * 10
+            limit = page * 10 + 10
 
         sort = query_params.get('sort')
-        if not sort and (not limit or not self.action == 'list'):
+        if not sort and ((not page and page != 0) or not self.action == 'list'):
             return Question.objects.all().order_by('-creation_date')
-        elif sort == 'closed' and limit:
-            return Question.objects.filter(is_solved=True).order_by('-creation_date')[:limit]
-        elif sort == 'opened' and limit:
-            return Question.objects.filter(is_solved=False).order_by('-creation_date')[:limit]
-        elif sort == 'best' and limit:
+        elif sort == 'closed' and (page or page == 0):
+            return Question.objects.filter(is_solved=True).order_by('-creation_date')[offset:limit]
+        elif sort == 'opened' and (page or page == 0):
+            return Question.objects.filter(is_solved=False).order_by('-creation_date')[offset:limit]
+        elif sort == 'best' and (page or page == 0):
 
             month_ago = timezone.now() - timedelta(days=30)
             amount_of_questions = 100
@@ -303,7 +305,7 @@ class QuestionViewSet(ModelViewSet):
             ).filter(creation_date__gte=month_ago).order_by('-score', '-creation_date')[:amount_of_questions]
             return questions
 
-        return Question.objects.all()[:limit]
+        return Question.objects.all()[offset:limit]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -318,7 +320,6 @@ class AnswerViewSet(ModelViewSet):
     queryset = QuestionAnswer.objects.all()
     serializer_class = AnswerSerializer
     http_method_names = ('get',)
-
 
 
 class RetrieveCommentAPIView(RetrieveAPIView):
