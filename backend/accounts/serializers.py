@@ -23,14 +23,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
             raise SerializerValidationError(str(err))
         return password
 
-    def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        password = self.validate_password(password)
-        instance = self.Meta.model(**validated_data)
-        instance.set_password(password)
-        instance.save()
-        return instance
-
 
 class UserEmailSerializer(serializers.Serializer):
     """

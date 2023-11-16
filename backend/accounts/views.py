@@ -1,4 +1,3 @@
-from django.template.loader import get_template
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
@@ -15,8 +14,9 @@ from .permissions import EmailIsNotConfirmed
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
                           UserWithRatingSerializer, UserSerializer)
+from .services import CreateAccountService, CreateTokenService
 from .tasks import send_confirmation_email
-from .utils import email_exists, get_current_site
+from .utils import email_exists
 
 
 class CustomUserRegisterAPIView(GenericAPIView):
@@ -32,7 +32,10 @@ class CustomUserRegisterAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+
+        validated_data: dict = serializer.validated_data
+        user = CreateAccountService.create_user(data=validated_data)
+
         if user:
             return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         return Response(data={"message": self.error_message}, status=status.HTTP_400_BAD_REQUEST)
@@ -50,17 +53,11 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
     serializer_class = DummySerializer
 
     def get(self, request):
-        current_url = get_current_site(request, path='email-confirmation-result')   # Часть url для подтверждения
-
         user = request.user
+        scheme = request.scheme
+        domain = request.get_host()
 
-        # Создание токена (будет частью url-адреса) для того, чтобы в дальнейшем подтвердить эл. почту.
-        token = EmailConfirmationToken.objects.create(user=user)
-
-        send_confirmation_email.delay(
-            template_name='email/confirm_email.txt', current_url=current_url,
-            email=user.email, token_id=token.id, user_id=user.id
-        )
+        CreateTokenService.send_email(user=user, scheme=scheme, path='email-confirmation-result', domain=domain, template_name='email/confirm_email.txt', request_path=request.path)
 
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
@@ -99,15 +96,8 @@ class ChangeEmailAddressAPIView(GenericAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         request.session['email'] = email
-        current_url = get_current_site(request, path='new-email-confirmation-result')   # Часть url для подтверждения
 
-        # Создаем новый токен
-        token = EmailConfirmationToken.objects.create(user=user)
-
-        send_confirmation_email.delay(
-            template_name='email/confirm_email.txt', current_url=current_url, email=email,
-            token_id=token.id, user_id=user.id
-        )
+        CreateTokenService.send_email(user=user, scheme=request.scheme, domain=request.get_host(), path='new-email-confirmation-result', template_name='email/confirm_email.txt', request_path=request.path)
 
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
@@ -165,13 +155,7 @@ class RestoreAccountAPIView(GenericAPIView):
             return Response(data={"message": self.error_message},
                             status=status.HTTP_400_BAD_REQUEST)
         elif user.email == email:
-            # Создаем новый токен
-            token = EmailConfirmationToken.objects.create(user=user)
-            current_url = get_current_site(request=request, path='restore-account-email-confirm')
-            send_confirmation_email.delay(
-                template_name='email/restore_account.txt', email=email, user_id=user.id,
-                current_url=current_url, token_id=token.id
-            )
+            CreateTokenService.send_email(user=user, scheme=request.scheme, domain=request.get_host(), path='restore-account-email-confirm', template_name='email/restore_account.txt', request_path=request.path)
 
             return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         # В случае, если что-то пошло не так
