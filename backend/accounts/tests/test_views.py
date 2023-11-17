@@ -328,7 +328,6 @@ class TestRestoreAccountAPIView(APITestCase):
         email_msg = mail.outbox[0]
         link = re.search(r'http://.+', email_msg.body).group()
         response = self.client.get(link, follow=True)
-        print(response.content.decode())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
