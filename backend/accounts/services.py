@@ -1,7 +1,8 @@
 import functools
 
-from accounts.models import NewUser, EmailConfirmationToken
 from accounts import repository
+from accounts.models import EmailConfirmationToken, NewUser
+
 from .tasks import send_confirmation_email
 
 

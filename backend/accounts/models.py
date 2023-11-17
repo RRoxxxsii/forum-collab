@@ -101,7 +101,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
                 .annotate(answer_count=models.Count('questions__question_answers'))
                 .order_by('-answer_count')[:5]
             )
-            cache.set(data_cache, expert_tags, 60 * 60)
+            cache.set(data_cache, expert_tags, 60)
         return expert_tags
 
     def get_amount_question_solved(self) -> int:
@@ -123,7 +123,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
         if not count:
             count = self.question_answers.filter(is_solving=True).count() - count_rated_himself
-            cache.set(data_cache, count, 60 * 60)
+            cache.set(data_cache, count, 60)
 
         return count
 
@@ -136,7 +136,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
             count = self.questions.aggregate(
                 count=Coalesce(Sum('rating__like_amount'), 0)
             ).get('count')
-            cache.set(data_cache, count, 60 * 60)
+            cache.set(data_cache, count, 60)
 
         return count
 
@@ -149,7 +149,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
             count = self.questions.aggregate(
                 count=Coalesce(Sum('rating__dislike_amount'), 0)
             ).get('count')
-            cache.set(data_cache, count, 60 * 60)
+            cache.set(data_cache, count, 60)
 
         return count
 
@@ -162,7 +162,7 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
             count = self.question_answers.aggregate(
                 count=Coalesce(Sum('rating__like_amount'), 0)
             ).get('count')
-            cache.set(data_cache, count, 60 * 60)
+            cache.set(data_cache, count, 60)
 
         return count
 

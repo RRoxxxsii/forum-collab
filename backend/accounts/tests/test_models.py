@@ -87,8 +87,7 @@ class TestNewUserModelTest(APITestCase):
         self.assertEqual(self.user5.count_answer_dislikes(), 0)
 
     def test_count_karma_return_when_no_rating(self):
-        user_karma = self.user5.count_karma()
-        self.assertEqual(user_karma, 0)
+        self.assertEqual(self.user5.count_karma(), 0)
 
 
 class TestCountRatedHimselfIsNotCountedToRating(APITestCase):

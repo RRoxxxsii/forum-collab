@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from accounts.models import NewUser, EmailConfirmationToken
+from accounts.models import EmailConfirmationToken, NewUser
 
 
 class BaseAccountRepository:
@@ -49,3 +49,10 @@ class BaseAccountRepository:
     def confirm_email(user: NewUser) -> None:
         user.email_confirmed = True
         user.save()
+
+
+class ViewsQC:
+
+    @staticmethod
+    def list_users():
+        return NewUser.objects.all()

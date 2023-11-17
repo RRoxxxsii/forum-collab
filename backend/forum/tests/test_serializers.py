@@ -6,8 +6,8 @@ import random
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
-from PIL import Image
 from faker import Faker
+from PIL import Image
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser

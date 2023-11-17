@@ -6,11 +6,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import NewUser
 from .permissions import EmailIsNotConfirmed
+from .repository import ViewsQC
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
-                          UserWithRatingSerializer, UserSerializer)
+                          UserSerializer, UserWithRatingSerializer)
 from .services import BaseAccountService
 
 
@@ -18,9 +18,9 @@ class BaseUserMixin:
     """
     Базовый класс для получения профиля пользователя.
     """
+    queryset = ViewsQC.list_users()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, ]
-    queryset = NewUser.objects.all()
     http_method_names = ['get', ]
 
     def get_object(self):
@@ -121,9 +121,11 @@ class ChangeEmailAddressAPIView(GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        BaseAccountService.send_email(user=request.user, scheme=request.scheme, domain=request.get_host(),
-                                      path='new-email-confirmation-result', template_name='email/confirm_email.txt',
-                                      request_path=request.path)
+        BaseAccountService.send_email(
+            user=request.user, scheme=request.scheme, domain=request.get_host(),
+            path='new-email-confirmation-result', template_name='email/confirm_email.txt',
+            request_path=request.path
+        )
 
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
@@ -185,9 +187,11 @@ class RestoreAccountAPIView(GenericAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         elif user.email == email:
-            BaseAccountService.send_email(user=user, scheme=request.scheme, domain=request.get_host(),
-                                          path='restore-account-email-confirm',
-                                          template_name='email/restore_account.txt', request_path=request.path)
+            BaseAccountService.send_email(
+                user=user, scheme=request.scheme, domain=request.get_host(),
+                path='restore-account-email-confirm',
+                template_name='email/restore_account.txt', request_path=request.path
+            )
 
             return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
         # В случае, если что-то пошло не так
@@ -222,7 +226,7 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 
 
 class UserViewSet(ModelViewSet):
-    queryset = NewUser.objects.all()
+    queryset = ViewsQC.list_users()
     http_method_names = ('get',)
     serializer_classes = {
         'retrieve': UserWithRatingSerializer,
