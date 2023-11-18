@@ -5,7 +5,8 @@ from typing import Iterator
 from django.db.models import QuerySet
 
 from accounts.models import NewUser
-from forum.models import Question, QuestionAnswer, QuestionImages, QuestionAnswerImages, ThemeTag, Attachment
+from forum.models import Question, QuestionAnswer, QuestionImages, QuestionAnswerImages, ThemeTag, Attachment, \
+    AnswerComment
 
 
 class ThemeTagRepository:
@@ -90,3 +91,29 @@ class AnswerRepository(BaseImageRepository):
     ) -> QuestionAnswer:
         answer = QuestionAnswer.objects.create(question=question, answer=answer, user=user)
         return answer
+
+    @staticmethod
+    def get_answer_by_id(answer_id: int):
+        return QuestionAnswer.objects.get(id=answer_id)
+
+
+class CommentRepository:
+
+    @staticmethod
+    def create_comment(
+            comment: str,
+            question_answer: QuestionAnswer,
+            parent_id: int,
+            user: NewUser
+    ) -> AnswerComment:
+
+        comment = AnswerComment.objects.create(
+            comment=comment, question_answer=question_answer,
+            user=user, parent_id=parent_id
+        )
+
+        return comment
+
+    @staticmethod
+    def get_comment_by_id(id) -> AnswerComment:
+        return AnswerComment.objects.get(id=id)

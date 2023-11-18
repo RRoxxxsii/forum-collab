@@ -13,23 +13,6 @@ from forum.utils import invalidate_questions_solved
 from notifications.utils import notify
 
 
-def create_return_tags(tags: list, user: NewUser) -> Iterator[int]:
-    """
-
-    Возвращает ID тегов с помощью yield. Если тега не существует, если тега не существует,
-    создает тег как пользовательский нерелвантный.
-    """
-    for tag in tags:
-
-        tag, created = ThemeTag.objects.get_or_create(tag_name=tag, defaults={
-            'is_user_tag': True,
-            'is_relevant': False,
-            'user': user
-        })
-
-        yield tag.id
-
-
 def make_tag_relevant_on_question_save(question: Question):
     """
     Делает релеватными тег, количество вопросов по которому >= 10.
@@ -41,15 +24,6 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.is_relevant = True
             tag.save(update_fields=['is_relevant'])
             notify(receiver=tag.user, target=tag, text='тег становится релевантным')
-
-
-def add_image(images: list, obj_model: [Question | QuestionAnswer],
-              attachment_model: [QuestionImages | QuestionAnswerImages]):
-    """
-    Создание вложений(фотографий) для поста.
-    """
-    for image in images:
-        attachment_model.objects.create(image=image, parent=obj_model)
 
 
 def vote_answer_solving(answer: QuestionAnswer, related_question: Question):

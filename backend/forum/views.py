@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.contrib.auth.models import AnonymousUser
 from django.db.models import Count, ExpressionWrapper, F, IntegerField
 from django.utils import timezone
 from drf_yasg import openapi
@@ -18,11 +17,10 @@ from accounts.models import NewUser
 from accounts.serializers import DummySerializer
 from forum.helpers import UpdateDestroyRetrieveMixin
 from forum.logic import (
-                         parse_comment, vote_answer_solving, add_image)
-from forum.models import (AnswerComment, Question, QuestionAnswer,
-                          QuestionAnswerImages, QuestionImages)
+                         vote_answer_solving,)
+from forum.models import (AnswerComment, Question, QuestionAnswer, QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
-from forum.querysets import QuestionQS, QuestionAnswerQS
+from forum.querysets import QuestionQS, QuestionAnswerQS, CommentQS
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -30,8 +28,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import QuestionService, AnswerService
-from notifications.utils import notify
+from forum.services import QuestionService, AnswerService, CommentService
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -137,39 +134,13 @@ class CommentAPIView(CreateAPIView):
         if serializer.is_valid():
             comment = serializer.data.get('comment')
             answer_id = serializer.data.get('question_answer')
-            answer = QuestionAnswer.objects.get(id=answer_id)
-            parsed_user_list = parse_comment(comment=comment)
-            current_user = request.user
             parent_id = serializer.data.get('parent')
 
-            if isinstance(current_user, AnonymousUser):
-                current_user = None
-
-            comment = AnswerComment.objects.create(
-                comment=comment, question_answer=answer,
-                user=current_user, parent_id=parent_id
+            comment = CommentService.create_comment(
+                comment=comment, question_answer_id=answer_id, user=request.user, parent_id=parent_id
             )
 
-            if parent_id:
-                parent = AnswerComment.objects.get(id=parent_id)
-
-                for parsed_user in parsed_user_list:
-                    notify(
-                        sender=current_user, receiver=parsed_user,
-                        text='ответил на ваш комментарий',
-                        action_obj=comment,
-                        target=parent
-                    )
-
-            if answer.user:
-                notify(
-                    sender=current_user, receiver=answer.user,
-                    text='прокомментировал ваш ответ на вопрос',
-                    target=answer, action_obj=comment
-                )
-
             serializer = self.serializer_class(instance=comment)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -178,7 +149,7 @@ class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление комментария.
     """
-    queryset = AnswerComment.objects.all()
+    queryset = CommentQS.comment_list()
     serializer_class = UpdateCommentSerializer
 
 
@@ -313,7 +284,7 @@ class RetrieveCommentAPIView(RetrieveAPIView):
     """
     Возвращение комментария по id.
     """
-    queryset = AnswerComment.objects.all()
+    queryset = CommentQS.comment_list()
     serializer_class = CommentSerializer
 
 
