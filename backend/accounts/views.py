@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .permissions import EmailIsNotConfirmed
-from .repository import ViewsQC
+from .repository import ViewsQS
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
                           UserSerializer, UserWithRatingSerializer)
@@ -18,7 +18,7 @@ class BaseUserMixin:
     """
     Базовый класс для получения профиля пользователя.
     """
-    queryset = ViewsQC.list_users()
+    queryset = ViewsQS.list_users()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['get', ]
@@ -226,7 +226,7 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 
 
 class UserViewSet(ModelViewSet):
-    queryset = ViewsQC.list_users()
+    queryset = ViewsQS.list_users()
     http_method_names = ('get',)
     serializer_classes = {
         'retrieve': UserWithRatingSerializer,

@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
+from accounts.repository import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.tests.test_serializers import generate_photo_file, reformat
 
@@ -626,19 +627,19 @@ class TestKarmaCalculated(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url_personal_page)
         content = json.loads(response.content.decode())
-        self.assertEqual(content.get('karma'), self.user.count_karma())
+        self.assertEqual(content.get('karma'), UserKarmaQS.count_karma(self.user))
 
     def test_karma_calculated_request_user_is_not_returned_obj_user(self):
         """
         Проверяем, что данные профиля другого пользователя не равны данным
         пользователя, запрашивающего ресурс.
         """
-        self.assertNotEqual(self.user.count_karma(), self.user2.count_karma())
+        self.assertNotEqual(UserKarmaQS.count_karma(self.user), UserKarmaQS.count_karma(self.user2))
 
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url)             # получаем профиль user2
         content = json.loads(response.content.decode())
-        self.assertNotEqual(self.user.count_karma(), content.get('karma'))
+        self.assertNotEqual(UserKarmaQS.count_karma(self.user), content.get('karma'))
 
         response = self.client.get(reverse('newuser-detail',
                                            kwargs={'pk': self.user.pk}))    # получаем профиль user1

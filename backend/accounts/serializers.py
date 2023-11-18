@@ -7,6 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import NewUser
+from .repository import UserKarmaQS
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -82,16 +83,16 @@ class UserWithRatingSerializer(UserSerializer):
         model = UserSerializer.Meta.model
 
     def get_amount_solved(self, instance: NewUser):
-        count = instance.get_amount_question_solved()
+        count = UserKarmaQS.get_amount_question_solved(instance)
         return count
 
     def get_best_tags(self, instance: NewUser):
         from forum.serializers import BaseTagFieldSerializer
-        best_tags = instance.get_top_expert_tags()
+        best_tags = UserKarmaQS.get_top_expert_tags(instance)
 
         serializer = BaseTagFieldSerializer(data=best_tags, many=True)
         serializer.is_valid(raise_exception=False)
         return serializer.data
 
     def get_karma(self, instance: NewUser):
-        return self.instance.count_karma()
+        return UserKarmaQS.count_karma(instance)

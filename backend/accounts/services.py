@@ -1,5 +1,3 @@
-import functools
-
 from accounts import repository
 from accounts.models import EmailConfirmationToken, NewUser
 
