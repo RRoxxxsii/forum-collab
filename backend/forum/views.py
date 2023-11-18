@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
                                      RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
@@ -16,8 +17,8 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from accounts.models import NewUser
 from accounts.serializers import DummySerializer
 from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         parse_comment, vote_answer_solving)
+from forum.logic import (
+                         parse_comment, vote_answer_solving, add_image)
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
@@ -28,6 +29,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
+from forum.services import QuestionService
 from notifications.utils import notify
 
 
@@ -51,7 +53,12 @@ class AskQuestionAPIView(GenericAPIView):
         """
         tag = request.query_params.get('q')
 
-        suggested_tags = get_tags_or_error(tag)
+        if not tag:
+            raise ValidationError('Тег не указан.')
+
+        suggested_tags = QuestionService.tag_repository.get_tags(tag)
+        if not suggested_tags:
+            raise ValidationError('Тег не указан')
 
         serializer = self.get_serializer_class()(suggested_tags, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -68,18 +75,10 @@ class AskQuestionAPIView(GenericAPIView):
         content = serializer.data.get('content')
         tags = serializer.data.get('tags')
         images = serializer.data.get('uploaded_images')
-        question = Question.objects.create(
-            user=request.user,
-            title=title,
-            content=content
+
+        question = QuestionService.create_question(
+            user=request.user, title=title, tags=tags, images=images, content=content
         )
-
-        if images:
-            add_image(images=images, obj_model=question, attachment_model=QuestionImages)
-
-        tag_ids = create_return_tags(tags=tags, user=request.user)
-        question.tags.add(*tag_ids)
-        question.save()
 
         serializer = BaseQuestionSerializer(instance=question)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
