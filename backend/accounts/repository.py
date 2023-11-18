@@ -55,13 +55,6 @@ class BaseAccountRepository:
         user.save()
 
 
-class ViewsQS:
-
-    @staticmethod
-    def list_users():
-        return NewUser.objects.all()
-
-
 class Cache:
 
     @staticmethod

@@ -39,12 +39,23 @@ class AttachmentFactory:
         if isinstance(parent, Question):
             return QuestionImages.objects.create(parent=parent, image=image)
         elif isinstance(parent, QuestionAnswer):
-            return QuestionAnswerImages(parent=parent, image=image)
+            return QuestionAnswerImages.objects.create(parent=parent, image=image)
         else:
             raise ValueError("Invalid parent type")
 
 
-class QuestionRepository:
+class BaseImageRepository:
+
+    @staticmethod
+    def add_attachments(
+            parent: Question | QuestionAnswer,
+            attachments: list[Attachment]
+    ) -> None:
+        for attachment in attachments:
+            AttachmentFactory.create_attachment(image=attachment, parent=parent)
+
+
+class QuestionRepository(BaseImageRepository):
 
     @staticmethod
     def create_question(
@@ -68,10 +79,14 @@ class QuestionRepository:
         question.tags.add(*tags)
         question.save()
 
+
+class AnswerRepository(BaseImageRepository):
+
     @staticmethod
-    def add_attachments(
-            parent: Question | QuestionAnswer,
-            attachments: list[Attachment]
-    ) -> None:
-        for attachment in attachments:
-            AttachmentFactory.create_attachment(image=attachment, parent=parent)
+    def create_answer(
+            question: Question,
+            answer: str,
+            user: NewUser = None
+    ) -> QuestionAnswer:
+        answer = QuestionAnswer.objects.create(question=question, answer=answer, user=user)
+        return answer

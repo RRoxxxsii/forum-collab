@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .permissions import EmailIsNotConfirmed
-from .repository import ViewsQS
+from .querysets import ViewsQS
 from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
                           RegisterUserSerializer, UserEmailSerializer,
                           UserSerializer, UserWithRatingSerializer)

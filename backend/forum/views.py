@@ -22,6 +22,7 @@ from forum.logic import (
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
+from forum.querysets import QuestionQS, QuestionAnswerQS
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -29,7 +30,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import QuestionService
+from forum.services import QuestionService, AnswerService
 from notifications.utils import notify
 
 
@@ -40,7 +41,7 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_class = BaseQuestionSerializer
 
     permission_classes = [IsAuthenticated, ]
-    queryset = Question.objects.all()
+    queryset = QuestionQS.question_list()
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -91,7 +92,7 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение комментария.
     """
-    queryset = Question.objects.all()
+    queryset = QuestionQS.question_list()
     serializer_class = UpdateQuestionSerializer
 
 
@@ -106,27 +107,14 @@ class AnswerQuestionAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         images = serializer.validated_data.get('uploaded_images')
         question = serializer.validated_data.get('question')
-        question_user = question.user  # автор вопроса
+        content = serializer.validated_data.get('answer')
         user = request.user
-        answer = serializer.validated_data.get('answer')
-        question_answer = QuestionAnswer.objects.create(
-            question_id=question.id,
-            answer=answer,
-            user=user if isinstance(user, NewUser) else None,
 
-        )
-        question_answer.save()
-
-        notify(
-            sender=user, receiver=question_user,
-            text='ответил на ваш вопрос', action_obj=question_answer,
-            target=question
+        answer = AnswerService.create_answer(
+            question=question, user=user if isinstance(user, NewUser) else None, answer=content, images=images
         )
 
-        if images:
-            add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
-
-        serializer = self.serializer_class(instance=question_answer, context={'request': request})
+        serializer = self.serializer_class(instance=answer, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -135,7 +123,7 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
     serializer_class = AnswerSerializer
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQS.answer_list()
 
 
 class CommentAPIView(CreateAPIView):
