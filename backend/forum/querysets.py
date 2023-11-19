@@ -3,22 +3,24 @@ from django.db.models import QuerySet
 from forum.models import Question, QuestionAnswer, AnswerComment
 
 
-class QuestionQS:
+class ObjQSBase:
+    @staticmethod
+    def get_obj_list(obj_type):
+        return obj_type.objects.all()
 
     @staticmethod
-    def question_list() -> QuerySet[Question]:
-        return Question.objects.all()
+    def get_obj_by_id(obj_type, obj_id: int):
+        return obj_type.objects.get(id=obj_id)
 
 
-class QuestionAnswerQS:
-
-    @staticmethod
-    def answer_list() -> QuerySet[QuestionAnswer]:
-        return QuestionAnswer.objects.all()
+class QuestionQS(ObjQSBase):
+    pass
 
 
-class CommentQS:
+class QuestionAnswerQSBase(ObjQSBase):
+    pass
 
-    @staticmethod
-    def comment_list() -> QuerySet[AnswerComment]:
-        return AnswerComment.objects.all()
+
+class CommentQSBase(ObjQSBase):
+    pass
+

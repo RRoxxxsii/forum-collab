@@ -7,6 +7,38 @@ from django.db.models import QuerySet
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, QuestionImages, QuestionAnswerImages, ThemeTag, Attachment, \
     AnswerComment
+from forum.querysets import ObjQSBase
+
+
+class LikeDislikeRepository:
+
+    @staticmethod
+    def get_users_liked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
+        return obj.rating.users_liked.all()
+
+    @staticmethod
+    def get_users_disliked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
+        return obj.rating.users_disliked.all()
+
+    @staticmethod
+    def set_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_liked.add(user)
+        obj.rating.like_amount += 1
+
+    @staticmethod
+    def set_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_disliked.add(user)
+        obj.rating.dislike_amount += 1
+
+    @staticmethod
+    def remove_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_liked.remove(user)
+        obj.rating.like_amount -= 1
+
+    @staticmethod
+    def remove_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_disliked.remove(user)
+        obj.rating.dislike_amount -= 1
 
 
 class ThemeTagRepository:
@@ -16,10 +48,7 @@ class ThemeTagRepository:
             tags: list,
             user: NewUser
     ) -> Iterator[ThemeTag]:
-        """
-        Возвращает ID тегов с помощью yield. Если тега не существует, если тега не существует,
-        создает тег как пользовательский нерелвантный.
-        """
+
         for tag in tags:
             tag, created = ThemeTag.objects.get_or_create(tag_name=tag, defaults={
                 'is_user_tag': True,
@@ -81,7 +110,7 @@ class QuestionRepository(BaseImageRepository):
         question.save()
 
 
-class AnswerRepository(BaseImageRepository):
+class AnswerRepository(BaseImageRepository, ObjQSBase):
 
     @staticmethod
     def create_answer(
@@ -92,12 +121,8 @@ class AnswerRepository(BaseImageRepository):
         answer = QuestionAnswer.objects.create(question=question, answer=answer, user=user)
         return answer
 
-    @staticmethod
-    def get_answer_by_id(answer_id: int):
-        return QuestionAnswer.objects.get(id=answer_id)
 
-
-class CommentRepository:
+class CommentRepository(ObjQSBase):
 
     @staticmethod
     def create_comment(
@@ -113,7 +138,3 @@ class CommentRepository:
         )
 
         return comment
-
-    @staticmethod
-    def get_comment_by_id(id) -> AnswerComment:
-        return AnswerComment.objects.get(id=id)

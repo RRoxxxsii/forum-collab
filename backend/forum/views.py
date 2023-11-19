@@ -20,7 +20,7 @@ from forum.logic import (
                          vote_answer_solving,)
 from forum.models import (AnswerComment, Question, QuestionAnswer, QuestionAnswerImages, QuestionImages)
 from forum.permissions import IsQuestionOwner
-from forum.querysets import QuestionQS, QuestionAnswerQS, CommentQS
+from forum.querysets import QuestionQS, QuestionAnswerQSBase, CommentQSBase
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -28,7 +28,7 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import QuestionService, AnswerService, CommentService
+from forum.services import QuestionService, AnswerService, CommentService, LikeDislikeService
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -38,7 +38,7 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_class = BaseQuestionSerializer
 
     permission_classes = [IsAuthenticated, ]
-    queryset = QuestionQS.question_list()
+    queryset = QuestionQS.get_obj_list(Question)
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -89,7 +89,7 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение комментария.
     """
-    queryset = QuestionQS.question_list()
+    queryset = QuestionQS.get_obj_list(Question)
     serializer_class = UpdateQuestionSerializer
 
 
@@ -120,7 +120,7 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
     serializer_class = AnswerSerializer
-    queryset = QuestionAnswerQS.answer_list()
+    queryset = QuestionAnswerQSBase.get_obj_list(QuestionAnswer)
 
 
 class CommentAPIView(CreateAPIView):
@@ -149,7 +149,7 @@ class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление комментария.
     """
-    queryset = CommentQS.comment_list()
+    queryset = CommentQSBase.get_obj_list(AnswerComment)
     serializer_class = UpdateCommentSerializer
 
 
@@ -176,7 +176,8 @@ class LikeDislikeViewSet(GenericViewSet):
         if instance.user == user:
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
-        instance.like(user=user)
+
+        LikeDislikeService.like(obj=instance, user=user)
 
         return Response(data='Лайк поставлен успешно')
 
@@ -189,7 +190,8 @@ class LikeDislikeViewSet(GenericViewSet):
         if instance.user == user:
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
-        instance.dislike(user=user)
+
+        LikeDislikeService.dislike(obj=instance, user=user)
 
         return Response(data='Дизлайк поставленен успешно')
 
@@ -284,7 +286,7 @@ class RetrieveCommentAPIView(RetrieveAPIView):
     """
     Возвращение комментария по id.
     """
-    queryset = CommentQS.comment_list()
+    queryset = CommentQSBase.get_obj_list(AnswerComment)
     serializer_class = CommentSerializer
 
 
@@ -328,4 +330,3 @@ class ComplainAPIView(GenericAPIView):
 
         obj.rating.users_complained.add(request.user)
         return Response(status=status.HTTP_200_OK)
-

@@ -1,8 +1,9 @@
 import datetime
 import io
 import json
-import random
 
+import pytz
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
@@ -16,9 +17,10 @@ from forum.models import (AnswerComment, Question, QuestionAnswer,
 from forum.serializers import DetailQuestionSerializer
 
 
-def reformat(obj):
-    obj = str(obj).replace(' ', '_').strip('<').replace('>', '')
-    return obj
+def convert_datetime(dt):
+    moscow_tz = pytz.timezone('Europe/Moscow')
+
+    return dt.replace(tzinfo=pytz.utc).astimezone(moscow_tz).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def generate_photo_file(file_name: str):
@@ -48,8 +50,8 @@ class TestQuestionDetailAPITestCase(APITestCase):
                                                 password='Ax6!a7OpNvq')
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')
-        question_image = generate_photo_file(file_name=fake.unique.file_name)
-        question_image2 = generate_photo_file(file_name=fake.unique.file_name)
+        question_image = generate_photo_file(file_name=fake.unique.file_name())
+        question_image2 = generate_photo_file(file_name=fake.unique.file_name())
         question_image_obj = QuestionImages.objects.create(image=question_image, parent=self.question)
         question_image_obj2 = QuestionImages.objects.create(image=question_image2, parent=self.question)
         self.question.tags.add(self.tag)
@@ -58,25 +60,22 @@ class TestQuestionDetailAPITestCase(APITestCase):
                                                     answer='Изначальный ответ...')
         self.answer2 = QuestionAnswer.objects.create(user=self.user, question=self.question,
                                                      answer='Изначальный ответ2...')
-        answer_image = generate_photo_file(file_name=fake.unique.file_name)
+        answer_image = generate_photo_file(file_name=fake.unique.file_name())
         answer_image_obj = QuestionAnswerImages.objects.create(image=answer_image, parent=self.answer)
         self.answer.answer_images.add(answer_image_obj)
 
         self.comment = AnswerComment.objects.create(user=self.user, question_answer=self.answer,
                                                     comment='agagag')
-        self.comment = AnswerComment.objects.create(user=self.user, question_answer=self.answer,
+        self.comment2 = AnswerComment.objects.create(user=self.user, question_answer=self.answer,
                                                     comment='bfbd')
 
         serialized_data = DetailQuestionSerializer(self.question, context={'request': request})
         self.data_json = json.dumps(serialized_data.data, indent=4, ensure_ascii=False)
 
-        # получаем текущее время
-        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         expected_data = {
-            "id": 1,
+            "id": self.question.pk,
             "user": {
-                "id": 1,
+                "id": self.user.pk,
                 "email": "testuser@gmail.com",
                 "user_name": "testuser",
                 "about": "",
@@ -84,42 +83,42 @@ class TestQuestionDetailAPITestCase(APITestCase):
                 "is_active": True,
                 "is_banned": False,
                 "email_confirmed": False,
-                "created": current_datetime
+                "created": str(convert_datetime(self.user.created))
             },
             "title": "Заголовок",
             "content": "Контент",
             "answers_amount": 2,
             "is_solved": False,
-            "creation_date": current_datetime,
-            "updated_date": current_datetime,
+            "creation_date": str(convert_datetime(self.question.creation_date)),
+            "updated_date": str(convert_datetime(self.question.updated_date)),
             "images": [
                 {
                     "id": question_image_obj.id,
-                    "image": f"http://testserver/media/{reformat(question_image2)}",
+                    "image": f"http://testserver/media/{question_image_obj}",
                     "alt_text": question_image_obj2.alt_text
                 },
                 {
                     "id": question_image_obj2.id,
-                    "image": f"http://testserver/media/{reformat(question_image2)}",
+                    "image": f"http://testserver/media/{question_image_obj2}",
                     "alt_text": question_image_obj2.alt_text
                 }
             ],
             "rating": {
-                "id": 1,
+                "id": self.question.pk,
                 "is_liked": False,
                 "is_disliked": False,
                 "like_amount": 0,
                 "dislike_amount": 0,
-                "question": 1,
+                "question": self.question.pk,
                 "users_liked": [],
                 "users_disliked": []
             },
             "answers": [
                 {
-                    "id": 1,
-                    "question": 1,
+                    "id": self.answer.pk,
+                    "question": self.question.pk,
                     "user": {
-                        "id": 1,
+                        "id": self.user.pk,
                         "email": "testuser@gmail.com",
                         "user_name": "testuser",
                         "about": "",
@@ -127,34 +126,34 @@ class TestQuestionDetailAPITestCase(APITestCase):
                         "is_active": True,
                         "is_banned": False,
                         "email_confirmed": False,
-                        "created": current_datetime
+                        "created": str(convert_datetime(self.user.created))
                     },
                     "answer": "Изначальный ответ...",
                     "is_solving": False,
-                    "creation_date": current_datetime,
-                    "updated_date": current_datetime,
+                    "creation_date": str(convert_datetime(self.answer.creation_date)),
+                    "updated_date": str(convert_datetime(self.answer.updated_date)),
                     "rating": {
-                        "id": 1,
+                        "id": self.answer.pk,
                         "is_liked": False,
                         "is_disliked": False,
                         "like_amount": 0,
                         "dislike_amount": 0,
-                        "answer": 1,
+                        "answer": self.answer.pk,
                         "users_liked": [],
                         "users_disliked": []
                     },
                     "images": [
                         {
                             "id": answer_image_obj.id,
-                            "image": f"http://testserver/media/{reformat(answer_image)}",
+                            "image": f"http://testserver/media/{answer_image_obj}",
                             "alt_text": answer_image_obj.alt_text
                         }
                     ],
                     "comments": [
                         {
-                            "id": 1,
+                            "id": self.comment.pk,
                             "user": {
-                                "id": 1,
+                                "id": self.user.pk,
                                 "email": "testuser@gmail.com",
                                 "user_name": "testuser",
                                 "about": "",
@@ -162,18 +161,18 @@ class TestQuestionDetailAPITestCase(APITestCase):
                                 "is_active": True,
                                 "is_banned": False,
                                 "email_confirmed": False,
-                                "created": current_datetime
+                                "created": str(convert_datetime(self.user.created))
                             },
                             "comment": "agagag",
-                            "creation_date": current_datetime,
-                            "updated_date": current_datetime,
-                            "question_answer": 1,
+                            "creation_date": str(convert_datetime(self.comment.creation_date)),
+                            "updated_date": str(convert_datetime(self.comment.updated_date)),
+                            "question_answer": self.answer.pk,
                             "parent": None
                         },
                         {
-                            "id": 2,
+                            "id": self.comment2.pk,
                             "user": {
-                                "id": 1,
+                                "id": self.user.pk,
                                 "email": "testuser@gmail.com",
                                 "user_name": "testuser",
                                 "about": "",
@@ -181,21 +180,21 @@ class TestQuestionDetailAPITestCase(APITestCase):
                                 "is_active": True,
                                 "is_banned": False,
                                 "email_confirmed": False,
-                                "created": current_datetime
+                                "created": str(convert_datetime(self.user.created))
                             },
                             "comment": "bfbd",
-                            "creation_date": current_datetime,
-                            "updated_date": current_datetime,
-                            "question_answer": 1,
+                            "creation_date": str(convert_datetime(self.comment2.creation_date)),
+                            "updated_date": str(convert_datetime(self.comment2.updated_date)),
+                            "question_answer": self.answer.pk,
                             "parent": None
                         }
                     ]
                 },
                 {
-                    "id": 2,
-                    "question": 1,
+                    "id": self.answer2.pk,
+                    "question": self.question.pk,
                     "user": {
-                        "id": 1,
+                        "id": self.user.pk,
                         "email": "testuser@gmail.com",
                         "user_name": "testuser",
                         "about": "",
@@ -203,19 +202,19 @@ class TestQuestionDetailAPITestCase(APITestCase):
                         "is_active": True,
                         "is_banned": False,
                         "email_confirmed": False,
-                        "created": current_datetime
+                        "created": str(convert_datetime(self.user.created))
                     },
                     "answer": "Изначальный ответ2...",
                     "is_solving": False,
-                    "creation_date": current_datetime,
-                    "updated_date": current_datetime,
+                    "creation_date": str(convert_datetime(self.answer2.creation_date)),
+                    "updated_date": str(convert_datetime(self.answer2.updated_date)),
                     "rating": {
-                        "id": 2,
+                        "id": self.answer2.pk,
                         "is_liked": False,
                         "is_disliked": False,
                         "like_amount": 0,
                         "dislike_amount": 0,
-                        "answer": 2,
+                        "answer": self.answer2.pk,
                         "users_liked": [],
                         "users_disliked": []
                     },
@@ -236,8 +235,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
 
     def test_ok(self):
         """
-        Тест может падать из-за различия в одну секунду или
-        небольших различиях в названии файлов, которые в рамках теста НЕКРИТИЧНЫ.
+        Тест может падать из-за небольших различий (во времени).
         В таком случае тест необходимо перезапустить отдельно.
         Или сравнить вручную.
         """

@@ -6,8 +6,52 @@ from django.contrib.auth.models import AnonymousUser
 
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, AnswerComment
-from forum.repository import QuestionRepository, ThemeTagRepository, AnswerRepository, CommentRepository
+from forum.repository import QuestionRepository, ThemeTagRepository, AnswerRepository, CommentRepository, \
+    LikeDislikeRepository
 from notifications.utils import notify
+
+
+class LikeDislikeService:
+    repository = LikeDislikeRepository
+
+    @classmethod
+    def like(cls, user: NewUser, obj: Question | QuestionAnswer):
+        # если у пользователя не стоит лайк
+        if user not in cls.repository.get_users_liked(obj):
+            # если у пользователя не стоит дизлайк
+            if user not in cls.repository.get_users_disliked(obj):
+                # ставим лайк
+                cls.repository.set_like(obj, user)
+            # если у пользователя стоит дизлайк
+            else:
+                cls.repository.remove_dislike(obj, user)
+                cls.repository.set_like(obj, user)
+        # если у пользователя уже стоит лайк
+        else:
+            cls.repository.remove_like(obj, user)
+
+        obj.rating.save()
+
+    @classmethod
+    def dislike(cls, user: NewUser, obj: Question | QuestionAnswer):
+        # если у пользователя не стоит дизлайк
+        if user not in cls.repository.get_users_disliked(obj):
+            # если у пользователя не стоит лайк
+            if user not in cls.repository.get_users_liked(obj):
+                # ставим дизлайк
+                cls.repository.set_dislike(obj, user)
+            # если у пользователя стоит лайк
+            else:
+                # убираем лайк
+                cls.repository.remove_like(obj, user)
+                # ставим дизлайк
+                cls.repository.set_dislike(obj, user)
+        # если у пользователя уже стоит дизлайк
+        else:
+            # убираем дизлайк
+            cls.repository.remove_dislike(obj, user)
+
+        obj.rating.save()
 
 
 class QuestionService:
@@ -76,7 +120,7 @@ class CommentService:
         if isinstance(user, AnonymousUser):
             user = None
 
-        answer = cls.answer_repository.get_answer_by_id(question_answer_id)
+        answer = cls.answer_repository.get_obj_by_id(QuestionAnswer, question_answer_id)
         answer_user = answer.user
 
         comment = cls.comment_repository.create_comment(
@@ -84,7 +128,7 @@ class CommentService:
         )
 
         if parent_id:
-            parent = cls.comment_repository.get_comment_by_id(parent_id)
+            parent = cls.comment_repository.get_obj_by_id(AnswerComment, parent_id)
             parsed_user_iterable = cls.parse_comment(comment=comment.comment)
 
             for parsed_user in parsed_user_iterable:

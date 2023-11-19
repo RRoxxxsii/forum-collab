@@ -10,7 +10,8 @@ from rest_framework.test import APITestCase, override_settings
 from accounts.models import NewUser
 from accounts.repository import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
-from forum.tests.test_serializers import generate_photo_file, reformat
+from forum.services import LikeDislikeService
+from forum.tests.test_serializers import generate_photo_file, convert_datetime
 
 
 class TestRegistrationAPI(APITestCase):
@@ -369,7 +370,7 @@ class TestUserViewSet(APITestCase):
     def setUp(self) -> None:
         fake = Faker()
 
-        image = generate_photo_file(fake.unique.file_name)
+        image = generate_photo_file(fake.unique.file_name())
         self.user = NewUser.objects.create_user(email='email@email.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', profile_image=image)
 
@@ -390,7 +391,7 @@ class TestUpdateProfileImage(APITestCase):
     def setUp(self) -> None:
         fake = Faker()
 
-        self.img_to_update = generate_photo_file(fake.unique.file_name)
+        self.img_to_update = generate_photo_file(fake.unique.file_name())
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True)
         self.url = reverse('update-image')
@@ -405,7 +406,7 @@ class TestUpdateProfileImage(APITestCase):
         self.client.patch(self.url, data={'profile_image': self.img_to_update})
 
         self.user.refresh_from_db()
-        self.assertEqual(self.user.profile_image, reformat(self.img_to_update))
+        self.assertEqual(self.user.profile_image, self.img_to_update)
 
     def test_update_profile_img_not_authenticated(self):
         response = self.client.patch(self.url, data={'profile_image': self.img_to_update})
@@ -417,7 +418,7 @@ class TestUpdateProfileAbout(APITestCase):
     def setUp(self) -> None:
         fake = Faker()
 
-        self.img_to_update = generate_photo_file(fake.unique.file_name)
+        self.img_to_update = generate_photo_file(fake.unique.file_name())
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True)
         self.url = reverse('update-about')
@@ -445,7 +446,7 @@ class TestGetPersonalProfile(APITestCase):
     def setUp(self) -> None:
         fake = Faker()
 
-        img = generate_photo_file(fake.unique.file_name)
+        img = generate_photo_file(fake.unique.file_name())
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq', email_confirmed=True,
                                                 profile_image=img)
@@ -596,25 +597,25 @@ class TestKarmaCalculated(APITestCase):
                                                     is_solving=True)
         self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
 
-        self.question.like(user=self.user2)
-        self.question.like(user=self.user3)
-        self.question.like(user=self.user4)
-        self.question.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user2, obj=self.question)
+        LikeDislikeService.like(user=self.user3, obj=self.question)
+        LikeDislikeService.like(user=self.user4, obj=self.question)
+        LikeDislikeService.dislike(user=self.user5, obj=self.question)
 
-        self.question2.like(user=self.user)
-        self.question2.like(user=self.user3)
-        self.question2.like(user=self.user4)
-        self.question2.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user, obj=self.question2)
+        LikeDislikeService.like(user=self.user3, obj=self.question2)
+        LikeDislikeService.like(user=self.user4, obj=self.question2)
+        LikeDislikeService.dislike(user=self.user5, obj=self.question2)
 
-        self.answer.like(user=self.user2)
-        self.answer.like(user=self.user3)
-        self.answer.like(user=self.user4)
-        self.answer.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user2, obj=self.answer)
+        LikeDislikeService.like(user=self.user3, obj=self.answer)
+        LikeDislikeService.like(user=self.user4, obj=self.answer)
+        LikeDislikeService.dislike(user=self.user5, obj=self.answer)
 
-        self.answer2.like(user=self.user)
-        self.answer2.like(user=self.user3)
-        self.answer2.like(user=self.user4)
-        self.answer2.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user, obj=self.answer2)
+        LikeDislikeService.like(user=self.user3, obj=self.answer2)
+        LikeDislikeService.like(user=self.user4, obj=self.answer2)
+        LikeDislikeService.dislike(user=self.user5, obj=self.answer2)
 
         self.url_personal_page = reverse('personal-page')
         self.url = reverse('newuser-detail', kwargs={'pk': self.user2.pk})

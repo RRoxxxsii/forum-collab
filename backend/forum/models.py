@@ -2,7 +2,6 @@ from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
 from accounts.models import NewUser
-from forum.helpers import LikeDislikeModelMixin
 
 
 class Attachment(models.Model):
@@ -75,7 +74,7 @@ class ThemeTag(models.Model):
         verbose_name_plural = 'Темы'
 
 
-class Question(models.Model, LikeDislikeModelMixin):
+class Question(models.Model):
     """
     Вопрос.
     """
@@ -156,7 +155,7 @@ class QuestionRating(Rating):
         verbose_name_plural = 'Рейтинги вопросов'
 
 
-class QuestionAnswer(models.Model, LikeDislikeModelMixin):
+class QuestionAnswer(models.Model):
     """
     Ответ на вопрос.
     """

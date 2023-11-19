@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 from accounts.models import NewUser
 from accounts.repository import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
+from forum.services import LikeDislikeService
 
 
 class TestNewUserModelTest(APITestCase):
@@ -32,25 +33,25 @@ class TestNewUserModelTest(APITestCase):
                                                     is_solving=True)
         self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
 
-        self.question.like(user=self.user2)
-        self.question.like(user=self.user3)
-        self.question.like(user=self.user4)
-        self.question.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user2, obj=self.question)
+        LikeDislikeService.like(user=self.user3, obj=self.question)
+        LikeDislikeService.like(user=self.user4, obj=self.question)
+        LikeDislikeService.dislike(user=self.user5, obj=self.question)
 
-        self.question2.like(user=self.user)
-        self.question2.like(user=self.user3)
-        self.question2.like(user=self.user4)
-        self.question2.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user, obj=self.question2)
+        LikeDislikeService.like(user=self.user3, obj=self.question2)
+        LikeDislikeService.like(user=self.user4, obj=self.question2)
+        LikeDislikeService.dislike(user=self.user5, obj=self.question2)
 
-        self.answer.like(user=self.user2)
-        self.answer.like(user=self.user3)
-        self.answer.like(user=self.user4)
-        self.answer.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user2, obj=self.answer)
+        LikeDislikeService.like(user=self.user3, obj=self.answer)
+        LikeDislikeService.like(user=self.user4, obj=self.answer)
+        LikeDislikeService.dislike(user=self.user5, obj=self.answer)
 
-        self.answer2.like(user=self.user)
-        self.answer2.like(user=self.user3)
-        self.answer2.like(user=self.user4)
-        self.answer2.dislike(user=self.user5)
+        LikeDislikeService.like(user=self.user, obj=self.answer2)
+        LikeDislikeService.like(user=self.user3, obj=self.answer2)
+        LikeDislikeService.like(user=self.user4, obj=self.answer2)
+        LikeDislikeService.dislike(user=self.user5, obj=self.answer2)
 
     def test_count_question_user_likes(self):
         self.assertEqual(UserKarmaQS.count_question_likes(self.user), self.question.rating.like_amount)
