@@ -19,7 +19,7 @@ class BaseUserMixin:
     """
     Базовый класс для получения профиля пользователя.
     """
-    queryset = UsersQS.get_obj_list(NewUser)
+    queryset = UsersQS.get_obj_list()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['get', ]
@@ -227,7 +227,7 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 
 
 class UserViewSet(ModelViewSet):
-    queryset = UsersQS.get_obj_list(NewUser)
+    queryset = UsersQS.get_obj_list()
     http_method_names = ('get',)
     serializer_classes = {
         'retrieve': UserWithRatingSerializer,

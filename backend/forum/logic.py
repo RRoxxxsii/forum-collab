@@ -9,7 +9,6 @@ from rest_framework.exceptions import ValidationError
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerImages,
                           QuestionImages, ThemeTag)
-from forum.utils import invalidate_questions_solved
 from notifications.utils import notify
 
 
@@ -24,48 +23,3 @@ def make_tag_relevant_on_question_save(question: Question):
             tag.is_relevant = True
             tag.save(update_fields=['is_relevant'])
             notify(receiver=tag.user, target=tag, text='тег становится релевантным')
-
-
-def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
-    """
-    Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
-    запрос, отметка вопроса как решившего проблему снимается, как и отметка вопроса как решенного.
-    Если ответ не отмечен как решающий и для вопроса нет решающих ответов, тогда ответ
-    отмечается как решающим, а вопрос как решенным, если же есть другой решающий ответ,
-    метка решающего ответа с него снимается и ставится на другой ответ.
-    """
-    if answer.is_solving:
-        answer.is_solving = False
-        related_question.is_solved = False
-    else:
-        if related_question.question_answers.filter(is_solving=True).exists():
-            is_solving_answer = related_question.question_answers.get(is_solving=True)
-            is_solving_answer.is_solving = False
-            is_solving_answer.save()
-        answer.is_solving = True
-        related_question.is_solved = True
-
-        notify(target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
-               sender=related_question.user)
-
-    invalidate_questions_solved(user=answer.user)
-
-    related_question.save()
-    answer.save()
-
-
-def parse_comment(comment: str) -> [NewUser | None]:
-    """
-    Проверка, есть ли упоминание других пользователей в комментарии.
-    """
-    pattern = r'@[a-zA-Z0-9_]+'
-    result = re.findall(pattern, comment)
-    for match in result:
-        # if NewUser.objects.filter(user_name=match).exists():
-        match = match.strip('@')
-        try:
-            user = NewUser.objects.get(user_name=match)
-        except NewUser.DoesNotExist:
-            pass
-        else:
-            yield user

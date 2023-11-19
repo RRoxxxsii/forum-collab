@@ -4,14 +4,18 @@ from accounts.models import NewUser
 
 
 class ObjQSBase:
-    @staticmethod
-    def get_obj_list(obj_type):
-        return obj_type.objects.all()
+    obj_type = None
 
-    @staticmethod
-    def get_obj_by_id(obj_type, obj_id: int):
-        return obj_type.objects.filter(id=obj_id)
+    @classmethod
+    def get_obj_list(cls):
+        if cls.obj_type:
+            return cls.obj_type.objects.all()
+
+    @classmethod
+    def get_obj_by_id(cls, obj_id: int):
+        if cls.obj_type:
+            return cls.obj_type.objects.get(id=obj_id)
 
 
 class UsersQS(ObjQSBase):
-    pass
+    obj_type = NewUser

@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.db.models import Count, ExpressionWrapper, F, IntegerField
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -16,11 +15,9 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from accounts.models import NewUser
 from accounts.serializers import DummySerializer
 from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import (
-                         vote_answer_solving,)
-from forum.models import (AnswerComment, Question, QuestionAnswer, QuestionAnswerImages, QuestionImages)
+
 from forum.permissions import IsQuestionOwner
-from forum.querysets import QuestionQS, QuestionAnswerQSBase, CommentQSBase
+from forum.querysets import QuestionQSBase, QuestionAnswerQSBase, CommentQSBase, QuestionQS
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -38,7 +35,7 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_class = BaseQuestionSerializer
 
     permission_classes = [IsAuthenticated, ]
-    queryset = QuestionQS.get_obj_list(Question)
+    queryset = QuestionQSBase.get_obj_list()
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -89,7 +86,7 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение комментария.
     """
-    queryset = QuestionQS.get_obj_list(Question)
+    queryset = QuestionQSBase.get_obj_list()
     serializer_class = UpdateQuestionSerializer
 
 
@@ -120,7 +117,7 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
     serializer_class = AnswerSerializer
-    queryset = QuestionAnswerQSBase.get_obj_list(QuestionAnswer)
+    queryset = QuestionAnswerQSBase.get_obj_list()
 
 
 class CommentAPIView(CreateAPIView):
@@ -149,7 +146,7 @@ class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление комментария.
     """
-    queryset = CommentQSBase.get_obj_list(AnswerComment)
+    queryset = CommentQSBase.get_obj_list()
     serializer_class = UpdateCommentSerializer
 
 
@@ -199,9 +196,9 @@ class LikeDislikeViewSet(GenericViewSet):
         if 'model' in self.request.query_params:
             model_name = self.request.query_params['model']
             if model_name == 'question':
-                return Question.objects.get(pk=pk)
+                return QuestionQSBase.get_obj_by_id(pk)
             elif model_name == 'answer':
-                return QuestionAnswer.objects.get(pk=pk)
+                return QuestionAnswerQSBase.get_obj_by_id(pk)
         raise ValueError('Параметр запроса несуществует или указан неверно.')
 
 
@@ -232,7 +229,7 @@ class QuestionViewSet(ModelViewSet):
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action)
 
-    def get_queryset(self):
+    def get_queryset(self, offset=None, limit=None):
         query_params = self.request.query_params
         page = query_params.get('page')
         if page:
@@ -242,30 +239,23 @@ class QuestionViewSet(ModelViewSet):
 
         sort = query_params.get('sort')
         if not sort and ((not page and page != 0) or not self.action == 'list'):
-            return Question.objects.all().order_by('-creation_date')
+            return QuestionQS.question_list_ordered('-creation_date')
         elif sort == 'closed' and (page or page == 0):
-            return Question.objects.filter(is_solved=True).order_by('-creation_date')[offset:limit]
+            return QuestionQS.question_list_filtered_by_solving_ordered_with_limit(
+                is_solved=True, offset=offset, limit=limit, field='-creation_date'
+            )
         elif sort == 'opened' and (page or page == 0):
-            return Question.objects.filter(is_solved=False).order_by('-creation_date')[offset:limit]
+            return QuestionQS.question_list_filtered_by_solving_ordered_with_limit(
+                is_solved=False, offset=offset, limit=limit, field='-creation_date'
+            )
         elif sort == 'best' and (page or page == 0):
-
             month_ago = timezone.now() - timedelta(days=30)
             amount_of_questions = 100
 
-            questions = Question.objects.annotate(
-                answer_count=Count('question_answers'),
-                comment_count=Count('question_answers__answer_comments'),
-                like_count=Count('rating__users_liked'),
-                dislike_count=Count('rating__users_disliked'),
-                score=ExpressionWrapper(
-                    F('like_count') + F('answer_count') * 2 +
-                    F('comment_count') - F('dislike_count') * 0.5,
-                    output_field=IntegerField()
-                )
-            ).filter(creation_date__gte=month_ago).order_by('-score', '-creation_date')[:amount_of_questions]
-            return questions
-
-        return Question.objects.all()[offset:limit]
+            return QuestionQS.question_list_ordered_by_best(
+                amount_of_questions=amount_of_questions, time_period=month_ago
+            )
+        return QuestionQS.get_obj_list(offset=offset, limit=limit)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -277,7 +267,7 @@ class AnswerViewSet(ModelViewSet):
     """
     Возвращение списка ответов / ответ по id.
     """
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQSBase.get_obj_list()
     serializer_class = AnswerSerializer
     http_method_names = ('get',)
 
@@ -286,7 +276,7 @@ class RetrieveCommentAPIView(RetrieveAPIView):
     """
     Возвращение комментария по id.
     """
-    queryset = CommentQSBase.get_obj_list(AnswerComment)
+    queryset = CommentQSBase.get_obj_list()
     serializer_class = CommentSerializer
 
 
@@ -294,7 +284,7 @@ class MarkAnswerSolving(RetrieveAPIView):
     """
     Отмечает ответ на вопрос, как решающий проблему.
     """
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQSBase.get_obj_list()
     permission_classes = [IsAuthenticated, IsQuestionOwner]
     serializer_class = None
 
@@ -302,7 +292,7 @@ class MarkAnswerSolving(RetrieveAPIView):
         answer = self.get_object()
         related_question = answer.question
 
-        vote_answer_solving(answer=answer, related_question=related_question)
+        AnswerService.vote_answer_solving(answer=answer, related_question=related_question)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -319,11 +309,12 @@ class ComplainAPIView(GenericAPIView):
     def patch(self, request, content_type, content_id):
         obj = None
         if content_type == 'question':
-            obj = Question.objects.get(id=content_id)
+            obj = QuestionQSBase.get_obj_by_id(content_id)
         elif content_type == 'answer':
-            obj = QuestionAnswer.objects.get(id=content_id)
+            obj = QuestionAnswerQSBase.get_obj_by_id(content_id)
         elif content_type == 'comment':
-            obj = AnswerComment.objects.get(id=content_id)
+            obj = CommentQSBase.get_obj_by_id(content_id)
+
         else:
             return Response(data={'message': 'content_type не корректен'},
                             status=status.HTTP_400_BAD_REQUEST)

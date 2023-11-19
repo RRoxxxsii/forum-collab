@@ -7,7 +7,7 @@ from django.db.models import QuerySet
 from accounts.models import NewUser
 from forum.models import Question, QuestionAnswer, QuestionImages, QuestionAnswerImages, ThemeTag, Attachment, \
     AnswerComment
-from forum.querysets import ObjQSBase
+from forum.querysets import QuestionAnswerQSBase, CommentQSBase
 
 
 class LikeDislikeRepository:
@@ -110,7 +110,7 @@ class QuestionRepository(BaseImageRepository):
         question.save()
 
 
-class AnswerRepository(BaseImageRepository, ObjQSBase):
+class AnswerRepository(BaseImageRepository, QuestionAnswerQSBase):
 
     @staticmethod
     def create_answer(
@@ -122,7 +122,7 @@ class AnswerRepository(BaseImageRepository, ObjQSBase):
         return answer
 
 
-class CommentRepository(ObjQSBase):
+class CommentRepository(CommentQSBase):
 
     @staticmethod
     def create_comment(
