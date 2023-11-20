@@ -8,14 +8,16 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
                                      RetrieveAPIView)
-from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
 from accounts.serializers import DummySerializer
-from forum.permissions import IsQuestionOwner, IsOwner
+from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
                              QuestionQSBase)
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
