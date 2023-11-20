@@ -327,7 +327,6 @@ class ComplainAPIView(GenericAPIView):
     http_method_names = ['patch', ]
 
     def patch(self, request, content_type, content_id):
-        obj = None
         if content_type == 'question':
             obj = QuestionQSBase.get_obj_by_id(content_id)
         elif content_type == 'answer':
