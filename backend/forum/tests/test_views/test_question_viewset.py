@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
+from forum.services import LikeDislikeService
 from forum.tests.test_serializers import generate_photo_file
 
 
@@ -100,8 +101,8 @@ class TestQuestionQueryParams(APITestCase):
         self.question11 = Question.objects.create(title='Заголовок11', content='Контент', user=self.user)
         self.question12 = Question.objects.create(title='Заголовок12', content='Контент', user=self.user)
 
-        self.question2.like(self.user2)
-        self.question2.like(self.user3)
+        LikeDislikeService.like(self.user2, obj=self.question2)
+        LikeDislikeService.like(self.user3, obj=self.question2)
 
         self.answer1 = QuestionAnswer.objects.create(question=self.question, answer='Ответ', user=self.user)
         self.answer2 = QuestionAnswer.objects.create(question=self.question5, answer='Ответ', user=self.user)

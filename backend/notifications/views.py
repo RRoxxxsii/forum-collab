@@ -1,7 +1,7 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Notification
+from .querysets import NotificationQuerySet
 from .serializers import NotificationsSerializer
 
 
@@ -13,6 +13,4 @@ class UserNotificationListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Notification.objects.filter(receiver=user)
-        return queryset
+        return NotificationQuerySet.filter_notifications_by_user(self.request.user)
