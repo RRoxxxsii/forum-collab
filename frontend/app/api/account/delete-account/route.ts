@@ -6,23 +6,16 @@ import { NextResponse } from 'next/server'
 export async function GET() {
 	const access_token = cookies().get('access_token')?.value
 
-	const hasAccessToken = cookies().has('refresh_token')
-
-	if (!hasAccessToken) {
-		return
-	}
-
-	const response = await fetch(`${BASE_URL}/account/me/`, {
+	const response = await fetch(`${BASE_URL}/account/delete-account`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${access_token ?? ''}`,
 		},
 	})
-	const result: IUser = await response.json()
-
+	const result = await response.json()
 	if (response.ok) {
-		return NextResponse.json({ ...result })
+		return NextResponse.json(result)
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

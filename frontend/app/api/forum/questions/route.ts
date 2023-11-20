@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 	const result = await response.json()
 
 	if (response.ok) {
-		return NextResponse.json({ ...result })
+		return NextResponse.json(result)
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

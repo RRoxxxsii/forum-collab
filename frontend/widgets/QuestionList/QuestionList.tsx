@@ -6,19 +6,22 @@ import { FetchStatusType, IQuestion } from '@/types'
 
 import { Error } from '@mui/icons-material'
 import { Box, Skeleton, Typography } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
 	const [listLoadingState, setListLoadingState] = useState<FetchStatusType>()
 	const { category } = useContext(CategoryContext)
 
-	const fetchQuestionList = async () => {
+	const fetchQuestionList = async ({ page }: { page: number }) => {
 		//reset the questions array on refetch
-		setQuestions([])
 		setListLoadingState('loading')
+		const pageNumber = page * 10
 		try {
-			const response = await fetchQuestions({ category: category })
+			const response = await fetchQuestions({
+				category: category,
+				limit: pageNumber,
+			})
 
 			//if the response is array then it is the right result
 			if (Array.isArray(response)) {
@@ -32,9 +35,26 @@ export const QuestionList = () => {
 		}
 	}
 
+	const bottom = useRef<null | any>(null)
+
 	useEffect(() => {
-		fetchQuestionList()
+		fetchQuestionList({ page: 1 })
 	}, [category])
+
+	const [pageIndex, setPageIndex] = useState(1)
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(() => {
+			setPageIndex((pageIndex) => (pageIndex += 1))
+			fetchQuestionList({ page: pageIndex })
+		})
+		observer.observe(bottom.current)
+		return () => {
+			if (bottom.current) {
+				observer.unobserve(bottom.current)
+			}
+		}
+	}, [bottom])
 
 	//Handling response error
 	if (listLoadingState === 'error') {
@@ -71,6 +91,7 @@ export const QuestionList = () => {
 					))}
 				</>
 			)}
+			<div className='h-4' ref={bottom} />
 		</>
 	)
 }

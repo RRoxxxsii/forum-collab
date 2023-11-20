@@ -55,7 +55,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 					/>
 					<Box sx={{ width: '100%', ml: 1 }}>
 						<QuestionItemContent questionData={questionData} />
-						<QuestionItemActions questionData={questionData}  />
+						<QuestionItemActions questionData={questionData} />
 					</Box>
 				</Link>
 			</Box>

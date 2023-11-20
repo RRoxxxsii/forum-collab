@@ -5,6 +5,7 @@ import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import Image from 'next/image'
 export const QuestionItemContent = ({
 	questionData,
 }: {

@@ -3,6 +3,12 @@ import { NextResponse } from 'next/server'
 import { BASE_URL } from './shared/constants'
 
 export async function middleware(request: NextRequest) {
+	const hasRefreshToken = request.cookies.has('refresh_token')
+
+	if (!hasRefreshToken) {
+		return
+	}
+
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()
 

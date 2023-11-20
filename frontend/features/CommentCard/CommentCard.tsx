@@ -249,7 +249,7 @@ export function CommentCard({
 											/>
 										</MenuItem>,
 									]}
-									{comment.user.id !== userDetails?.id && (
+									{comment?.user?.id !== userDetails?.id && (
 										<MenuItem
 											onClick={handleClose}
 											sx={{ width: '100%', height: 36 }}>

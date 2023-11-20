@@ -1,6 +1,6 @@
 'use client'
 import { Transliterate } from '@/shared/transliterate'
-import { ErrorRes, IQuestion, ITag } from '@/types'
+import { ICustomFile, IErrorRes, IQuestion, ITag } from '@/types'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
@@ -26,7 +26,7 @@ export const AskQuestionFormSubmit = ({
 	titleValue: string
 	questionContent: string
 	tags: string[]
-	images: string[]
+	images: File[]
 	type: 'edit' | 'create'
 	userId?: number | null
 	questionId?: number | null
@@ -105,7 +105,7 @@ export const AskQuestionFormSubmit = ({
 				headers: { 'Content-Type': 'application/json' },
 			})
 
-			const result: IQuestion | ErrorRes = await response.json()
+			const result: IQuestion | IErrorRes = await response.json()
 
 			if (!response.ok || 'error' in result) {
 				if ('error' in result) {

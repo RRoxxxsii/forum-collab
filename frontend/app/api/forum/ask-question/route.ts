@@ -3,6 +3,17 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
+	const hasAccessToken = cookies().has('access_token')
+
+	if (hasAccessToken) {
+		return NextResponse.json(
+			{
+				error: 'Для того, чтобы задать вопрос вы должны войти в аккаунт',
+			},
+			{ status: 400 }
+		)
+	}
+
 	try {
 		const session = cookies().get('access_token')?.value
 
@@ -51,7 +62,7 @@ export async function POST(req: NextRequest) {
 			}
 			return NextResponse.json(
 				{
-					error: errorMessage,
+					error: errorMessage.length !== 0 ? errorMessage : data,
 				},
 				{ status: res.status }
 			)

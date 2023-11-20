@@ -35,7 +35,7 @@ export const EditorExtensions: (
 		openOnClick: false,
 	}),
 	PlaceholderExtension.configure({
-		placeholder: 'Вы сейчас здесь',
+		placeholder: '/ Выделите текст, чтобы изменить его',
 	}),
 	ImageExtension,
 ]

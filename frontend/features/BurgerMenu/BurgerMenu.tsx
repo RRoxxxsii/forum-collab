@@ -1,6 +1,5 @@
 'use client'
 
-import { LinkType } from '@/types'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import MenuIcon from '@mui/icons-material/Menu'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
@@ -11,6 +10,7 @@ import List from '@mui/material/List'
 import { styled } from '@mui/material/styles'
 import * as React from 'react'
 import { Navlink } from '../Navlink'
+import { ILinkType } from '@/types'
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean
@@ -50,9 +50,9 @@ export const BurgerMenu = ({
 	PRIVATE_USER_LINKS,
 	session,
 }: {
-	LINKS: LinkType[]
-	PUBLIC_USER_LINKS: LinkType[]
-	PRIVATE_USER_LINKS: LinkType[]
+	LINKS: ILinkType[]
+	PUBLIC_USER_LINKS: ILinkType[]
+	PRIVATE_USER_LINKS: ILinkType[]
 	session: boolean
 }) => {
 	const [open, setOpen] = React.useState(false)

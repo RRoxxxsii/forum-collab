@@ -1,4 +1,4 @@
-import { Model } from '@/types'
+import { IModelType } from '@/types'
 import { toast } from 'react-toastify'
 
 export async function DeleteContent({
@@ -7,17 +7,17 @@ export async function DeleteContent({
 	toastEnabled,
 }: {
 	id: number
-	model: Model
+	model: IModelType
 	toastEnabled?: boolean
 }) {
 	if (!id) return null
 
-	const ERROR_VIEWS: Record<Model, string> = {
+	const ERROR_VIEWS: Record<IModelType, string> = {
 		answer: 'ответ',
 		comment: 'коммента',
 		question: 'вопроса',
 	}
-	const RESPONSE_VIEWS: Record<Model, string> = {
+	const RESPONSE_VIEWS: Record<IModelType, string> = {
 		answer: 'Ответ',
 		comment: 'Коммент',
 		question: 'Вопрос',

@@ -67,6 +67,7 @@ export const UserRegisterForm = () => {
 
 	return (
 		<FormControl
+			sx={{ px: 1 }}
 			component={'form'}
 			onSubmit={handleSubmit(onSubmit)}
 			className='w-full'>

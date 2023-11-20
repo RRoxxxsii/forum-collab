@@ -14,6 +14,7 @@ import {
 	useState,
 } from 'react'
 import { TiptapEditor } from '../TiptapEditor'
+import { UploadImage } from '../UploadImage'
 const fetchTagsOnQuery = async ({
 	setTagsToDisplay,
 	tagQuery,
@@ -38,20 +39,23 @@ const fetchTagsOnQuery = async ({
 export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 	const searchParams = useSearchParams()
 	const pageId = searchParams.get('id')
-
 	const { askFastValue } = useContext(AskFastContext)
+
 	const [questionData, setQuestionData] = useState<IQuestion | null>(null)
 	const [profileData, setProfileData] = useState<IUser | null>(null)
-	const [questionContent, setQuestionContent] = useState('')
-	const [images, setImages] = useState<string[]>([])
-	const [titleValue, setTitleValue] = useState(askFastValue ? askFastValue : '')
 
+	const [titleValue, setTitleValue] = useState(askFastValue ? askFastValue : '')
+	const [questionContent, setQuestionContent] = useState('')
+	const [images, setImages] = useState<File[]>([])
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
+
 	const [tagQuery, setTagQuery] = useState<string>('')
 	const [tagsToDisplay, setTagsToDisplay] = useState<ITag[]>([])
 
 	useEffect(() => {
-		fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
+		if (type === 'edit') {
+			fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
+		}
 		fetchMe({ setProfileData: setProfileData })
 	}, [])
 
@@ -83,6 +87,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 
 	return (
 		<>
+			<UploadImage images={images} setImages={setImages} model='answer' />
 			<Typography
 				variant='h1'
 				sx={{ fontSize: 24, fontWeight: 500, mb: 2, color: '#b4b4b4' }}>
@@ -135,7 +140,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 						titleValue={titleValue}
 						questionContent={questionContent}
 						tags={selectedTags}
-						images={images}
+						images={images.map((image) => image)}
 						userId={profileData?.id}
 						questionId={questionData?.id}
 					/>
@@ -147,7 +152,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 						titleValue={titleValue}
 						questionContent={questionContent}
 						tags={selectedTags}
-						images={images}
+						images={images.map((image) => image)}
 						userId={profileData?.id}
 						questionId={questionData?.id}
 					/>

@@ -1,5 +1,6 @@
 'use client'
-import { CategoryContext, CategoryType } from '@/providers/CategoryProvider'
+import { CategoryContext } from '@/providers/CategoryProvider'
+import { CategoryType } from '@/types'
 import { Verified } from '@mui/icons-material'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import StarIcon from '@mui/icons-material/Star'

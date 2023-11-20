@@ -121,14 +121,13 @@ export function AnswerCard({
 		<>
 			<Box
 				sx={{
-					p: 1,
+					p: 2,
 					width: '100%',
-					background: solved ? '#252525' : 'transparent',
-					borderRadius: 4,
+					borderLeft: solved ? '1px solid rgb(104, 130, 177)' : '',
 				}}>
 				{solved && (
 					<>
-						<Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+						<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
 							<Star sx={{ mr: 1 }} />
 							<Typography
 								sx={{
@@ -137,7 +136,6 @@ export function AnswerCard({
 								Лучший ответ
 							</Typography>
 						</Box>
-						<Divider sx={{ mb: 1 }} />
 					</>
 				)}
 				<Box
@@ -288,7 +286,7 @@ export function AnswerCard({
 											/>
 										</MenuItem>,
 									]}
-									{answerData.user.id !== userDetails?.id && (
+									{answerData?.user?.id !== userDetails?.id && (
 										<MenuItem
 											onClick={handleClose}
 											sx={{ width: '100%', height: 36 }}>
@@ -316,7 +314,7 @@ export function AnswerCard({
 											onClick={() => handleSolve({ answerId: answerData.id })}
 											size='small'
 											variant='outlined'>
-											Отметить решающим
+											Отметить лучшим
 										</Button>
 									</Box>
 								)}

@@ -218,7 +218,9 @@ export const BubbleMenuContent = ({ editor }: { editor: Editor }) => {
 					borderRadius: '0',
 				}}
 				aria-label='clear'
-				onClick={() => editor?.chain().focus().clearNodes().run()}>
+				onClick={() =>
+					editor.chain().focus().clearNodes().unsetAllMarks().run()
+				}>
 				<FormatClearIcon />
 			</IconButton>
 		</Box>

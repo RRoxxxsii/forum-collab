@@ -56,6 +56,7 @@ export const UserLoginForm = () => {
 				isLoading: false,
 				autoClose: 3000,
 			})
+			router.refresh()
 			router.push('/')
 		} catch (error: any | unknown) {
 			toast.update(loginToast, {
@@ -69,7 +70,10 @@ export const UserLoginForm = () => {
 
 	return (
 		<>
-			<FormControl component={'form'} onSubmit={handleSubmit(onSubmit)}>
+			<FormControl
+				sx={{ px: 1 }}
+				component={'form'}
+				onSubmit={handleSubmit(onSubmit)}>
 				<Controller
 					name='email'
 					rules={{

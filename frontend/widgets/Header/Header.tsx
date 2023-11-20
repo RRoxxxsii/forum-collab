@@ -1,6 +1,6 @@
 import { BurgerMenu } from '@/features/BurgerMenu'
 import { Navlink } from '@/features/Navlink'
-import { LinkType } from '@/types'
+import { ILinkType } from '@/types'
 import { Login } from '@mui/icons-material'
 import AccountBoxIcon from '@mui/icons-material/AccountBox'
 import HomeIcon from '@mui/icons-material/Home'
@@ -19,6 +19,7 @@ import {
 	Typography,
 } from '@mui/material'
 import { cookies } from 'next/headers'
+import { Logout } from './components/Logout'
 import './styles.scss'
 
 export const metadata = {
@@ -28,21 +29,25 @@ export const metadata = {
 
 const DRAWER_WIDTH = 240
 
-const LINKS: LinkType[] = [
+const LINKS: ILinkType[] = [
 	{ text: 'Главная', href: '/', icon: HomeIcon },
 	{ text: 'Вопросы', href: '/questions', icon: QuestionAnswerIcon },
 	{ text: 'Спросить', href: '/ask', icon: LiveHelpIcon },
 ]
 
-const PUBLIC_USER_LINKS: LinkType[] = [
+const PUBLIC_USER_LINKS: ILinkType[] = [
 	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
-	{ text: 'Уведомления', icon: NotificationsIcon, href: '/notifications' },
+	{
+		text: 'Уведомления',
+		icon: NotificationsIcon,
+		href: '?notifications=open',
+	},
 	{ text: 'Войти', icon: Login, href: '/login' },
 ]
 
-const PRIVATE_USER_LINKS: LinkType[] = [
+const PRIVATE_USER_LINKS: ILinkType[] = [
 	{ text: 'Настройки', icon: SettingsIcon, href: '/settings' },
-	{ text: 'Уведомления', icon: NotificationsIcon, href: '/notifications' },
+	{ text: 'Уведомления', icon: NotificationsIcon, href: '?notifications=open' },
 	{
 		text: 'Профиль',
 		icon: AccountBoxIcon,
@@ -119,13 +124,24 @@ export const HeaderDesktop = async ({
 					</List>
 					<Divider sx={{ mt: 'auto' }} />
 					<List>
-						{session
-							? PRIVATE_USER_LINKS.map(({ text, icon: Icon, href }) => (
-									<Navlink key={href} text={text} href={href} icon={Icon} />
-							  ))
-							: PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
-									<Navlink key={href} text={text} href={href} icon={Icon} />
-							  ))}
+						{session ? (
+							<>
+								{PRIVATE_USER_LINKS.map(({ text, icon: Icon, href }) => (
+									<Navlink
+										key={href}
+										text={text}
+										href={href}
+										icon={Icon}
+										session={session}
+									/>
+								))}
+								<Logout />
+							</>
+						) : (
+							PUBLIC_USER_LINKS.map(({ text, icon: Icon, href }) => (
+								<Navlink key={href} text={text} href={href} icon={Icon} />
+							))
+						)}
 					</List>
 				</Drawer>
 			</header>

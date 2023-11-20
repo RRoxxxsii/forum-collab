@@ -5,9 +5,10 @@ import { QuestionItemRating } from '@/features/QuestionItemRating'
 import { QuestionContent } from '@/shared/QuestionContent'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
-import { IQuestion, IUser } from '@/types'
+import { IChangeRating, IQuestion, IUser } from '@/types'
 import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
+import { revalidatePath } from 'next/cache'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
@@ -25,9 +26,16 @@ export default function QuestionPage() {
 	useEffect(() => {
 		fetchQuestion({ id: id, setQuestionData: setQuestionData })
 		fetchMe({ setProfileData: setProfileData })
-	}, [])
+	}, [id])
 
-	const handleQuestionRating = () => {}
+	const handleQuestionRating = ({
+		model,
+		id,
+		action,
+		checked,
+	}: IChangeRating) => {
+		ChangeRating({ action: action, checked: checked, id: id, model: model })
+	}
 
 	return (
 		<Suspense fallback={<QuestionLoading />}>
@@ -46,6 +54,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
+
 									<QuestionActionsMenu
 										profileData={profileData}
 										questionData={questionData}

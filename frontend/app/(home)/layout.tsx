@@ -1,5 +1,6 @@
 import { AskFastProvider } from '@/providers/AskFastProvider'
 import { CategoryProvider } from '@/providers/CategoryProvider'
+import { NotificationProvider } from '@/providers/NotificationsProvider'
 import { UserDetailsProvider } from '@/providers/UserDetailsProvider'
 import { Header } from '@/widgets/Header'
 import { Metadata } from 'next'
@@ -32,11 +33,13 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
 				limit={5}
 			/>
 			<UserDetailsProvider>
-				<Header>
-					<CategoryProvider>
-						<AskFastProvider>{children}</AskFastProvider>
-					</CategoryProvider>
-				</Header>
+				<NotificationProvider>
+					<Header>
+						<CategoryProvider>
+							<AskFastProvider>{children}</AskFastProvider>
+						</CategoryProvider>
+					</Header>
+				</NotificationProvider>
 			</UserDetailsProvider>
 		</>
 	)

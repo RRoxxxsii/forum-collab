@@ -49,12 +49,24 @@ async function onSubmit(credentials: UserResetType) {
 			autoClose: 3000,
 		})
 	} catch (error: any | unknown) {
-		toast.update(resetToast, {
-			render: 'Соединение с сервером разорвано, попробуйте попытку позже',
-			type: 'error',
-			isLoading: false,
-			autoClose: 3000,
-		})
+		if (typeof error === 'string') {
+			toast.update(resetToast, {
+				render: error,
+				type: 'error',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			return error
+		}
+		if (error instanceof Error) {
+			toast.update(resetToast, {
+				render: error.message,
+				type: 'error',
+				isLoading: false,
+				autoClose: 3000,
+			})
+			return error.message
+		}
 	}
 }
 
