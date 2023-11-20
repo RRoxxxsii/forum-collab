@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import re
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 
+from accounts.cache_manager import CacheManager
 from accounts.models import NewUser
-from forum.models import Question, QuestionAnswer, AnswerComment
-from forum.repository import QuestionRepository, ThemeTagRepository, AnswerRepository, CommentRepository, \
-    LikeDislikeRepository
+from forum.models import AnswerComment, Question, QuestionAnswer
+from forum.repository import (AnswerRepository, CommentRepository,
+                              LikeDislikeRepository, QuestionRepository,
+                              ThemeTagRepository)
 from notifications.utils import notify
 
 
@@ -69,6 +72,19 @@ class QuestionService:
         cls.question_repository.add_tags(question=question, tags=tags)
         return question
 
+    @classmethod
+    def make_tag_relevant_on_question_save(cls, question: Question) -> None:
+        """
+        Делает релеватными тег, количество вопросов по которому >= 10.
+        Уведомляет пользователя, что тег релевантен.
+        """
+        tags = question.tags.filter(is_user_tag=True, is_relevant=False)
+        for tag in tags:
+            if tag.questions.count() >= 10:
+                tag.is_relevant = True
+                tag.save(update_fields=['is_relevant'])
+                notify(receiver=tag.user, target=tag, text='тег становится релевантным')
+
 
 class AnswerService:
     answer_repository = AnswerRepository
@@ -91,7 +107,7 @@ class AnswerService:
         return answer
 
     @staticmethod
-    def vote_answer_solving(answer: QuestionAnswer, related_question: Question):
+    def vote_answer_solving(answer: QuestionAnswer, related_question: Question, user: NewUser):
         """
         Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
         запрос, отметка вопроса как решившего проблему снимается, как и отметка вопроса как решенного.
@@ -115,6 +131,8 @@ class AnswerService:
 
         related_question.save()
         answer.save()
+
+        CacheManager.delete_cache_data(user_id=user.pk, key_prefix=settings.QUESTION_SOLVED_NAME)
 
 
 class CommentService:

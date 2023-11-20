@@ -8,16 +8,16 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
                                      RetrieveAPIView)
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
 from accounts.serializers import DummySerializer
-from forum.helpers import UpdateDestroyRetrieveMixin
-
-from forum.permissions import IsQuestionOwner
-from forum.querysets import QuestionQSBase, QuestionAnswerQSBase, CommentQSBase, QuestionQS
+from forum.permissions import IsQuestionOwner, IsOwner
+from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
+                             QuestionQSBase)
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -25,7 +25,25 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import QuestionService, AnswerService, CommentService, LikeDislikeService
+from forum.services import (AnswerService, CommentService, LikeDislikeService,
+                            QuestionService)
+
+
+class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
+    """
+    Миксин для обновления, удаления и получения.
+    """
+    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
+    allowed_methods = ['PUT', 'DELETE', 'GET']
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -292,7 +310,9 @@ class MarkAnswerSolving(RetrieveAPIView):
         answer = self.get_object()
         related_question = answer.question
 
-        AnswerService.vote_answer_solving(answer=answer, related_question=related_question)
+        AnswerService.vote_answer_solving(
+            answer=answer, related_question=related_question, user=request.user
+        )
 
         return Response(status=status.HTTP_200_OK)
 

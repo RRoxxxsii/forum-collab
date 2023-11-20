@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from django.db.models import QuerySet, Count, ExpressionWrapper, F, IntegerField
+from django.db.models import (Count, ExpressionWrapper, F, IntegerField,
+                              QuerySet)
 
-from forum.models import Question, QuestionAnswer, AnswerComment
+from forum.models import AnswerComment, Question, QuestionAnswer
 
 
 class ObjQSBase:

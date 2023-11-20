@@ -11,7 +11,7 @@ from accounts.models import NewUser
 from accounts.repository import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
-from forum.tests.test_serializers import generate_photo_file, convert_datetime
+from forum.tests.test_serializers import convert_datetime, generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):

@@ -1,9 +1,9 @@
 from django.conf import settings
-from django.core.cache import cache
-from django.db.models import Sum, QuerySet, Count
+from django.db.models import Count, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from accounts.cache_manager import CacheManager
 from accounts.models import EmailConfirmationToken, NewUser
 
 
@@ -55,34 +55,10 @@ class BaseAccountRepository:
         user.save()
 
 
-class Cache:
-
-    @staticmethod
-    def cache_data(key_prefix: str):
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                user_id = args[1].id
-                key = f'{key_prefix}//{user_id}'
-                data = cache.get(key)
-                if data:
-                    return data
-                data = func(*args, **kwargs)
-                cache.set(key, data, 60)
-                return data
-            return wrapper
-        return decorator
-
-    @staticmethod
-    def delete_cache_data(key_prefix: str, user_id: int):
-        key = f'{key_prefix}//{user_id}'
-        if cache.get(key):
-            cache.delete(key)
-
-
 class UserKarmaQS:
 
     @classmethod
-    @Cache.cache_data(key_prefix=settings.EXPERT_TAGS_NAME)
+    @CacheManager.cache_data(key_prefix=settings.EXPERT_TAGS_NAME)
     def get_top_expert_tags(cls, user) -> QuerySet:
         from forum.models import ThemeTag
 
@@ -95,7 +71,7 @@ class UserKarmaQS:
         return expert_tags
 
     @classmethod
-    @Cache.cache_data(key_prefix=settings.QUESTION_SOLVED_NAME)
+    @CacheManager.cache_data(key_prefix=settings.QUESTION_SOLVED_NAME, time=3600)
     def get_amount_question_solved(cls, user) -> int:
         """
         Считает количество решенных вопросов, не считая случаи, когда пользователь ответил на свой вопрос, и

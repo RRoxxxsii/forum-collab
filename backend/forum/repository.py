@@ -5,9 +5,9 @@ from typing import Iterator
 from django.db.models import QuerySet
 
 from accounts.models import NewUser
-from forum.models import Question, QuestionAnswer, QuestionImages, QuestionAnswerImages, ThemeTag, Attachment, \
-    AnswerComment
-from forum.querysets import QuestionAnswerQSBase, CommentQSBase
+from forum.models import (AnswerComment, Attachment, Question, QuestionAnswer,
+                          QuestionAnswerImages, QuestionImages, ThemeTag)
+from forum.querysets import CommentQSBase, QuestionAnswerQSBase
 
 
 class LikeDislikeRepository:

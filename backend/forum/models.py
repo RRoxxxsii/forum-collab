@@ -104,12 +104,11 @@ class Question(models.Model):
         verbose_name_plural = 'Вопросы'
 
     def save(self, *args, **kwargs):
-        from forum.logic import \
-            make_tag_relevant_on_question_save  # Избегаем цикличного импорта
+        from forum.services import QuestionService
 
         super(Question, self).save(*args, **kwargs)
         self.rating, _ = QuestionRating.objects.get_or_create(question=self)
-        make_tag_relevant_on_question_save(self)
+        QuestionService.make_tag_relevant_on_question_save(self)
 
 
 class QuestionImages(Attachment):
