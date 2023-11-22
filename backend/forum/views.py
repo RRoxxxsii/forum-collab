@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     RetrieveAPIView)
+                                     RetrieveAPIView, ListAPIView)
 from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.permissions import (IsAuthenticated,
@@ -19,7 +19,7 @@ from accounts.models import NewUser
 from accounts.serializers import DummySerializer
 from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
-                             QuestionQSBase)
+                             QuestionQSBase, ThemeTagQSBase)
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -342,3 +342,8 @@ class ComplainAPIView(GenericAPIView):
 
         obj.rating.users_complained.add(request.user)
         return Response(status=status.HTTP_200_OK)
+
+
+class ThemeTagsAPIView(ListAPIView):
+    queryset = ThemeTagQSBase.get_most_popular_tags()
+    serializer_class = TagFieldWithCountSerializer
