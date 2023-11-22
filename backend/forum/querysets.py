@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models import (Count, ExpressionWrapper, F, IntegerField,
                               QuerySet)
 
-from forum.models import AnswerComment, Question, QuestionAnswer
+from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 
 
 class ObjQSBase:
@@ -32,6 +32,14 @@ class QuestionAnswerQSBase(ObjQSBase):
 
 class CommentQSBase(ObjQSBase):
     obj_type = AnswerComment
+
+
+class ThemeTagQSBase(ObjQSBase):
+    obj_type = ThemeTag
+
+    @classmethod
+    def get_most_popular_tags(cls):
+        return ThemeTag.objects.annotate(use_amount=Count('questions')).order_by('-use_amount')[:20]
 
 
 class QuestionQS(QuestionQSBase):
