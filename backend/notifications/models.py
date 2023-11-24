@@ -5,7 +5,7 @@ from django.db import models
 from accounts.models import NewUser
 
 
-class NotificationQuerySet(models.query.QuerySet):
+class NotificationManager(models.query.QuerySet):
     """
     Реализует QuerySet для уведомлений.
     """
@@ -100,7 +100,7 @@ class Notification(models.Model):
     unread = models.BooleanField('Не прочитано', default=True)
     creation_date = models.DateTimeField('Дата создания', auto_now_add=True)
 
-    objects = NotificationQuerySet.as_manager()
+    objects = NotificationManager.as_manager()
 
     class Meta:
         verbose_name = 'Уведомление'

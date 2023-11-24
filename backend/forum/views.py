@@ -1,26 +1,25 @@
 from datetime import timedelta
 
-from django.contrib.auth.models import AnonymousUser
-from django.db.models import Count, ExpressionWrapper, F, IntegerField
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     RetrieveAPIView)
-from rest_framework.permissions import IsAuthenticated
+                                     RetrieveAPIView, ListAPIView)
+from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
 from accounts.serializers import DummySerializer
-from forum.helpers import UpdateDestroyRetrieveMixin
-from forum.logic import (add_image, create_return_tags, get_tags_or_error,
-                         parse_comment, vote_answer_solving)
-from forum.models import (AnswerComment, Question, QuestionAnswer,
-                          QuestionAnswerImages, QuestionImages)
-from forum.permissions import IsQuestionOwner
+from forum.permissions import IsOwner, IsQuestionOwner
+from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
+                             QuestionQSBase, ThemeTagQSBase)
 from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                BaseQuestionSerializer, CommentSerializer,
                                DetailQuestionSerializer,
@@ -28,7 +27,25 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from notifications.utils import notify
+from forum.services import (AnswerService, CommentService, LikeDislikeService,
+                            QuestionService)
+
+
+class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
+    """
+    Миксин для обновления, удаления и получения.
+    """
+    permission_classes = [IsOwner, IsAuthenticatedOrReadOnly]
+    allowed_methods = ['PUT', 'DELETE', 'GET']
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 
 class AskQuestionAPIView(GenericAPIView):
@@ -38,7 +55,7 @@ class AskQuestionAPIView(GenericAPIView):
     serializer_class = BaseQuestionSerializer
 
     permission_classes = [IsAuthenticated, ]
-    queryset = Question.objects.all()
+    queryset = QuestionQSBase.get_obj_list()
     q = openapi.Parameter(name='q', in_=openapi.IN_QUERY,
                           description="Ввод символов для поиска совпадений по тегам",
                           type=openapi.TYPE_STRING, required=True)
@@ -51,7 +68,12 @@ class AskQuestionAPIView(GenericAPIView):
         """
         tag = request.query_params.get('q')
 
-        suggested_tags = get_tags_or_error(tag)
+        if not tag:
+            raise ValidationError('Тег не указан.')
+
+        suggested_tags = QuestionService.tag_repository.get_tags(tag)
+        if not suggested_tags:
+            raise ValidationError('Тег не указан')
 
         serializer = self.get_serializer_class()(suggested_tags, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -68,18 +90,10 @@ class AskQuestionAPIView(GenericAPIView):
         content = serializer.data.get('content')
         tags = serializer.data.get('tags')
         images = serializer.data.get('uploaded_images')
-        question = Question.objects.create(
-            user=request.user,
-            title=title,
-            content=content
+
+        question = QuestionService.create_question(
+            user=request.user, title=title, tags=tags, images=images, content=content
         )
-
-        if images:
-            add_image(images=images, obj_model=question, attachment_model=QuestionImages)
-
-        tag_ids = create_return_tags(tags=tags, user=request.user)
-        question.tags.add(*tag_ids)
-        question.save()
 
         serializer = BaseQuestionSerializer(instance=question)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -92,7 +106,7 @@ class UpdateQuestionAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление, удаление, получение комментария.
     """
-    queryset = Question.objects.all()
+    queryset = QuestionQSBase.get_obj_list()
     serializer_class = UpdateQuestionSerializer
 
 
@@ -107,27 +121,14 @@ class AnswerQuestionAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         images = serializer.validated_data.get('uploaded_images')
         question = serializer.validated_data.get('question')
-        question_user = question.user  # автор вопроса
+        content = serializer.validated_data.get('answer')
         user = request.user
-        answer = serializer.validated_data.get('answer')
-        question_answer = QuestionAnswer.objects.create(
-            question_id=question.id,
-            answer=answer,
-            user=user if isinstance(user, NewUser) else None,
 
-        )
-        question_answer.save()
-
-        notify(
-            sender=user, receiver=question_user,
-            text='ответил на ваш вопрос', action_obj=question_answer,
-            target=question
+        answer = AnswerService.create_answer(
+            question=question, user=user if isinstance(user, NewUser) else None, answer=content, images=images
         )
 
-        if images:
-            add_image(images=images, obj_model=question_answer, attachment_model=QuestionAnswerImages)
-
-        serializer = self.serializer_class(instance=question_answer, context={'request': request})
+        serializer = self.serializer_class(instance=answer, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -136,7 +137,7 @@ class UpdateQuestionAnswerAPIView(UpdateDestroyRetrieveMixin):
     Обновление, удаление, получение ответа на вопрос. Можно обновить только текст ответа.
     """
     serializer_class = AnswerSerializer
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQSBase.get_obj_list()
 
 
 class CommentAPIView(CreateAPIView):
@@ -150,39 +151,13 @@ class CommentAPIView(CreateAPIView):
         if serializer.is_valid():
             comment = serializer.data.get('comment')
             answer_id = serializer.data.get('question_answer')
-            answer = QuestionAnswer.objects.get(id=answer_id)
-            parsed_user_list = parse_comment(comment=comment)
-            current_user = request.user
             parent_id = serializer.data.get('parent')
 
-            if isinstance(current_user, AnonymousUser):
-                current_user = None
-
-            comment = AnswerComment.objects.create(
-                comment=comment, question_answer=answer,
-                user=current_user, parent_id=parent_id
+            comment = CommentService.create_comment(
+                comment=comment, question_answer_id=answer_id, user=request.user, parent_id=parent_id
             )
 
-            if parent_id:
-                parent = AnswerComment.objects.get(id=parent_id)
-
-                for parsed_user in parsed_user_list:
-                    notify(
-                        sender=current_user, receiver=parsed_user,
-                        text='ответил на ваш комментарий',
-                        action_obj=comment,
-                        target=parent
-                    )
-
-            if answer.user:
-                notify(
-                    sender=current_user, receiver=answer.user,
-                    text='прокомментировал ваш ответ на вопрос',
-                    target=answer, action_obj=comment
-                )
-
             serializer = self.serializer_class(instance=comment)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +166,7 @@ class UpdateCommentAPIView(UpdateDestroyRetrieveMixin):
     """
     Обновление комментария.
     """
-    queryset = AnswerComment.objects.all()
+    queryset = CommentQSBase.get_obj_list()
     serializer_class = UpdateCommentSerializer
 
 
@@ -218,7 +193,8 @@ class LikeDislikeViewSet(GenericViewSet):
         if instance.user == user:
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
-        instance.like(user=user)
+
+        LikeDislikeService.like(obj=instance, user=user)
 
         return Response(data='Лайк поставлен успешно')
 
@@ -231,7 +207,8 @@ class LikeDislikeViewSet(GenericViewSet):
         if instance.user == user:
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
-        instance.dislike(user=user)
+
+        LikeDislikeService.dislike(obj=instance, user=user)
 
         return Response(data='Дизлайк поставленен успешно')
 
@@ -239,9 +216,9 @@ class LikeDislikeViewSet(GenericViewSet):
         if 'model' in self.request.query_params:
             model_name = self.request.query_params['model']
             if model_name == 'question':
-                return Question.objects.get(pk=pk)
+                return QuestionQSBase.get_obj_by_id(pk)
             elif model_name == 'answer':
-                return QuestionAnswer.objects.get(pk=pk)
+                return QuestionAnswerQSBase.get_obj_by_id(pk)
         raise ValueError('Параметр запроса несуществует или указан неверно.')
 
 
@@ -257,8 +234,8 @@ class QuestionViewSet(ModelViewSet):
         'retrieve': DetailQuestionSerializer,
     }
 
-    limit = openapi.Parameter(name='limit', in_=openapi.IN_QUERY,
-                              description="кол-во возвращаемых записей",
+    limit = openapi.Parameter(name='page', in_=openapi.IN_QUERY,
+                              description="страница, min=0",
                               type=openapi.TYPE_STRING, required=True)
 
     sort = openapi.Parameter(name='sort', in_=openapi.IN_QUERY,
@@ -272,38 +249,33 @@ class QuestionViewSet(ModelViewSet):
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action)
 
-    def get_queryset(self):
+    def get_queryset(self, offset=None, limit=None):
         query_params = self.request.query_params
-        limit = query_params.get('limit')
-        if limit:
-            limit = int(limit)
+        page = query_params.get('page')
+        if page:
+            page = int(page)
+            offset = page * 10
+            limit = page * 10 + 10
 
         sort = query_params.get('sort')
-        if not sort and (not limit or not self.action == 'list'):
-            return Question.objects.all().order_by('-creation_date')
-        elif sort == 'closed' and limit:
-            return Question.objects.filter(is_solved=True).order_by('-creation_date')[:limit]
-        elif sort == 'opened' and limit:
-            return Question.objects.filter(is_solved=False).order_by('-creation_date')[:limit]
-        elif sort == 'best' and limit:
-
+        if not sort and ((not page and page != 0) or not self.action == 'list'):
+            return QuestionQS.question_list_ordered('-creation_date')
+        elif sort == 'closed' and (page or page == 0):
+            return QuestionQS.question_list_filtered_by_solving_ordered_with_limit(
+                is_solved=True, offset=offset, limit=limit, field='-creation_date'
+            )
+        elif sort == 'opened' and (page or page == 0):
+            return QuestionQS.question_list_filtered_by_solving_ordered_with_limit(
+                is_solved=False, offset=offset, limit=limit, field='-creation_date'
+            )
+        elif sort == 'best' and (page or page == 0):
             month_ago = timezone.now() - timedelta(days=30)
             amount_of_questions = 100
 
-            questions = Question.objects.annotate(
-                answer_count=Count('question_answers'),
-                comment_count=Count('question_answers__answer_comments'),
-                like_count=Count('rating__users_liked'),
-                dislike_count=Count('rating__users_disliked'),
-                score=ExpressionWrapper(
-                    F('like_count') + F('answer_count') * 2 +
-                    F('comment_count') - F('dislike_count') * 0.5,
-                    output_field=IntegerField()
-                )
-            ).filter(creation_date__gte=month_ago).order_by('-score', '-creation_date')[:amount_of_questions]
-            return questions
-
-        return Question.objects.all()[:limit]
+            return QuestionQS.question_list_ordered_by_best(
+                amount_of_questions=amount_of_questions, time_period=month_ago
+            )
+        return QuestionQS.get_obj_list(offset=offset, limit=limit)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -315,17 +287,16 @@ class AnswerViewSet(ModelViewSet):
     """
     Возвращение списка ответов / ответ по id.
     """
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQSBase.get_obj_list()
     serializer_class = AnswerSerializer
     http_method_names = ('get',)
-
 
 
 class RetrieveCommentAPIView(RetrieveAPIView):
     """
     Возвращение комментария по id.
     """
-    queryset = AnswerComment.objects.all()
+    queryset = CommentQSBase.get_obj_list()
     serializer_class = CommentSerializer
 
 
@@ -333,7 +304,7 @@ class MarkAnswerSolving(RetrieveAPIView):
     """
     Отмечает ответ на вопрос, как решающий проблему.
     """
-    queryset = QuestionAnswer.objects.all()
+    queryset = QuestionAnswerQSBase.get_obj_list()
     permission_classes = [IsAuthenticated, IsQuestionOwner]
     serializer_class = None
 
@@ -341,7 +312,9 @@ class MarkAnswerSolving(RetrieveAPIView):
         answer = self.get_object()
         related_question = answer.question
 
-        vote_answer_solving(answer=answer, related_question=related_question)
+        AnswerService.vote_answer_solving(
+            answer=answer, related_question=related_question, user=request.user
+        )
 
         return Response(status=status.HTTP_200_OK)
 
@@ -356,13 +329,13 @@ class ComplainAPIView(GenericAPIView):
     http_method_names = ['patch', ]
 
     def patch(self, request, content_type, content_id):
-        obj = None
         if content_type == 'question':
-            obj = Question.objects.get(id=content_id)
+            obj = QuestionQSBase.get_obj_by_id(content_id)
         elif content_type == 'answer':
-            obj = QuestionAnswer.objects.get(id=content_id)
+            obj = QuestionAnswerQSBase.get_obj_by_id(content_id)
         elif content_type == 'comment':
-            obj = AnswerComment.objects.get(id=content_id)
+            obj = CommentQSBase.get_obj_by_id(content_id)
+
         else:
             return Response(data={'message': 'content_type не корректен'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -370,3 +343,7 @@ class ComplainAPIView(GenericAPIView):
         obj.rating.users_complained.add(request.user)
         return Response(status=status.HTTP_200_OK)
 
+
+class ThemeTagsAPIView(ListAPIView):
+    queryset = ThemeTagQSBase.get_most_popular_tags()
+    serializer_class = TagFieldWithCountSerializer
