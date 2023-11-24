@@ -134,7 +134,7 @@ export interface IChangeRating {
 	id: number
 	model: IModelType
 	action: 'like' | 'dislike'
-	checked?: boolean
+	checked?: boolean | number
 }
 
 export interface DBlockOptions {

@@ -1,5 +1,4 @@
 import { BASE_URL } from '@/shared/constants'
-import { IUser } from '@/types'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -10,7 +9,7 @@ export async function GET() {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result = await response.json()

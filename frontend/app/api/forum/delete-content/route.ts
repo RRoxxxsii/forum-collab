@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${access_token ?? ''}`,
+				Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 			},
 		})
 		const result = await response.json()

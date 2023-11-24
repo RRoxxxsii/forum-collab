@@ -1,7 +1,7 @@
 'use client'
 import { IQuestion } from '@/types'
 
-import { Avatar, Box, Typography, Tooltip } from '@mui/material'
+import { Avatar, Box, Tooltip, Typography } from '@mui/material'
 import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'

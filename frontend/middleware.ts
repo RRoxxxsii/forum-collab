@@ -2,8 +2,20 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { BASE_URL } from './shared/constants'
 
+export const config = {
+	matcher: ['/profile/:path*', '/settings/:path*'],
+}
+
 export async function middleware(request: NextRequest) {
 	const hasRefreshToken = request.cookies.has('refresh_token')
+
+	if (request.nextUrl.pathname.startsWith('/profile') && !hasRefreshToken) {
+		return NextResponse.rewrite(new URL('/', request.url))
+	}
+
+	if (request.nextUrl.pathname.startsWith('/settings')) {
+		return NextResponse.rewrite(new URL('/', request.url))
+	}
 
 	if (!hasRefreshToken) {
 		return

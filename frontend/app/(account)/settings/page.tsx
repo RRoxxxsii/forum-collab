@@ -1,8 +1,5 @@
 import { AccountDeletion } from '@/components/settings/AccountDeletion'
-import { OauthActions } from '@/features/OauthActions/OauthActions'
 import { ChevronLeft, Settings } from '@mui/icons-material'
-import Logo from '@mui/icons-material/NotListedLocation'
-import { Button } from '@mui/material'
 import { Metadata } from 'next'
 import Link from 'next/link'
 

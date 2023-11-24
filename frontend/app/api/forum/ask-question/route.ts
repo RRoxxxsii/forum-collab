@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 			}),
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${session}`,
+				Authorization: `${session ? `Bearer ${session}` : ''}`,
 			},
 		})
 
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${session}`,
+				Authorization: `${session ? `Bearer ${session}` : ''}`,
 			},
 		})
 

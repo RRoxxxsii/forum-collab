@@ -1,7 +1,7 @@
-import { EmailAlert } from '@/features/EmailAlert'
-import { CategoryTabs } from '@/widgets/CategoryTabs'
-import { QuestionList } from '@/widgets/QuestionList'
-import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
+import { EmailAlert } from '@/components/EmailAlert'
+import { QuestionList } from '@/components/Question/QuestionList'
+import { CategoryTabs } from '@/components/Question/QuestionList/models'
+import { QuestionListAskFast } from '@/components/Question/QuestionListAskFast'
 import { Box } from '@mui/material'
 
 export default async function HomePage() {

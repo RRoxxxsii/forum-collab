@@ -9,14 +9,14 @@ export async function GET() {
 	const hasAccessToken = cookies().has('refresh_token')
 
 	if (!hasAccessToken) {
-		return
+		return NextResponse.json('Пользователь не авторизован')
 	}
 
 	const response = await fetch(`${BASE_URL}/account/me/`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result: IUser = await response.json()

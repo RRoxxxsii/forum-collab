@@ -1,7 +1,7 @@
 import { ModalComponent } from '@/shared/Modal'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function NotificationPage() {
+export default function NotificationModal() {
 	const modalOpen = useSearchParams().has('notifications')
 
 	const router = useRouter()

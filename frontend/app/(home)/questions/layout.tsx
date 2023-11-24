@@ -1,4 +1,3 @@
-import { Header } from '@/widgets/Header'
 import { Metadata } from 'next'
 
 interface QuestionsLayoutProps {

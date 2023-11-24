@@ -1,14 +1,15 @@
 'use client'
-import { AnswerCreateForm } from '@/features/AnswerCreateForm'
-import { QuestionActionsMenu } from '@/features/QuestionActionsMenu'
-import { QuestionItemRating } from '@/features/QuestionItemRating'
+import { AnswerCreateForm } from '@/components/Answer/AnswerCreateForm'
+import { AnswerList } from '@/components/Answer/AnswerList'
+import {
+	QuestionCardMenu,
+	QuestionCardRating,
+} from '@/components/Question/QuestionCard/models'
 import { QuestionContent } from '@/shared/QuestionContent'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IChangeRating, IQuestion, IUser } from '@/types'
-import { AnswerList } from '@/widgets/AnswerList'
 import { Box, Divider, Paper, Typography } from '@mui/material'
-import { revalidatePath } from 'next/cache'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
@@ -45,7 +46,7 @@ export default function QuestionPage() {
 						<Box sx={{ px: 3, py: 2 }}>
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
-									<QuestionItemRating
+									<QuestionCardRating
 										model='question'
 										questionData={questionData}
 										handleRating={handleQuestionRating}
@@ -54,8 +55,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
-
-									<QuestionActionsMenu
+									<QuestionCardMenu
 										profileData={profileData}
 										questionData={questionData}
 									/>

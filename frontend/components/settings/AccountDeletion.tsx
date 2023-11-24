@@ -14,7 +14,7 @@ import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
 export const AccountDeletion = () => {
-	const { setUserDetails } = useContext(UserDetailsContext)
+	const { setUserDetails, userDetails } = useContext(UserDetailsContext)
 
 	const handleDelete = async () => {
 		try {
@@ -86,12 +86,14 @@ export const AccountDeletion = () => {
 					<Button onClick={toggleModal}>Отмена</Button>
 				</DialogActions>
 			</Dialog>
-			<Button
-				onClick={toggleModal}
-				data-cy='register-link'
-				className='hover:text-brand max-w-xs m-auto hover:text-red-600 transition-colors underline-offset-4'>
-				Удалить аккаунт
-			</Button>
+			{userDetails && (
+				<Button
+					onClick={toggleModal}
+					data-cy='register-link'
+					className='hover:text-brand max-w-xs m-auto hover:text-red-600 transition-colors underline-offset-4'>
+					Удалить аккаунт
+				</Button>
+			)}
 		</>
 	)
 }
