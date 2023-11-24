@@ -1,4 +1,4 @@
-import { IChangeRating, IModelType } from '@/types'
+import { IChangeRating } from '@/types'
 
 export async function ChangeRating({ id, model, action }: IChangeRating) {
 	try {

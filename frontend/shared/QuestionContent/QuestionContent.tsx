@@ -1,5 +1,6 @@
 import { IQuestion } from '@/types'
 import { Box, Chip, Typography } from '@mui/material'
+import Image from 'next/image'
 import { UserInformation } from '../UserInformation'
 
 export const QuestionContent = ({
@@ -18,6 +19,19 @@ export const QuestionContent = ({
 					__html: questionData?.content ?? 'error',
 				}}
 			/>
+
+			<Box sx={{ mb: 2, display: 'flex' }}>
+				{questionData?.images?.map((image) => (
+					<Box sx={{ mr: 1 }}>
+						<Image
+							alt={image?.alt_text ?? ''}
+							src={image.image}
+							width={64}
+							height={64}
+						/>
+					</Box>
+				))}
+			</Box>
 			<Box>
 				{questionData.tags.map((tag) => (
 					<Chip key={tag.tag_name} sx={{ mr: 1 }} label={tag.tag_name} />

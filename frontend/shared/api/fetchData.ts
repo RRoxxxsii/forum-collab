@@ -1,11 +1,17 @@
-import { CategoryType, IQuestion, IUser } from '@/types'
+import { CategoryType, INotifications, IQuestion, IUser } from '@/types'
 import { Dispatch, SetStateAction } from 'react'
 import { BASE_URL } from '../constants'
 
-export async function fetchQuestions({ category }: { category: CategoryType }) {
+export async function fetchQuestions({
+	category,
+	limit,
+}: {
+	category: CategoryType
+	limit: number
+}) {
 	try {
 		const response = await fetch(
-			`${BASE_URL}/forum/questions/?limit=10&sort=${category}`,
+			`${BASE_URL}/forum/questions/?limit=${limit}&sort=${category}`,
 			{
 				method: 'GET',
 				headers: {
@@ -72,5 +78,25 @@ export async function fetchMe({
 		}
 
 		setProfileData(result)
+	} catch (error) {}
+}
+
+export async function fetchNotifications({
+	setNotifications,
+}: {
+	setNotifications: Dispatch<SetStateAction<INotifications[]>>
+}) {
+	try {
+		if (setNotifications === null) return null
+
+		const response = await fetch(`/api/account/notifications/`)
+
+		const result = await response.json()
+
+		if (!response.ok) {
+			throw new Error(result)
+		}
+
+		setNotifications(result)
 	} catch (error) {}
 }

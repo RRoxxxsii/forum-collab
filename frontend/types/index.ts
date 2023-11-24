@@ -1,7 +1,55 @@
+import { SvgIconTypeMap } from '@mui/material'
+import { OverridableComponent } from '@mui/material/OverridableComponent'
+
+export type ILinkTo =
+	| 'Настройки'
+	| 'Уведомления'
+	| 'Профиль'
+	| 'Выйти'
+	| 'Войти'
+	| 'Главная'
+	| 'Вопросы'
+	| 'Спросить'
+
+export type IHref =
+	| '/'
+	| '/profile'
+	| '/login'
+	| '/register'
+	| '/ask'
+	| '/questions'
+	| '/settings'
+	| '?notifications=open'
+
 export interface ILinkType {
+	text: ILinkTo
+	href: IHref
+	icon: OverridableComponent<SvgIconTypeMap<{}, 'svg'>> & {
+		muiName: string
+	}
+	action?: () => void
+	session?: boolean
+}
+
+export interface INotifications {
+	id: number
+	level: string
+	target_object_id: number
+	action_obj_object_id: number
 	text: string
-	href: string
-	icon: any
+	emailed: boolean
+	unread: boolean
+	creation_date: string // Assuming it's a date string
+	sender: number
+	receiver: number
+	target_content_type: number
+	action_obj_content_type: number
+}
+
+export interface IImage {
+	alt_text: string
+	id: number
+	image: string
 }
 
 export interface IQuestion {
@@ -13,7 +61,7 @@ export interface IQuestion {
 	answers: IAnswer[]
 	creation_date: string
 	updated_date: string
-	images: string[]
+	images: IImage[]
 	rating: IRating
 	tags: ITag[]
 	answers_amount: number
@@ -53,14 +101,17 @@ export interface IComment {
 
 export interface IUser {
 	id: number
-	about: string
-	user_name: string
-	created: Date
 	email: string
-	email_confirmed: boolean
+	user_name: string
+	about: string
+	profile_image: null | string
 	is_active: boolean
 	is_banned: boolean
-	profile_image: null | string
+	email_confirmed: boolean
+	created: Date
+	amount_solved: number
+	best_tags: ITag[]
+	karma: number
 }
 
 export interface IRating {
@@ -83,7 +134,7 @@ export interface IChangeRating {
 	id: number
 	model: IModelType
 	action: 'like' | 'dislike'
-	checked?: boolean
+	checked?: boolean | number
 }
 
 export interface DBlockOptions {

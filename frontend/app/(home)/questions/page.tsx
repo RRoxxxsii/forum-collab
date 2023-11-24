@@ -1,23 +1,18 @@
-import { CategoryTabs } from '@/widgets/CategoryTabs'
-import { QuestionList } from '@/widgets/QuestionList'
-import { QuestionListAskFast } from '@/widgets/QuestionListAskFast'
-import { Home } from '@mui/icons-material'
-import { Box, Typography } from '@mui/material'
+import { QuestionSearch } from '@/components/Question/QuestionSearch'
+import { QuestionList } from '@/components/Question/QuestionList'
+import { QuestionListAskFast } from '@/components/Question/QuestionListAskFast'
+
+import { Box } from '@mui/material'
 
 export default async function QuestionPage() {
 	return (
 		<>
-			<Typography variant='h1' align='center'>
-				!This page is under construction!
-			</Typography>
-			<Box sx={{ p: 3 }}>Поиск по тегам:</Box>
 			<Box
 				sx={questionPage}
 				className='flex min-h-screen items-start max-h-80 relative'>
-				<CategoryTabs />
 				<Box sx={questionPageContainer}>
 					<Box sx={desktopList}>
-						<QuestionListAskFast />
+						<QuestionSearch />
 						<QuestionList />
 					</Box>
 					<Box sx={mobileList}>
@@ -39,6 +34,7 @@ const mobileList = {
 	display: { md: 'none', xs: 'block' },
 }
 const questionPage = {
+	mt: 12,
 	display: 'flex',
 	minHeight: 'screen',
 	flexDirection: { md: 'row', xs: 'column' },

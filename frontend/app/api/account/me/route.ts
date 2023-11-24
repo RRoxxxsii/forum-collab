@@ -6,11 +6,17 @@ import { NextResponse } from 'next/server'
 export async function GET() {
 	const access_token = cookies().get('access_token')?.value
 
+	const hasAccessToken = cookies().has('refresh_token')
+
+	if (!hasAccessToken) {
+		return NextResponse.json('Пользователь не авторизован')
+	}
+
 	const response = await fetch(`${BASE_URL}/account/me/`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result: IUser = await response.json()

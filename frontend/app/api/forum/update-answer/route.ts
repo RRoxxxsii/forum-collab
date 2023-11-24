@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 		}),
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result = await response.json()

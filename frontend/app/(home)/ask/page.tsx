@@ -1,5 +1,4 @@
 import { AskQuestionForm } from '@/widgets/AskQuestionForm'
-import { AskTabs } from '@/widgets/AskTabs'
 import { Box, Paper } from '@mui/material'
 
 const askPageWrapper = {

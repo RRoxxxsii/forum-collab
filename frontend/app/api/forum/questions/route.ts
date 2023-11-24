@@ -18,13 +18,13 @@ export async function POST(req: NextRequest) {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result = await response.json()
 
 	if (response.ok) {
-		return NextResponse.json({ ...result })
+		return NextResponse.json(result)
 	} else {
 		return NextResponse.json({ error: result }, { status: response.status })
 	}

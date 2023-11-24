@@ -1,4 +1,4 @@
-import { UserResetForm } from '@/widgets/UserResetForm'
+import { UserResetForm } from '@/components/Auth/UserResetForm'
 import { ChevronLeft, LogoDev } from '@mui/icons-material'
 import { Metadata } from 'next'
 import Link from 'next/link'

@@ -1,9 +1,9 @@
-import { OauthActions } from '@/features/OauthActions/OauthActions'
-import { UserRegisterForm } from '@/widgets/UserRegisterForm'
-import { ChevronLeft, LogoDev } from '@mui/icons-material'
+import { OauthActions } from '@/components/Auth/OauthActions/OauthActions'
+import { UserRegisterForm } from '@/components/Auth/UserRegisterForm'
+import { ChevronLeft } from '@mui/icons-material'
+import Logo from '@mui/icons-material/NotListedLocation'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Logo from '@mui/icons-material/NotListedLocation'
 
 export const metadata: Metadata = {
 	title: 'Register',

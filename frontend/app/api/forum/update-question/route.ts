@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 		body: JSON.stringify({ user: user, title: title, content: content }),
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${access_token ?? ''}`,
+			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 	})
 	const result = await response.json()

@@ -1,12 +1,14 @@
 'use client'
-import { AnswerCreateForm } from '@/features/AnswerCreateForm'
-import { QuestionActionsMenu } from '@/features/QuestionActionsMenu'
-import { QuestionItemRating } from '@/features/QuestionItemRating'
+import { AnswerCreateForm } from '@/components/Answer/AnswerCreateForm'
+import { AnswerList } from '@/components/Answer/AnswerList'
+import {
+	QuestionCardMenu,
+	QuestionCardRating,
+} from '@/components/Question/QuestionCard/models'
 import { QuestionContent } from '@/shared/QuestionContent'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
-import { IQuestion, IUser } from '@/types'
-import { AnswerList } from '@/widgets/AnswerList'
+import { IChangeRating, IQuestion, IUser } from '@/types'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
@@ -25,9 +27,16 @@ export default function QuestionPage() {
 	useEffect(() => {
 		fetchQuestion({ id: id, setQuestionData: setQuestionData })
 		fetchMe({ setProfileData: setProfileData })
-	}, [])
+	}, [id])
 
-	const handleQuestionRating = () => {}
+	const handleQuestionRating = ({
+		model,
+		id,
+		action,
+		checked,
+	}: IChangeRating) => {
+		ChangeRating({ action: action, checked: checked, id: id, model: model })
+	}
 
 	return (
 		<Suspense fallback={<QuestionLoading />}>
@@ -37,7 +46,7 @@ export default function QuestionPage() {
 						<Box sx={{ px: 3, py: 2 }}>
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
-									<QuestionItemRating
+									<QuestionCardRating
 										model='question'
 										questionData={questionData}
 										handleRating={handleQuestionRating}
@@ -46,7 +55,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionContent questionData={questionData} />
-									<QuestionActionsMenu
+									<QuestionCardMenu
 										profileData={profileData}
 										questionData={questionData}
 									/>
