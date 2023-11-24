@@ -1,5 +1,5 @@
 'use client'
-import { Transliterate } from '@/shared/transliterate'
+import { Transliterate } from '@/shared/utils/Transliterate'
 import { IErrorRes, IQuestion, ITag } from '@/types'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'

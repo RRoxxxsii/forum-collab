@@ -99,7 +99,7 @@ export const UploadImage = ({
 											left: '35%',
 										}}
 										//</div>onClick={() => openImage({ file: file, photoId: index })}
-										>
+									>
 										{/* <Link
 											href={{
 												pathname:
@@ -143,8 +143,4 @@ export const UploadImage = ({
 			</div>
 		</ModalComponent>
 	)
-}
-
-const tab = {
-	'font-size': { md: '12px', xl: 0 },
 }

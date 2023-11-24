@@ -1,6 +1,6 @@
 'use client'
 
-import { Transliterate } from '@/shared/transliterate'
+import { Transliterate } from '@/shared/utils/Transliterate'
 import { IQuestion } from '@/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import { Box, Chip, Typography, styled } from '@mui/material'

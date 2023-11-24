@@ -1,5 +1,5 @@
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
-import { Transliterate } from '@/shared/transliterate'
+import { Transliterate } from '@/shared/utils/Transliterate'
 import { IChangeRating, IQuestion, ITag } from '@/types'
 import { Box, Divider } from '@mui/material'
 import Link from 'next/link'
