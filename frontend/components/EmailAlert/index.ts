@@ -1,0 +1,1 @@
+export { EmailAlert } from './EmailAlert'

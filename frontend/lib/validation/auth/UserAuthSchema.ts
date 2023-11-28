@@ -8,7 +8,10 @@ export const UserRegisterSchema = z.object({
 		.min(1, { message: 'Введите почтовый адрес' }),
 	password: z
 		.string()
-		.min(6, { message: 'Пароль должен содержать минимум 6 символов' }),
+		.min(6, { message: 'Пароль должен содержать минимум 6 символов' })
+		.refine((value: string) => !/^\d+$/.test(value), {
+			message: 'Пароль не может состоять только из цифр',
+		}),
 })
 
 export type UserRegisterType = z.infer<typeof UserRegisterSchema>
@@ -24,3 +27,12 @@ export const UserLoginSchema = z.object({
 })
 
 export type UserLoginType = z.infer<typeof UserLoginSchema>
+
+export const UserResetSchema = z.object({
+	email: z
+		.string()
+		.email({ message: 'Неправильный формат почтового адреса' })
+		.min(1, { message: 'Введите почтовый адрес' }),
+})
+
+export type UserResetType = z.infer<typeof UserLoginSchema>

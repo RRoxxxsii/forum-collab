@@ -1,51 +1,46 @@
-import { CategoryTabs } from '@/widgets/CategoryTabs'
-import { QuestionList } from '@/widgets/QuestionList'
-import { AccountCircle } from '@mui/icons-material'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import { Box, Button, InputAdornment, TextField } from '@mui/material'
+import { EmailAlert } from '@/components/EmailAlert'
+import { QuestionList } from '@/components/Question/QuestionList'
+import { CategoryTabs } from '@/components/Question/QuestionList/models'
+import { QuestionListAskFast } from '@/components/Question/QuestionListAskFast'
+import { Box } from '@mui/material'
 
-export default function HomePage() {
+export default async function HomePage() {
 	return (
-		<Box
-			className='flex min-h-screen items-start max-h-80 relative'>
-			<CategoryTabs />
-			<Box sx={{ px: 3, width: '100%' }}>
-				<Box sx={{ display: 'flex' }}>
-					<Box
-						sx={{
-							position: 'relative',
-							width: 'clamp(300px, 100%, 1200px)',
-							height: '100%',
-							display: 'flex',
-							alignItems: 'center',
-						}}>
-						<TextField
-							fullWidth
-							id='input-with-icon-textfield'
-							size='medium'
-							variant='outlined'
-							label='Задайте вопрос'
-							InputProps={{
-								startAdornment: (
-									<InputAdornment position='start'>
-										<AccountCircle />
-									</InputAdornment>
-								),
-								endAdornment: (
-									<InputAdornment position='end'>
-										<Button>
-											<ArrowForwardIosIcon />
-										</Button>
-									</InputAdornment>
-								),
-							}}
-						/>
+		<>
+			<Box sx={Home} className='flex min-h-screen items-start relative'>
+				<CategoryTabs />
+				<Box sx={HomeContainer}>
+					<Box sx={desktopList}>
+						<EmailAlert />
+						<QuestionListAskFast />
+						<QuestionList />
+					</Box>
+					<Box sx={mobileList}>
+						<EmailAlert />
+						<QuestionListAskFast />
+						<QuestionList />
 					</Box>
 				</Box>
-				<Box sx={{ mt: 4, width: 'clamp(300px, 100%, 1200px)' }}>
-					<QuestionList />
-				</Box>
 			</Box>
-		</Box>
+		</>
 	)
+}
+
+const desktopList = {
+	width: 'clamp(300px, 100%, 1200px)',
+	display: { md: 'block', xs: 'none' },
+}
+const mobileList = {
+	width: 'clamp(300px, 100%, 1200px)',
+	display: { md: 'none', xs: 'block' },
+}
+const Home = {
+	display: 'flex',
+	minHeight: 'screen',
+	flexDirection: { md: 'row', xs: 'column' },
+}
+const HomeContainer = {
+	width: '100%',
+	mt: { md: 3, xs: 4 },
+	ml: { md: 2, xs: 0 },
 }
