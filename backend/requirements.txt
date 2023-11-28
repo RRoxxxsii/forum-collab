@@ -43,6 +43,7 @@ drf_yasg
 celery[redis]==5.2.7
 django_rest_passwordreset
 pytest-django
+punq
 django_celery_beat
 django-cors-headers
 Pillow

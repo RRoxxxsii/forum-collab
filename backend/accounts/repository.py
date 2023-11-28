@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 from django.conf import settings
 from django.db.models import Count, QuerySet, Sum
 from django.db.models.functions import Coalesce
@@ -6,23 +8,75 @@ from django.utils import timezone
 from accounts.cache_manager import CacheManager
 from accounts.models import EmailConfirmationToken, NewUser
 
+from . import dto
 
-class BaseAccountRepository:
+
+class AbstractAccountRepository(ABC):
 
     @staticmethod
-    def create_user(instance: NewUser, password: str) -> NewUser:
-        instance.set_password(password)
-        instance.save()
-        return instance
+    @abstractmethod
+    def create_user(data: dto.CreateUserDTO, password: str) -> NewUser:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def get_email_exists(email: str) -> bool:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def create_token(user: NewUser) -> EmailConfirmationToken:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_token_exists(token_id: int, user_id: int) -> bool:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def get_token(token_id: int, user_id: int) -> EmailConfirmationToken:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def set_new_email(user: NewUser, email: str) -> None:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def make_user_not_active(user: NewUser) -> None:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def make_user_active(user: NewUser) -> None:
+        user.is_active = True
+        user.time_deleted = None
+        user.save()
+
+    @staticmethod
+    @abstractmethod
+    def confirm_email(user: NewUser) -> None:
+        raise NotImplementedError
+
+
+class BaseAccountRepository(AbstractAccountRepository):
+
+    @staticmethod
+    def create_user(data: dto.CreateUserDTO, password: str) -> NewUser:
+        user = NewUser.objects.create_user(
+            email=data.get('email'), user_name=data.get('user_name'), password=data.get('password')
+        )
+        return user
 
     @staticmethod
     def get_email_exists(email: str) -> bool:
         return NewUser.objects.filter(email=email).exists()
 
     @staticmethod
-    def create_token(instance: EmailConfirmationToken) -> EmailConfirmationToken:
-        instance.save()
-        return instance
+    def create_token(user: NewUser) -> EmailConfirmationToken:
+        token = EmailConfirmationToken(user=user)
+        return token
 
     @staticmethod
     def get_token_exists(token_id: int, user_id: int) -> bool:
@@ -140,4 +194,3 @@ class UserKarmaQS:
         karma += answers_like_amount
 
         return karma
-

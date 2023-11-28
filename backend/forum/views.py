@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     RetrieveAPIView, ListAPIView)
+                                     ListAPIView, RetrieveAPIView)
 from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.permissions import (IsAuthenticated,
