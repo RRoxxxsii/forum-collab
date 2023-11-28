@@ -11,7 +11,7 @@ from accounts.models import NewUser
 from accounts.repository import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
-from forum.tests.test_serializers import convert_datetime, generate_photo_file
+from forum.tests.test_serializers import generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):
@@ -36,7 +36,7 @@ class TestRegistrationAPI(APITestCase):
         response = self.client.post(self.url, data={'email': 'a@a.ru', 'user_name': 'test-user'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         try:
-            new_user = NewUser.objects.get(email='a@a.ru')
+            NewUser.objects.get(email='a@a.ru')
         except NewUser.DoesNotExist:
             assert True
         else:
@@ -50,7 +50,7 @@ class TestRegistrationAPI(APITestCase):
                                                     'password': ''})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         try:
-            new_user = NewUser.objects.get(email='a@a.ru')
+            NewUser.objects.get(email='a@a.ru')
         except NewUser.DoesNotExist:
             assert True
         else:
@@ -468,8 +468,8 @@ class TestUserRating(APITestCase):
         self.url = reverse('personal-page')
 
         for i in range(6):
-            user = NewUser.objects.create_user(email=f'testuser{i}@gmail.com', user_name=f'testuser{i}',
-                                               password='Ax6!a7OpNvq', email_confirmed=True)
+            NewUser.objects.create_user(email=f'testuser{i}@gmail.com', user_name=f'testuser{i}',
+                                        password='Ax6!a7OpNvq', email_confirmed=True)
         for i in range(30):
             self.tag = ThemeTag.objects.create(tag_name=f'django{i}')
 
@@ -585,7 +585,7 @@ class TestKarmaCalculated(APITestCase):
         self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)

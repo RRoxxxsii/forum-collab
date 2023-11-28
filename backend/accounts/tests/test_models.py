@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
@@ -21,7 +20,7 @@ class TestNewUserModelTest(APITestCase):
         self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)
@@ -105,7 +104,7 @@ class TestCountRatedHimselfIsNotCountedToRating(APITestCase):
         self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)
