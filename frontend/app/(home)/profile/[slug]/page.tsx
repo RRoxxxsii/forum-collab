@@ -1,21 +1,56 @@
 'use client'
-import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { Tag } from '@/shared/Tag'
+import { IUser } from '@/types'
 import { Cake, Check } from '@mui/icons-material'
 import { Avatar, Box, Chip, Skeleton, Tooltip, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Link from 'next/link'
-import { useContext } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
-export default function ProfilePage() {
-	const { userDetails } = useContext(UserDetailsContext)
+export default function ProfilePage({ params }: { params: { slug: string } }) {
+	const [profileData, setProfileData] = useState<IUser | null>(null)
+	const userId = params.slug
+
+	console.log(params)
 	dayjs.extend(relativeTime)
+
+	const getProfile = async () => {
+		try {
+			const response = await fetch('/api/account/profile', {
+				method: 'POST',
+				body: JSON.stringify({ userId: userId }),
+			})
+
+			const result = await response.json()
+
+			if (!response.ok) {
+				throw new Error(
+					result?.detail ?? result ?? 'Ошибка при загрузке профиля'
+				)
+			}
+
+			setProfileData(result)
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message)
+			}
+			if (typeof error === 'string') {
+				toast.error(error)
+			}
+		}
+	}
+
+	useEffect(() => {
+		getProfile()
+	}, [])
+
 	return (
 		<>
 			<Box className='flex flex-col min-h-screen items-start relative p-4'>
-				{userDetails ? (
+				{profileData ? (
 					<>
 						<Box sx={{ display: 'flex', height: '100%', mb: 3 }}>
 							<Avatar
@@ -26,14 +61,14 @@ export default function ProfilePage() {
 									width: 64,
 									aspectRatio: '1/1',
 								}}
-								src={userDetails?.profile_image ?? ''}
-								alt={'Картинка профиля' + userDetails?.user_name}>
-								{!userDetails?.profile_image &&
-									userDetails?.user_name[0].toUpperCase()}
+								src={profileData?.profile_image ?? ''}
+								alt={'Картинка профиля' + profileData?.user_name}>
+								{!profileData?.profile_image &&
+									profileData?.user_name[0].toUpperCase()}
 							</Avatar>
 							<Box>
 								<Box sx={{ display: 'flex', alignItems: 'center' }}>
-									{userDetails.is_active && (
+									{profileData.is_active && (
 										<Tooltip title={'Подтверждён'}>
 											<Check
 												sx={{ width: 20, height: 20, mr: 1 }}
@@ -42,11 +77,11 @@ export default function ProfilePage() {
 										</Tooltip>
 									)}
 									<Link
-										href={`/profile/:${userDetails.id}`}
+										href={`/profile/:${profileData.id}`}
 										className='text-lg'>
-										{userDetails?.user_name}
+										{profileData?.user_name}
 									</Link>
-									{userDetails.is_banned && (
+									{profileData.is_banned && (
 										<Chip sx={{ ml: 1 }} label={'Забанен'} color={'error'} />
 									)}
 								</Box>
@@ -54,7 +89,7 @@ export default function ProfilePage() {
 									<Cake sx={{ width: 20, height: 20, mb: 0.5, mr: 1 }} />
 									<Typography sx={{ fontSize: '16px' }}>
 										{' Cоздан: ' +
-											dayjs(userDetails?.created)
+											dayjs(profileData?.created)
 												?.locale(ru)
 												?.fromNow()}
 									</Typography>
@@ -73,10 +108,10 @@ export default function ProfilePage() {
 									p: 1,
 								}}>
 								<Typography sx={{ mr: 3, fontSize: 16 }}>
-									Карма: {userDetails.karma}
+									Карма: {profileData.karma}
 								</Typography>
 								<Typography sx={{ fontSize: 16 }}>
-									Лучших ответов: {userDetails.amount_solved}
+									Лучших ответов: {profileData.amount_solved}
 								</Typography>
 							</Box>
 							<Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -84,7 +119,7 @@ export default function ProfilePage() {
 									<Typography>Лучшие теги</Typography>
 									<Box
 										sx={{ borderRadius: 2, border: '1px solid #3b3b3b', p: 1 }}>
-										{userDetails?.best_tags?.map((tag) => (
+										{profileData?.best_tags?.map((tag) => (
 											<Tag key={tag.tag_name} tagData={tag} />
 										))}
 									</Box>
@@ -98,4 +133,9 @@ export default function ProfilePage() {
 			</Box>
 		</>
 	)
+}
+const Home = {
+	display: 'flex',
+	minHeight: 'screen',
+	flexDirection: { md: 'row', xs: 'column' },
 }

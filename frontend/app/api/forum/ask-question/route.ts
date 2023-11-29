@@ -1,14 +1,14 @@
-import { BASE_URL } from '@/shared/constants'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { BASE_URL } from './../../../../shared/constants/index'
 
 export async function POST(req: NextRequest) {
 	const hasAccessToken = cookies().has('access_token')
 
-	if (hasAccessToken) {
+	if (!hasAccessToken) {
 		return NextResponse.json(
 			{
-				error: 'Для того, чтобы задать вопрос вы должны войти в аккаунт',
+				error: 'Для того, чтобы задать вопрос, вы должны войти в аккаунт',
 			},
 			{ status: 400 }
 		)
@@ -26,16 +26,17 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
+		const formData = new FormData()
+
+		formData.append(tags, tags)
+		formData.append(title, title)
+		formData.append(content, content)
+		formData.append(uploaded_images, uploaded_images)
+
 		const res = await fetch(`${BASE_URL}/forum/ask-question/`, {
 			method: 'POST',
-			body: JSON.stringify({
-				tags,
-				title,
-				content,
-				uploaded_images,
-			}),
+			body: formData,
 			headers: {
-				'Content-Type': 'application/json',
 				Authorization: `${session ? `Bearer ${session}` : ''}`,
 			},
 		})
@@ -80,7 +81,9 @@ export async function GET(req: NextRequest) {
 		const { searchParams } = new URL(req.url ?? '')
 		const q = searchParams.get('q')
 
-		const res = await fetch(`${BASE_URL}/forum/ask-question/?q=${q}`, {
+		const url = BASE_URL + `/forum/ask-question/?q=` + q
+
+		const res = await fetch(url, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',

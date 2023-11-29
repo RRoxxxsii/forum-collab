@@ -1,7 +1,7 @@
 'use client'
 import { ModalComponent } from '@/shared/Modal'
 import { Delete, OpenInFull, UploadFile } from '@mui/icons-material'
-import { Box, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Tab, Tabs, Typography, Button } from '@mui/material'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Dispatch, SetStateAction, useState } from 'react'
@@ -59,7 +59,7 @@ export const UploadImage = ({
 					<Tab icon={<UploadFile />} label='Загрузить с устройства' />
 					{/* <Tab icon={<LinkIcon />} label='Загрузить по ссылке' /> */}
 				</Tabs>
-				<section>
+				<section className='mb-2'>
 					<Box
 						sx={{
 							mb: 2,
@@ -140,6 +140,12 @@ export const UploadImage = ({
 						))}
 					</div>
 				</section>
+				<Button
+					onClick={handleClose}
+					variant='outlined'
+					sx={{ float: 'right' }}>
+					Подтвердить
+				</Button>
 			</div>
 		</ModalComponent>
 	)

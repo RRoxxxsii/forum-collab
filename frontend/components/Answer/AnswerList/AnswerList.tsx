@@ -15,6 +15,10 @@ export const AnswerList = ({
 }) => {
 	const { userDetails } = useContext(UserDetailsContext)
 
+	const sortedAnswers = questionData.answers.sort((a, b) =>
+		a.is_solving ? -1 : 1
+	)
+
 	const handleSolve = async ({ answerId }: { answerId: number }) => {
 		const solveToast = toast.loading('Обработка ответа...')
 		try {
@@ -48,38 +52,6 @@ export const AnswerList = ({
 		}
 	}
 
-	const handleDelete = ({ id, model }: { id: number; model: IModelType }) => {
-		DeleteContent({
-			id: id,
-			model: model,
-		})
-		if (model === 'answer') {
-			setQuestionData({
-				...questionData,
-				answers: questionData.answers.filter((answer) => answer.id !== id),
-			})
-		}
-		if (model === 'comment') {
-			//why updating nested data has to be that complicated :((((((((((((((((((((((()))))))))))))))))))))))
-			const updatedQuestionData = {
-				...questionData,
-				answers: questionData.answers.map((answer) => {
-					if (answer.comments) {
-						return {
-							...answer,
-							comments: answer.comments.filter((comment) => comment.id !== id),
-						}
-					}
-					return answer
-				}),
-			}
-			setQuestionData(updatedQuestionData)
-		}
-	}
-	const sortedAnswers = questionData.answers.sort((a, b) =>
-		a.is_solving ? -1 : 1
-	)
-
 	return sortedAnswers.map((answer: IAnswer) => (
 		<AnswerCard
 			key={answer.id}
@@ -88,8 +60,6 @@ export const AnswerList = ({
 			questionData={questionData}
 			userDetails={userDetails}
 			setQuestionData={setQuestionData}
-			handleSolve={handleSolve}
-			handleDelete={handleDelete}
 		/>
 	))
 }

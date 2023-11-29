@@ -1,5 +1,6 @@
 'use client'
 import { QuestionCard } from '@/components/Question/QuestionCard'
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver'
 import { CategoryContext } from '@/providers/CategoryProvider'
 import { fetchQuestions } from '@/shared/api/fetchData'
 import { FetchStatusType, IQuestion } from '@/types'
@@ -10,22 +11,36 @@ import { useContext, useEffect, useRef, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
+	const [pageIndex, setPageIndex] = useState(1)
 	const [listLoadingState, setListLoadingState] = useState<FetchStatusType>()
+
 	const { category } = useContext(CategoryContext)
 
-	const fetchQuestionList = async ({ page }: { page: number }) => {
+	const fetchQuestionList = async ({
+		page,
+		action,
+	}: {
+		page: number
+		action: 'change' | 'add'
+	}) => {
 		//reset the questions array on refetch
 		setListLoadingState('loading')
-		const pageNumber = page * 10
 		try {
-			const response = await fetchQuestions({
-				category: category,
-				limit: pageNumber,
-			})
+			const response: Awaited<IQuestion[] | string> =
+				await fetchQuestions<IQuestion>({
+					category: category,
+					page: page,
+				})
 
 			//if the response is array then it is the right result
-			if (Array.isArray(response)) {
-				setQuestions(response)
+			if (Array.isArray(response) && typeof response !== 'string') {
+				if (action === 'add') {
+					setQuestions((prev) => [...prev, ...response])
+				}
+				if (action === 'change') {
+					setQuestions([])
+					setQuestions(response)
+				}
 				setListLoadingState('success')
 			} else {
 				setListLoadingState('error')
@@ -36,25 +51,25 @@ export const QuestionList = () => {
 	}
 
 	const bottom = useRef<null | any>(null)
+	const entry = useIntersectionObserver(bottom, {
+		threshold: 0,
+		root: null,
+		rootMargin: '0px',
+	})
+	const isVisible = !!entry?.isIntersecting
 
 	useEffect(() => {
-		fetchQuestionList({ page: 1 })
+		setPageIndex((prev) => (prev += 1))
+	}, [isVisible])
+
+	useEffect(() => {
+		fetchQuestionList({ page: pageIndex, action: 'add' })
+	}, [pageIndex])
+
+	useEffect(() => {
+		fetchQuestionList({ page: 1, action: 'change' })
+		setPageIndex(0)
 	}, [category])
-
-	const [pageIndex, setPageIndex] = useState(1)
-
-	useEffect(() => {
-		const observer = new IntersectionObserver(() => {
-			setPageIndex((pageIndex) => (pageIndex += 1))
-			fetchQuestionList({ page: pageIndex })
-		})
-		observer.observe(bottom.current)
-		return () => {
-			if (bottom.current) {
-				observer.unobserve(bottom.current)
-			}
-		}
-	}, [bottom])
 
 	//Handling response error
 	if (listLoadingState === 'error') {

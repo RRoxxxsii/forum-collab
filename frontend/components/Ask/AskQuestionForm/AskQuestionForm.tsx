@@ -58,7 +58,7 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 			fetchQuestion({ id: pageId, setQuestionData: setQuestionData })
 		}
 		fetchMe({ setProfileData: setProfileData })
-	}, [])
+	}, [pageId, type])
 
 	useEffect(() => {
 		if (tagQuery !== '') {

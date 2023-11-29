@@ -15,7 +15,7 @@ services:
     build:
       context: ./backend
     command:
-      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && 
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate &&
       gunicorn -b 0.0.0.0:8000 core.wsgi:application —log-level debug"
     ports:
       - '8000:8000'
@@ -29,17 +29,17 @@ services:
       - media_volume:/backend/media
 
   # Frontend Next.js
-  frontend:
-    build:
-      context: ./frontend
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend/:/frontend
-      - /frontend/:/node_modules
-      - /frontend/:/.next
-    ports:
-      - '3000:3000'
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   depends_on:
+  #     - backend
+  #   volumes:
+  #     - ./frontend/:/frontend
+  #     - /frontend/:/node_modules
+  #     - /frontend/:/.next
+  #   ports:
+  #     - '3000:3000'
 
   # Nginx
   nginx:
@@ -53,7 +53,7 @@ services:
       - media_volume:/backend/media
     depends_on:
       - backend
-      - frontend
+      # - frontend
       - db
 
   # Redis
@@ -80,23 +80,23 @@ services:
     env_file:
       - backend/web.env
 
-#  celery-beat:
-#    restart: always
-#    build:
-#      context: ./backend
-#    entrypoint: /bin/sh
-#    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app beat --loglevel=info"
-#    volumes:
-#      - .:/backend
-#    container_name: celery-beat
-#    depends_on:
-#      - db
-#      - redis
-#      - backend
-#    links:
-#      - redis
-#    env_file:
-#      - backend/web.env
+  #  celery-beat:
+  #    restart: always
+  #    build:
+  #      context: ./backend
+  #    entrypoint: /bin/sh
+  #    command: -c "export PYTHONPATH=/backend:/backend/backend && celery -A backend.celery_app:app beat --loglevel=info"
+  #    volumes:
+  #      - .:/backend
+  #    container_name: celery-beat
+  #    depends_on:
+  #      - db
+  #      - redis
+  #      - backend
+  #    links:
+  #      - redis
+  #    env_file:
+  #      - backend/web.env
 
   # Flower
   flower:

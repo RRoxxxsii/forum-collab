@@ -1,4 +1,4 @@
-import { AccountDeletion } from '@/components/Settings/AccountDeletion'
+import { AccountDeletion } from '@/components/settings/AccountDeletion'
 import { ChevronLeft, Settings } from '@mui/icons-material'
 import { Metadata } from 'next'
 import Link from 'next/link'

@@ -6,6 +6,7 @@ import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import Link from 'next/link'
 
 export const UserInformation = ({
 	questionData,
@@ -32,7 +33,17 @@ export const UserInformation = ({
 					: questionData?.user?.user_name[0].toUpperCase()}
 			</Avatar>
 			<Typography sx={{ marginRight: 1 }} variant='caption'>
-				{questionData?.user?.user_name ?? 'Гость'}
+				{questionData?.user?.user_name ? (
+					<Link
+						href={`/profile/${questionData?.user?.id}`}
+						className='text-xs mr-1'>
+						{questionData?.user?.user_name}
+					</Link>
+				) : (
+					<Typography sx={{ marginRight: 1 }} variant='caption'>
+						Гость
+					</Typography>
+				)}
 			</Typography>
 			<Tooltip
 				placement='right'
