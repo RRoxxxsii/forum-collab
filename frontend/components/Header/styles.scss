@@ -1,0 +1,13 @@
+.drawer {
+	width: 240px;
+	@media (max-width: 879px) {
+		display: none;
+		width: 0px;
+	}
+}
+.main {
+	margin-left: 240px;
+	@media (max-width: 879px) {
+		margin-left: 0px !important;
+	}
+}

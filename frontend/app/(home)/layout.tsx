@@ -1,13 +1,46 @@
-import { Header } from '@/widgets/Header'
+import { Header } from '@/components/Header'
+import { AskFastProvider } from '@/providers/AskFastProvider'
+import { CategoryProvider } from '@/providers/CategoryProvider'
+import { NotificationProvider } from '@/providers/NotificationsProvider'
+import { UserDetailsProvider } from '@/providers/UserDetailsProvider'
+import { Metadata } from 'next'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+export const metadata: Metadata = {
+	title: 'Yoman',
+	description: 'Форум для решения вопросов всех областей и направлений',
+}
 
 interface HomeLayoutProps {
 	children: React.ReactNode
 }
 
-export default async function HomeLayout({ children }: HomeLayoutProps) {
+export default function HomeLayout({ children }: HomeLayoutProps) {
 	return (
-		<div className=''>
-			<Header>{children}</Header>
-		</div>
+		<>
+			<ToastContainer
+				position='bottom-center'
+				autoClose={5000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss={false}
+				draggable
+				pauseOnHover
+				theme='dark'
+				limit={5}
+			/>
+			<UserDetailsProvider>
+				<NotificationProvider>
+					<Header>
+						<CategoryProvider>
+							<AskFastProvider>{children}</AskFastProvider>
+						</CategoryProvider>
+					</Header>
+				</NotificationProvider>
+			</UserDetailsProvider>
+		</>
 	)
 }

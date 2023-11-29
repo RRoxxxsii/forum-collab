@@ -58,5 +58,6 @@ jobs:
           install: npm ci
           start: npm run dev
           start-windows: npm run dev:windows:server
+          wait-on-timeout: 120
           component: true
           browser: chrome
