@@ -62,7 +62,7 @@ class CreateQuestionService:
         self.tag_repo: repository.AbsractThemeTagRepository = (
             container.resolve(repository.AbsractThemeTagRepository))
 
-    def _create_question(self, user: NewUser, title: str, content: str, tags: list, images: list = None):
+    def _create_question(self, user: NewUser, title: str, content: str, tags: list, images: list = None) -> Question:
 
         question = self.question_repo.create_question(title=title, content=content, user=user)
         tags = self.tag_repo.create_tags(tags=tags, user=user)
@@ -71,6 +71,7 @@ class CreateQuestionService:
             self.question_repo.add_attachments(parent=question, attachments=images)
 
         self.question_repo.add_tags(question=question, tags=tags)
+        return question
 
     def execute(self, user: NewUser, title: str, content: str, tags: list, images: list = None):
         return self._create_question(user=user, title=title, content=content, tags=tags, images=images)
