@@ -19,7 +19,6 @@ export const QuestionContent = ({
 					__html: questionData?.content ?? 'error',
 				}}
 			/>
-
 			<Box sx={{ mb: 2, display: 'flex' }}>
 				{questionData?.images?.map((image) => (
 					<Box sx={{ mr: 1 }}>

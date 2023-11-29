@@ -5,6 +5,7 @@ import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import Link from 'next/link'
 export const QuestionCardContent = ({
 	questionData,
 }: {
@@ -63,13 +64,15 @@ export const QuestionCardContent = ({
 									{!questionData?.user?.profile_image &&
 										questionData?.user?.user_name[0].toUpperCase()}
 								</Avatar>
-
-								<Typography
-									variant='body2'
-									fontSize={12}
-									color='text.secondary'>
-									Отправлено: {user.user_name ?? 'Гость'}
-								</Typography>
+								{user ? (
+									<Link href={`/profile/${user?.id}`} className='text-xs mr-1'>
+										{user?.user_name}
+									</Link>
+								) : (
+									<Typography sx={{ marginRight: 1 }} variant='caption'>
+										Гость
+									</Typography>
+								)}
 								<Tooltip
 									placement='top'
 									title={`${

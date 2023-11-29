@@ -1,5 +1,6 @@
 'use client'
-import { Transliterate } from '@/shared/transliterate'
+import { BASE_URL } from '@/shared/constants'
+import { Transliterate } from '@/shared/utils/Transliterate'
 import { IErrorRes, IQuestion, ITag } from '@/types'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
@@ -37,7 +38,7 @@ export const AskQuestionFormSubmit = ({
 		const questionToast = toast.loading('Открытие вопроса...')
 
 		try {
-			const response = await fetch('/api/forum/ask-question', {
+			const response = await fetch(`/api/forum/ask-question/`, {
 				method: 'POST',
 				body: JSON.stringify({
 					tags: tags,
@@ -45,7 +46,9 @@ export const AskQuestionFormSubmit = ({
 					content: questionContent,
 					uploaded_images: images,
 				}),
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+				},
 			})
 
 			const result: SubmitResponse = await response.json()
@@ -53,7 +56,7 @@ export const AskQuestionFormSubmit = ({
 			if (!response.ok || 'error' in result) {
 				if ('error' in result) {
 					return toast.update(questionToast, {
-						render: result.error,
+						render: result.error.detail ?? result.error,
 						type: 'error',
 						isLoading: false,
 						autoClose: 3000,

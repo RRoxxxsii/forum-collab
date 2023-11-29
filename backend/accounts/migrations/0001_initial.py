@@ -1,4 +1,3 @@
-# Generaed by Django 4.2.3 on 2023-11-24 18:28
 
 import uuid
 

@@ -1,6 +1,6 @@
 import { CommentList } from '@/components/Comment/CommentList/CommentList'
 import { EditingBox } from '@/components/EditingBox'
-import { IAnswer, IModelType, IQuestion, UserDetailsType } from '@/types'
+import { IAnswer, IQuestion, UserDetailsType } from '@/types'
 import { Comment, Star } from '@mui/icons-material'
 import { Avatar, Box, Button, Divider, Typography } from '@mui/material'
 import { green } from '@mui/material/colors'
@@ -8,14 +8,14 @@ import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+
+import Link from 'next/link'
 import { AnswerCardEditing, AnswerCardMore, AnswerCardRating } from './models'
 
 interface AnswerCardProps {
 	answerData: IAnswer
 	questionData: IQuestion
 	userDetails: UserDetailsType
-	handleSolve: ({ answerId }: { answerId: number }) => void
-	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 	solved: boolean
 }
@@ -24,8 +24,6 @@ export function AnswerCard({
 	answerData,
 	questionData,
 	userDetails,
-	handleSolve,
-	handleDelete,
 	setQuestionData,
 	solved,
 }: AnswerCardProps) {
@@ -101,9 +99,17 @@ export function AnswerCard({
 					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
-							<Typography sx={{ marginRight: 1 }} variant='caption'>
-								{answerData?.user?.user_name ?? 'Гость'}
-							</Typography>
+							{answerData?.user?.user_name ? (
+								<Link
+									href={`/profile/${answerData.user.id}`}
+									className='text-xs mr-1'>
+									{answerData?.user.user_name}
+								</Link>
+							) : (
+								<Typography sx={{ marginRight: 1 }} variant='caption'>
+									Гость
+								</Typography>
+							)}
 							<Typography sx={{ color: 'GrayText' }} variant='caption'>
 								{dayjs(answerData?.creation_date).toNow(true) + ' назад'}
 							</Typography>
@@ -155,7 +161,7 @@ export function AnswerCard({
 									isEditing={isEditing}
 									answerData={answerData}
 									userDetails={userDetails}
-									handleDelete={handleDelete}
+									// handleDelete={handleDelete}
 									setIsEditing={setIsEditing}
 								/>
 							</Box>
@@ -163,7 +169,7 @@ export function AnswerCard({
 								questionData.user.id === userDetails?.id && (
 									<Box sx={{ display: 'flex', alignItems: 'center' }}>
 										<Button
-											onClick={() => handleSolve({ answerId: answerData.id })}
+											// onClick={() => handleSolve({ answerId: answerData.id })}
 											size='small'
 											variant='outlined'>
 											Отметить лучшим
@@ -180,7 +186,7 @@ export function AnswerCard({
 					setIsCommenting={setIsCommenting}
 					userDetails={userDetails}
 				/>
-				<CommentList answerData={answerData} handleDelete={handleDelete} />
+				<CommentList answerData={answerData} />
 			</Box>
 		</>
 	)

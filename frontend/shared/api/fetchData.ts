@@ -1,17 +1,20 @@
-import { CategoryType, INotifications, IQuestion, IUser } from '@/types'
+import { CategoryType, INotifications, IUser } from '@/types'
 import { Dispatch, SetStateAction } from 'react'
 import { BASE_URL } from '../constants'
+import { IQuestion } from './../../types/index'
 
-export async function fetchQuestions({
-	category,
-	limit,
-}: {
+interface FetchQuestionProps {
 	category: CategoryType
-	limit: number
-}) {
+	page: number
+}
+
+export async function fetchQuestions<T>({
+	category,
+	page,
+}: FetchQuestionProps): Promise<T[] | string> {
 	try {
 		const response = await fetch(
-			`${BASE_URL}/forum/questions/?limit=${limit}&sort=${category}`,
+			`${BASE_URL}/forum/questions/?&sort=${category}&page=${page ?? 1}`,
 			{
 				method: 'GET',
 				headers: {
@@ -20,7 +23,7 @@ export async function fetchQuestions({
 			}
 		)
 
-		const result = await response.json()
+		const result: T[] = await response.json()
 
 		if (!response.ok || !Array.isArray(result)) {
 			throw new Error('Failed to fetch questions')
@@ -28,7 +31,13 @@ export async function fetchQuestions({
 
 		return result
 	} catch (error) {
-		return error
+		if (typeof error === 'string') {
+			return error
+		}
+		if (error instanceof Error) {
+			return error.message
+		}
+		return ''
 	}
 }
 

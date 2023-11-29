@@ -3,15 +3,14 @@ import { DeleteContent } from '@/shared/api/deleteContent'
 import { IQuestion, IUser } from '@/types'
 import {
 	Bookmark,
-	BookmarkOutlined,
 	Delete,
 	Edit,
 	MoreHoriz,
 	Report,
 	Share,
-	ShareOutlined,
 } from '@mui/icons-material'
 import {
+	Box,
 	Checkbox,
 	Divider,
 	FormControlLabel,
@@ -23,6 +22,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 
 export const QuestionCardMenu = ({
 	questionData,
@@ -47,19 +47,53 @@ export const QuestionCardMenu = ({
 			model: 'question',
 		}).then(() => router.push('/'))
 	}
+	const FavoriteHandler = async () => {
+		try {
+			const response = await fetch('/api/favourites/favourites-add/', {
+				method: 'POST',
+				body: JSON.stringify({ question: questionData.id }),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			const result = await response.json()
+
+			if (!response.ok) {
+				throw new Error(result?.detail ?? 'Не удалось добавить в избранное')
+			}
+
+			toast.success('Вопрос добавлен в избранное')
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message)
+				return
+			}
+			if (typeof error === 'string') {
+				toast.error(error)
+				return
+			}
+		}
+	}
+
+	const shareHandler = () => {
+		navigator.clipboard.writeText(window.location.href)
+		toast('Сохранено в буфер обмена')
+	}
 
 	return (
-		<>
-			<FormControlLabel
-				control={<Checkbox icon={<ShareOutlined />} checkedIcon={<Share />} />}
-				label='Поделиться'
-			/>
-			<FormControlLabel
-				control={
-					<Checkbox icon={<BookmarkOutlined />} checkedIcon={<Bookmark />} />
-				}
-				label='Избранное'
-			/>
+		<Box sx={{ display: 'flex', alignItems: 'center' }}>
+			<button
+				className='flex mr-4 hover:bg-neutral-800 rounded-md p-2'
+				onClick={shareHandler}>
+				<Share sx={{ mr: 1 }} />
+				<Typography>Поделиться</Typography>
+			</button>
+			<button
+				className='flex mr-4 hover:bg-neutral-800 rounded-md p-2'
+				onClick={FavoriteHandler}>
+				<Bookmark sx={{ mr: 1 }} />
+				<Typography>Избранное</Typography>
+			</button>
 			<IconButton
 				id='more'
 				aria-controls={moreDropdownOpen ? 'more options' : undefined}
@@ -111,6 +145,6 @@ export const QuestionCardMenu = ({
 					/>
 				</MenuItem>
 			</Menu>
-		</>
+		</Box>
 	)
 }

@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction, useEffect } from 'react'
 import { BubbleMenuContent } from './models/BubbleMenuContent'
 import { EditorExtensions } from './models/Extensions'
 import './styles.scss'
+import { UploadImage } from '../UploadImage'
 
 const EditorContentValue = ``
 
@@ -119,8 +120,7 @@ export const TiptapEditor = ({
 			{(type === 'question' || type === 'answer') && (
 				<Box sx={{ height: 40, px: 1 }} border={'1px solid #343947'}>
 					<IconButton sx={{ width: 36, height: 36, color: '#b7b8c4' }}>
-						<Link
-							href={type === 'answer' ? '/ask?upload_image' : `?upload_image`}>
+						<Link href={`?upload_image`}>
 							<AddPhotoAlternate />
 						</Link>
 					</IconButton>

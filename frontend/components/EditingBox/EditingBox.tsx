@@ -3,7 +3,7 @@ import { IAnswer, IErrorRes } from '@/types'
 import { Box } from '@mui/material'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { toast } from 'react-toastify'
-import { AskAnswerFormSubmit } from '../Answer/AnswerCreateForm/AskAnswerFormSubmit'
+import { AskAnswerFormSubmit } from '../Answer/AnswerCreateForm/models'
 
 export const EditingBox = ({
 	isEditing,

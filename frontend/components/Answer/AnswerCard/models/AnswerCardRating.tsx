@@ -41,7 +41,7 @@ export const AnswerCardRating = ({
 		if (answerData.rating.is_disliked) {
 			setChecked(1)
 		}
-	}, [])
+	}, [answerData.rating.is_disliked, answerData.rating.is_liked])
 
 	return (
 		<>

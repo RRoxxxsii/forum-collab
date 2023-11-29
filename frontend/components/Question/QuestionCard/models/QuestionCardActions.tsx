@@ -1,6 +1,6 @@
 'use client'
 
-import { Transliterate } from '@/shared/transliterate'
+import { Transliterate } from '@/shared/utils/Transliterate'
 import { IQuestion } from '@/types'
 import TextsmsIcon from '@mui/icons-material/Textsms'
 import { Box, Chip, Typography, styled } from '@mui/material'
@@ -45,15 +45,16 @@ export const QuestionCardActions = ({
 								flexWrap: 'nowrap',
 							}}
 							key={tag.tag_name}>
-							<Chip
-								label={tag.tag_name}
-								sx={{
-									background: '#292929',
-									color: '#e1e1e1',
-									'&:hover': { transition: 0.3, background: '#363636' },
-								}}
-							/>
-							<Link href={`/questions/?tags=${Transliterate(tag?.tag_name)}`} />
+							<Link href={`/questions/?tags=${Transliterate(tag?.tag_name)}`}>
+								<Chip
+									label={tag.tag_name}
+									sx={{
+										background: '#292929',
+										color: '#e1e1e1',
+										'&:hover': { transition: 0.3, background: '#363636' },
+									}}
+								/>
+							</Link>
 						</ListItem>
 					)
 				})}

@@ -14,7 +14,8 @@ export const QuestionSearch = () => {
 	const questionsQuery = async () => {
 		try {
 			const response = await fetch(
-				BASE_URL + `/search/search?q=${debouncedValue}`
+				BASE_URL + `/search/search?q=${debouncedValue}`,
+				{ method: 'GET', headers: { 'Content-Type': 'application/json' } }
 			)
 
 			const result = await response.json()

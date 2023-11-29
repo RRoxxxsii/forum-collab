@@ -1,5 +1,4 @@
-import { AskQuestionForm } from '@/widgets/AskQuestionForm'
-import { AskTabs } from '@/widgets/AskTabs'
+import { AskQuestionForm } from '@/components/Ask/AskQuestionForm'
 import { Box, Paper } from '@mui/material'
 import { useSearchParams } from 'next/navigation'
 

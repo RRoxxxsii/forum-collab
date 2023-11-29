@@ -6,7 +6,7 @@ export const CommentList = ({
 	handleDelete,
 }: {
 	answerData: IAnswer
-	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
+	handleDelete?: ({ id, model }: { id: number; model: IModelType }) => void
 }) => {
 	return answerData.comments.map((comment) => (
 		<CommentCard

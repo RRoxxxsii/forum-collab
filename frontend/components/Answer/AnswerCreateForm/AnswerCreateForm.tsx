@@ -1,5 +1,6 @@
 'use client'
 import { TiptapEditor } from '@/components/TiptapEditor'
+import { UploadImage } from '@/components/UploadImage'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { IAnswer, IErrorRes, IQuestion, IUser } from '@/types'
 import { Button, Typography } from '@mui/material'
@@ -12,12 +13,14 @@ async function addAnswer({
 	answerContent,
 	setAnswerContent,
 	userDetails,
+	answerImages,
 }: {
 	questionData: IQuestion | null
 	answerContent: string | null
 	setAnswerContent: Dispatch<SetStateAction<string>>
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 	userDetails: IUser | null
+	answerImages?: File[]
 }) {
 	try {
 		const response = await fetch(`/api/forum/create-answer`, {
@@ -26,6 +29,7 @@ async function addAnswer({
 			body: JSON.stringify({
 				question_id: questionData?.id,
 				answer_content: answerContent,
+				answerImages: answerImages,
 			}),
 		})
 
@@ -67,10 +71,16 @@ export const AnswerCreateForm = ({
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }) => {
 	const [answerContent, setAnswerContent] = useState<string>('')
+	const [answerImages, setAnswerImages] = useState<File[]>([])
 	const { userDetails } = useContext(UserDetailsContext)
 
 	return (
 		<>
+			<UploadImage
+				setImages={setAnswerImages}
+				model='answer'
+				images={answerImages}
+			/>
 			<Typography
 				variant='caption'
 				color={'GrayText'}
@@ -85,6 +95,16 @@ export const AnswerCreateForm = ({
 				content={answerContent}
 				setContent={setAnswerContent}
 			/>
+			<Typography sx={{ color: '#919191', fontSize: 14, display: 'flex' }}>
+				{[
+					answerImages && (
+						<Typography sx={{ mr: 1 }}>Прикрепленные изображения: </Typography>
+					),
+					answerImages.map((image) => (
+						<Typography sx={{ mr: 0.5 }}>{image.name},</Typography>
+					)),
+				]}
+			</Typography>
 			<Button
 				sx={{ mt: 1, mb: 3, width: 220, height: 50 }}
 				variant='outlined'
@@ -95,6 +115,7 @@ export const AnswerCreateForm = ({
 						setAnswerContent: setAnswerContent,
 						setQuestionData: setQuestionData,
 						userDetails: userDetails,
+						answerImages: answerImages,
 					})
 				}>
 				Ответить

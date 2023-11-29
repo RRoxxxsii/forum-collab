@@ -20,11 +20,12 @@ import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AddComment } from '../AddComment'
+import Link from 'next/link'
 
 interface CommentCardProps {
 	comment: IComment
 	answerData: IAnswer
-	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
+	handleDelete?: ({ id, model }: { id: number; model: IModelType }) => void
 }
 
 export function CommentCard({
@@ -152,10 +153,17 @@ export function CommentCard({
 						</Box>
 						<Box sx={{ width: '100%' }}>
 							<Box sx={{ display: 'flex' }}>
-								<Typography sx={{ marginRight: 1 }} variant='caption'>
-									{comment?.user?.user_name ?? 'Гость'}
-								</Typography>
-
+								{comment?.user?.user_name ? (
+									<Link
+										href={`/profile/${comment.user.id}`}
+										className='text-xs mr-1'>
+										{comment?.user.user_name}
+									</Link>
+								) : (
+									<Typography sx={{ marginRight: 1 }} variant='caption'>
+										Гость
+									</Typography>
+								)}
 								<Typography sx={{ color: 'GrayText' }} variant='caption'>
 									{dayjs(comment?.creation_date).toNow(true) + ' назад'}
 								</Typography>
@@ -241,9 +249,9 @@ export function CommentCard({
 											onClick={handleClose}
 											sx={{ width: '100%', height: 36 }}>
 											<FormControlLabel
-												onClick={() =>
-													handleDelete({ id: comment.id, model: 'comment' })
-												}
+												// onClick={() =>
+												// 	//handleDelete({ id: comment.id, model: 'comment' })
+												// }
 												control={<Delete sx={{ mx: 1.2 }} />}
 												label='Удалить'
 											/>

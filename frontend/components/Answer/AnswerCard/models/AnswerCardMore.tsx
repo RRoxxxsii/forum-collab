@@ -1,21 +1,20 @@
-import { IAnswer, IUser, IModelType } from '@/types'
-import { MoreHoriz, Edit, Delete, Report } from '@mui/icons-material'
+import { IAnswer, IUser } from '@/types'
+import { Delete, Edit, MoreHoriz, Report } from '@mui/icons-material'
 import {
+	Box,
+	Checkbox,
+	Divider,
+	FormControlLabel,
 	IconButton,
 	Menu,
 	MenuItem,
-	Box,
 	Typography,
-	FormControlLabel,
-	Divider,
-	Checkbox,
 } from '@mui/material'
 import React, { SetStateAction, useState } from 'react'
 
 export const AnswerCardMore = ({
 	answerData,
 	userDetails,
-	handleDelete,
 	isEditing,
 	setIsEditing,
 }: {
@@ -23,7 +22,6 @@ export const AnswerCardMore = ({
 	userDetails: IUser | null
 	isEditing: boolean
 	setIsEditing: React.Dispatch<SetStateAction<boolean>>
-	handleDelete: ({ id, model }: { id: number; model: IModelType }) => void
 }) => {
 	const [moreButtonEl, setMoreButtonEl] = useState<HTMLElement | null>(null)
 	const moreDropdownOpen = Boolean(moreButtonEl)
@@ -58,9 +56,9 @@ export const AnswerCardMore = ({
 					</MenuItem>,
 					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
 						<FormControlLabel
-							onClick={() =>
-								handleDelete({ id: answerData.id, model: 'answer' })
-							}
+							// onClick={() =>
+							// 	handleDelete({ id: answerData.id, model: 'answer' })
+							// }
 							control={<Delete sx={{ mx: 1.2 }} />}
 							label='Удалить'
 						/>

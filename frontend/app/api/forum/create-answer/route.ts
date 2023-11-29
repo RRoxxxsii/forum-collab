@@ -6,7 +6,19 @@ export async function POST(req: NextRequest) {
 	const {
 		question_id,
 		answer_content,
-	}: { question_id: number; answer_content: string } = await req.json()
+		answerImages,
+	}: { question_id: number; answer_content: string; answerImages?: File[] } =
+		await req.json()
+
+	let formField = new FormData()
+
+	formField.append('question', question_id.toString())
+	formField.append('answer', answer_content)
+	answerImages?.forEach((image) => {
+		formField.append('uploaded_images', image)
+	})
+
+	console.log(formField)
 
 	const access_token = cookies().get('access_token')?.value
 
@@ -27,13 +39,10 @@ export async function POST(req: NextRequest) {
 	const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
+			'Content-Type': 'multipart/form-data; boundary=dqwsdasdqweqw312asdqwe123',
 			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
-		body: JSON.stringify({
-			question: question_id,
-			answer: answer_content,
-		}),
+		body: formField,
 	})
 	const result = await response.json()
 

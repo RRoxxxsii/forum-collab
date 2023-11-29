@@ -20,10 +20,10 @@ export async function middleware(request: NextRequest) {
 	if (!hasRefreshToken) {
 		return
 	}
+	console.log('click')
 
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()
-
 	try {
 		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
 			method: 'POST',
@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
 		const newAccessToken = data.access
 
 		response.cookies.set({ name: 'access_token', value: newAccessToken })
+		response.headers.set('access_token', newAccessToken)
 		return response
 	} catch (error) {}
 }
