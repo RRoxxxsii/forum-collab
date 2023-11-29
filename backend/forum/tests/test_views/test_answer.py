@@ -18,7 +18,7 @@ class TestLeaveAnswerAPIView(APITestCase):
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')
         self.user2 = NewUser.objects.create_user(email='testuser2@gmail.com', user_name='testuser2',
-                                                password='Ax6!a7OpNvq')
+                                                 password='Ax6!a7OpNvq')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user)
         self.tag = ThemeTag.objects.create(tag_name='django')

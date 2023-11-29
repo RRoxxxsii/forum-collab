@@ -1,9 +1,7 @@
-import datetime
 import io
 import json
 
 import pytz
-from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
@@ -67,7 +65,7 @@ class TestQuestionDetailAPITestCase(APITestCase):
         self.comment = AnswerComment.objects.create(user=self.user, question_answer=self.answer,
                                                     comment='agagag')
         self.comment2 = AnswerComment.objects.create(user=self.user, question_answer=self.answer,
-                                                    comment='bfbd')
+                                                     comment='bfbd')
 
         serialized_data = DetailQuestionSerializer(self.question, context={'request': request})
         self.data_json = json.dumps(serialized_data.data, indent=4, ensure_ascii=False)

@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import NewUser
-from .repository import UserKarmaQS
+from .querysets import UserKarmaQS
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):

@@ -12,7 +12,7 @@ class CreateUserService:
         self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
 
     def _create_user(self, data: dto.CreateUserDTO) -> NewUser:
-        password = data.get('password')
+        password = data.password
         user = self.repo.create_user(data=data, password=password)
         return user
 
@@ -26,13 +26,13 @@ class SendConfirmationEmailService:
         self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
 
     def _send_confirmation_email(self, data: dto.RequestForConfirmationEmailDTO):
-        user = data.get('user')
+        user = data.user
         token = self.repo.create_token(user)
 
-        current_url = '/'.join(data.get('request_path').split('/')[:-2]) + f"/{data.get('path')}"
+        current_url = '/'.join(data.request_path.split('/')[:-2]) + f"/{data.path}"
 
         send_confirmation_email.delay(
-            template_name=data.get('template_name'), current_url=current_url,
+            template_name=data.template_name, current_url=current_url,
             email=user.email, token_id=token.id, user_id=user.pk
         )
 
@@ -65,7 +65,7 @@ class PerformActionWhenConfirm:
 
     @ConfirmWithEmailService().confirm_with_email
     def confirm_email(self, data: dto.ConfirmByEmailDTO):
-        user = data.get('user')
+        user = data.user
         if isinstance(user, NewUser):
             self.repo.confirm_email(user)
             return True
@@ -73,7 +73,7 @@ class PerformActionWhenConfirm:
 
     @ConfirmWithEmailService().confirm_with_email
     def make_user_active(self, data: dto.ConfirmByEmailDTO):
-        user = data.get('user')
+        user = data.user
         if isinstance(user, NewUser):
             self.repo.make_user_active(user)
             return True
@@ -81,8 +81,8 @@ class PerformActionWhenConfirm:
 
     @ConfirmWithEmailService().confirm_with_email
     def set_new_email(self, data: dto.ConfirmByEmailWithEmailDTO):
-        user = data.get('user')
-        email = data.get('email')
+        user = data.user
+        email = data.email
         if isinstance(user, NewUser):
             self.repo.set_new_email(user, email)
             return True

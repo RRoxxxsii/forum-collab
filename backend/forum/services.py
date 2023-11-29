@@ -7,107 +7,139 @@ from django.contrib.auth.models import AnonymousUser
 
 from accounts.cache_manager import CacheManager
 from accounts.models import NewUser
+from forum import repository
+from forum.di import container
 from forum.models import AnswerComment, Question, QuestionAnswer
-from forum.repository import (AnswerRepository, CommentRepository,
-                              LikeDislikeRepository, QuestionRepository,
-                              ThemeTagRepository)
+from forum.querysets import CommentQSBase, QuestionAnswerQSBase, QuestionQSBase
 from notifications.utils import notify
 
 
 class LikeDislikeService:
-    repository = LikeDislikeRepository
 
-    @classmethod
-    def like(cls, user: NewUser, obj: Question | QuestionAnswer):
+    def __init__(self):
+        self.repo: repository.AbstractLikeDislikeRepository = (
+            container.resolve(repository.AbstractLikeDislikeRepository))
+
+    def like(self, user: NewUser, obj: Question | QuestionAnswer):
         # если у пользователя не стоит лайк
-        if user not in cls.repository.get_users_liked(obj):
+        if user not in self.repo.get_users_liked(obj):
             # если у пользователя не стоит дизлайк
-            if user not in cls.repository.get_users_disliked(obj):
+            if user not in self.repo.get_users_disliked(obj):
                 # ставим лайк
-                cls.repository.set_like(obj, user)
+                self.repo.set_like(obj, user)
             # если у пользователя стоит дизлайк
             else:
-                cls.repository.remove_dislike(obj, user)
-                cls.repository.set_like(obj, user)
+                self.repo.remove_dislike(obj, user)
+                self.repo.set_like(obj, user)
         # если у пользователя уже стоит лайк
         else:
-            cls.repository.remove_like(obj, user)
+            self.repo.remove_like(obj, user)
 
-        obj.rating.save()
-
-    @classmethod
-    def dislike(cls, user: NewUser, obj: Question | QuestionAnswer):
+    def dislike(self, user: NewUser, obj: Question | QuestionAnswer):
         # если у пользователя не стоит дизлайк
-        if user not in cls.repository.get_users_disliked(obj):
+        if user not in self.repo.get_users_disliked(obj):
             # если у пользователя не стоит лайк
-            if user not in cls.repository.get_users_liked(obj):
+            if user not in self.repo.get_users_liked(obj):
                 # ставим дизлайк
-                cls.repository.set_dislike(obj, user)
+                self.repo.set_dislike(obj, user)
             # если у пользователя стоит лайк
             else:
                 # убираем лайк
-                cls.repository.remove_like(obj, user)
+                self.repo.remove_like(obj, user)
                 # ставим дизлайк
-                cls.repository.set_dislike(obj, user)
+                self.repo.set_dislike(obj, user)
         # если у пользователя уже стоит дизлайк
         else:
             # убираем дизлайк
-            cls.repository.remove_dislike(obj, user)
-
-        obj.rating.save()
+            self.repo.remove_dislike(obj, user)
 
 
-class QuestionService:
-    question_repository = QuestionRepository
-    tag_repository = ThemeTagRepository
+class CreateQuestionService:
 
-    @classmethod
-    def create_question(cls, user: NewUser, title: str, content: str, tags: list, images: list = None) -> Question:
-        question = cls.question_repository.create_question(title=title, content=content, user=user)
-        tags = cls.tag_repository.create_tags(tags=tags, user=user)
+    def __init__(self):
+        self.question_repo: repository.AbstractQuestionRepository = (
+            container.resolve(repository.AbstractQuestionRepository))
+        self.tag_repo: repository.AbsractThemeTagRepository = (
+            container.resolve(repository.AbsractThemeTagRepository))
+
+    def _create_question(self, user: NewUser, title: str, content: str, tags: list, images: list = None):
+
+        question = self.question_repo.create_question(title=title, content=content, user=user)
+        tags = self.tag_repo.create_tags(tags=tags, user=user)
 
         if images:
-            cls.question_repository.add_attachments(parent=question, attachments=images)
+            self.question_repo.add_attachments(parent=question, attachments=images)
 
-        cls.question_repository.add_tags(question=question, tags=tags)
-        return question
+        self.question_repo.add_tags(question=question, tags=tags)
 
-    @classmethod
-    def make_tag_relevant_on_question_save(cls, question: Question) -> None:
-        """
-        Делает релеватными тег, количество вопросов по которому >= 10.
-        Уведомляет пользователя, что тег релевантен.
-        """
+    def execute(self, user: NewUser, title: str, content: str, tags: list, images: list = None):
+        return self._create_question(user=user, title=title, content=content, tags=tags, images=images)
+
+
+class MakeTagRelevantOnQuestionSave:
+
+    def __init__(self):
+        self.repo: repository.AbsractThemeTagRepository = (
+            container.resolve(repository.AbsractThemeTagRepository))
+
+    def _notify(self, receiver, target, text):
+        return notify(receiver=receiver, target=target, text=text)
+
+    def execute(self, question: Question) -> None:
         tags = question.tags.filter(is_user_tag=True, is_relevant=False)
         for tag in tags:
             if tag.questions.count() >= 10:
-                tag.is_relevant = True
-                tag.save(update_fields=['is_relevant'])
-                notify(receiver=tag.user, target=tag, text='тег становится релевантным')
+                self.repo.make_tag_relevant(tag)
+                self._notify(receiver=tag.user, target=tag, text='тег становится релевантным')
 
 
-class AnswerService:
-    answer_repository = AnswerRepository
+class CreateAnswerService:
 
-    @classmethod
-    def create_answer(
-            cls, question: Question, answer: str, images: list = None, user: NewUser = None
+    def __init__(self):
+        self.repo: repository.AbstractAnswerRepository = container.resolve(repository.AbstractAnswerRepository)
+
+    def _create_answer(
+            self, question: Question, answer: str, images: list = None, user: NewUser = None
                       ) -> QuestionAnswer:
 
-        answer = cls.answer_repository.create_answer(question=question, answer=answer, user=user)
+        answer = self.repo.create_answer(question=question, answer=answer, user=user)
         if images:
-            cls.answer_repository.add_attachments(parent=answer, attachments=images)
-
-        notify(
-            sender=user, receiver=question.user,
-            text='ответил на ваш вопрос', action_obj=answer,
-            target=question
-        )
+            self.repo.add_attachments(parent=answer, attachments=images)
 
         return answer
 
-    @staticmethod
-    def vote_answer_solving(answer: QuestionAnswer, related_question: Question, user: NewUser):
+    def _notify(
+            self, sender: NewUser, receiver: NewUser,
+            text: str, action_obj: QuestionAnswer,
+            target: Question
+                ) -> None:
+        notify(
+            sender=sender, receiver=receiver,
+            text='ответил на ваш вопрос', action_obj=action_obj,
+            target=target
+            )
+
+    def execute(
+            self, question: Question, answer: str, images: list = None, user: NewUser = None
+                ) -> QuestionAnswer:
+        answer = self._create_answer(question, answer, images, user)
+        self._notify(
+            sender=user, receiver=question.user,
+            text='ответил на ваш вопрос', action_obj=answer,
+            target=question
+                     )
+        return answer
+
+
+class VoteAnswerSolving:
+
+    def __init__(self):
+        self.repo: repository.AbstractAnswerRepository = container.resolve(repository.AbstractAnswerRepository)
+
+    def _notify(self, target: QuestionAnswer, receiver: NewUser, text: str, sender: NewUser) -> None:
+        notify(receiver=receiver, target=target, text=text, sender=sender)
+
+    def execute(self, answer: QuestionAnswer, related_question: Question, user: NewUser):
         """
         Отмечает ответ как решивший проблему. Если данный вопрос отмечен и на него поступает
         запрос, отметка вопроса как решившего проблему снимается, как и отметка вопроса как решенного.
@@ -115,32 +147,33 @@ class AnswerService:
         отмечается как решающим, а вопрос как решенным, если же есть другой решающий ответ,
         метка решающего ответа с него снимается и ставится на другой ответ.
         """
+        queryset = QuestionQSBase()
         if answer.is_solving:
-            answer.is_solving = False
-            related_question.is_solved = False
+            self.repo.remove_is_solving_mark(answer=answer, question=related_question)
         else:
-            if related_question.question_answers.filter(is_solving=True).exists():
-                is_solving_answer = related_question.question_answers.get(is_solving=True)
-                is_solving_answer.is_solving = False
-                is_solving_answer.save()
-            answer.is_solving = True
-            related_question.is_solved = True
+            if queryset.filter_solving_answers(related_question):
+                is_solving_answer = queryset.get_solving_answer(related_question)
+                self.repo.make_solving_answer_not_solving(is_solving_answer)
 
-            notify(target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
-                   sender=related_question.user)
+            self.repo.mark_answer_as_solving(answer=answer, question=related_question)
 
-        related_question.save()
-        answer.save()
+            self._notify(
+                target=answer, receiver=answer.user, text='ваш ответ отмечен как решающий',
+                sender=related_question.user
+            )
 
         CacheManager.delete_cache_data(user_id=user.pk, key_prefix=settings.QUESTION_SOLVED_NAME)
 
 
-class CommentService:
-    comment_repository = CommentRepository
-    answer_repository = AnswerRepository
+class CreateComment:
 
-    @classmethod
-    def parse_comment(cls, comment: str) -> [NewUser | None]:
+    def __init__(self):
+        self.answer_repo: repository.AbstractAnswerRepository = (
+            container.resolve(repository.AbstractAnswerRepository))
+        self.comment_repo: repository.AbstractCommentRepository = (
+            container.resolve(repository.AbstractCommentRepository))
+
+    def parse_comment(self, comment: str) -> [NewUser | None]:
         """
         Проверка, есть ли упоминание других пользователей в комментарии.
         """
@@ -156,25 +189,23 @@ class CommentService:
             else:
                 yield user
 
-    @classmethod
-    def create_comment(
-            cls, comment: str, question_answer_id: int, parent_id: int, user: NewUser | AnonymousUser
-                       ) -> AnswerComment:
+    def _create_comment(
+            self, comment: str, answer: QuestionAnswer, parent_id: int, user: NewUser
+    ) -> AnswerComment:
 
         if isinstance(user, AnonymousUser):
             user = None
 
-        answer = cls.answer_repository.get_obj_by_id(question_answer_id)
-        answer_user = answer.user
-
-        comment = cls.comment_repository.create_comment(
+        comment = self.comment_repo.create_comment(
             comment=comment, question_answer=answer, parent_id=parent_id, user=user
         )
 
-        if parent_id:
-            parent = cls.comment_repository.get_obj_by_id(parent_id)
-            parsed_user_iterable = cls.parse_comment(comment=comment.comment)
+        return comment
 
+    def _notify_parsed_users(self, parent_id: int, comment: AnswerComment, user: NewUser) -> None:
+        if parent_id:
+            parent = CommentQSBase().get_obj_by_id(parent_id)
+            parsed_user_iterable = self.parse_comment(comment=comment.comment)
             for parsed_user in parsed_user_iterable:
                 notify(
                     sender=user, receiver=parsed_user,
@@ -183,11 +214,31 @@ class CommentService:
                     target=parent
                 )
 
+    def _get_answer(self, answer_id: int) -> QuestionAnswer:
+        answer = QuestionAnswerQSBase().get_obj_by_id(answer_id)
+        return answer
+
+    def _notify_answer_user(
+            self, sender: NewUser, target: QuestionAnswer, action_obj: AnswerComment
+    ) -> None:
+        answer_user = target.user
         if answer_user:
             notify(
-                sender=user, receiver=answer_user,
+                sender=sender, receiver=answer_user,
                 text='прокомментировал ваш ответ на вопрос',
-                target=answer, action_obj=comment
+                target=target, action_obj=action_obj
             )
+
+    def execute(
+            self, comment: str, question_answer_id: int, parent_id: int, user: NewUser | AnonymousUser
+    ) -> AnswerComment:
+
+        answer = self._get_answer(answer_id=question_answer_id)
+
+        comment = self._create_comment(
+            comment=comment, answer=answer, parent_id=parent_id, user=user
+        )
+        self._notify_parsed_users(parent_id=parent_id, comment=comment, user=user)
+        self._notify_answer_user(sender=user, target=answer, action_obj=comment)
 
         return comment
