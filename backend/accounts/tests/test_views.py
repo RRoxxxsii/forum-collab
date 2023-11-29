@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
-from accounts.repository import UserKarmaQS
+from accounts.querysets import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
 from forum.tests.test_serializers import generate_photo_file
