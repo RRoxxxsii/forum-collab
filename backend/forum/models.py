@@ -1,4 +1,3 @@
-from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
 from accounts.models import NewUser
@@ -104,11 +103,11 @@ class Question(models.Model):
         verbose_name_plural = 'Вопросы'
 
     def save(self, *args, **kwargs):
-        from forum.services import QuestionService
+        from forum.services import MakeTagRelevantOnQuestionSave
 
         super(Question, self).save(*args, **kwargs)
         self.rating, _ = QuestionRating.objects.get_or_create(question=self)
-        QuestionService.make_tag_relevant_on_question_save(self)
+        MakeTagRelevantOnQuestionSave().execute(self)
 
 
 class QuestionImages(Attachment):

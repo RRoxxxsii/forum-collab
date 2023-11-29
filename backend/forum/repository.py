@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import Iterator
 
 from django.db.models import QuerySet
@@ -7,60 +8,131 @@ from django.db.models import QuerySet
 from accounts.models import NewUser
 from forum.models import (AnswerComment, Attachment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
-from forum.querysets import CommentQSBase, QuestionAnswerQSBase
 
 
-class LikeDislikeRepository:
-
+class AbstractLikeDislikeRepository(ABC):
     @staticmethod
+    @abstractmethod
     def get_users_liked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
-        return obj.rating.users_liked.all()
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def get_users_disliked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
-        return obj.rating.users_disliked.all()
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def set_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
-        obj.rating.users_liked.add(user)
-        obj.rating.like_amount += 1
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def set_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
-        obj.rating.users_disliked.add(user)
-        obj.rating.dislike_amount += 1
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def remove_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
-        obj.rating.users_liked.remove(user)
-        obj.rating.like_amount -= 1
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def remove_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
-        obj.rating.users_disliked.remove(user)
-        obj.rating.dislike_amount -= 1
+        raise NotImplementedError
 
 
-class ThemeTagRepository:
+class AbstractQuestionRepository(ABC):
 
     @staticmethod
+    @abstractmethod
+    def create_question(
+            title: str,
+            content: str,
+            user: NewUser,
+    ) -> Question:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def add_attachments(
+            parent: Question,
+            attachments: list[Attachment]
+    ) -> None:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def add_tags(
+            tags: Iterator[ThemeTag],
+            question: Question
+    ) -> None:
+        raise NotImplementedError
+
+
+class AbstractAnswerRepository(ABC):
+
+    @staticmethod
+    @abstractmethod
+    def add_attachments(
+            parent: QuestionAnswer,
+            attachments: list[Attachment]
+    ) -> None:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def create_answer(
+            question: Question,
+            answer: str,
+            user: NewUser = None
+    ) -> QuestionAnswer:
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def remove_is_solving_mark(answer: QuestionAnswer, question: Question):
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def mark_answer_as_solving(answer: QuestionAnswer, question: Question):
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def make_solving_answer_not_solving(answer: QuestionAnswer):
+        raise NotImplementedError
+
+
+class AbstractCommentRepository(ABC):
+
+    @staticmethod
+    @abstractmethod
+    def create_comment(
+            comment: str,
+            question_answer: QuestionAnswer,
+            parent_id: int,
+            user: NewUser
+    ) -> AnswerComment:
+
+        raise NotImplementedError
+
+
+class AbsractThemeTagRepository(ABC):
+
+    @staticmethod
+    @abstractmethod
     def create_tags(
             tags: list,
             user: NewUser
     ) -> Iterator[ThemeTag]:
-
-        for tag in tags:
-            tag, created = ThemeTag.objects.get_or_create(tag_name=tag, defaults={
-                'is_user_tag': True,
-                'is_relevant': False,
-                'user': user
-            })
-
-            yield tag
+        raise NotImplementedError
 
     @staticmethod
-    def get_tags(tag) -> QuerySet[ThemeTag | None]:
-        return ThemeTag.objects.filter(tag_name__icontains=tag).order_by('is_user_tag')
+    @abstractmethod
+    def make_tag_relevant(tag: ThemeTag) -> None:
+        raise NotImplementedError
 
 
 class AttachmentFactory:
@@ -85,13 +157,69 @@ class BaseImageRepository:
             AttachmentFactory.create_attachment(image=attachment, parent=parent)
 
 
-class QuestionRepository(BaseImageRepository):
+class LikeDislikeRepository(AbstractLikeDislikeRepository):
+
+    @staticmethod
+    def get_users_liked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
+        return obj.rating.users_liked.all()
+
+    @staticmethod
+    def get_users_disliked(obj: Question | QuestionAnswer) -> QuerySet[Question | QuestionAnswer]:
+        return obj.rating.users_disliked.all()
+
+    @staticmethod
+    def set_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_liked.add(user)
+        obj.rating.like_amount += 1
+        obj.rating.save()
+
+    @staticmethod
+    def set_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_disliked.add(user)
+        obj.rating.dislike_amount += 1
+        obj.rating.save()
+
+    @staticmethod
+    def remove_like(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_liked.remove(user)
+        obj.rating.like_amount -= 1
+        obj.rating.save()
+
+    @staticmethod
+    def remove_dislike(obj: Question | QuestionAnswer, user: NewUser) -> None:
+        obj.rating.users_disliked.remove(user)
+        obj.rating.dislike_amount -= 1
+        obj.rating.save()
+
+
+class ThemeTagRepository(AbsractThemeTagRepository):
+
+    @staticmethod
+    def create_tags(
+            tags: list,
+            user: NewUser
+    ) -> Iterator[ThemeTag]:
+
+        for tag in tags:
+            tag, created = ThemeTag.objects.get_or_create(tag_name=tag, defaults={
+                'is_user_tag': True,
+                'is_relevant': False,
+                'user': user
+            })
+
+            yield tag
+
+    @staticmethod
+    def make_tag_relevant(tag: ThemeTag) -> None:
+        tag.is_relevant = True
+        tag.save(update_fields=['is_relevant'])
+
+
+class QuestionRepository(AbstractQuestionRepository, BaseImageRepository):
 
     @staticmethod
     def create_question(
-            title: str,
-            content: str,
-            user: NewUser,
+            title: str, content: str, user: NewUser,
     ) -> Question:
         question = Question.objects.create(
             user=user,
@@ -102,6 +230,12 @@ class QuestionRepository(BaseImageRepository):
         return question
 
     @staticmethod
+    def add_attachments(
+            parent: Question, attachments: list[Attachment]
+    ) -> None:
+        return BaseImageRepository.add_attachments(parent, attachments)
+
+    @staticmethod
     def add_tags(
             tags: Iterator[ThemeTag],
             question: Question
@@ -110,7 +244,7 @@ class QuestionRepository(BaseImageRepository):
         question.save()
 
 
-class AnswerRepository(BaseImageRepository, QuestionAnswerQSBase):
+class AnswerRepository(AbstractAnswerRepository, BaseImageRepository):
 
     @staticmethod
     def create_answer(
@@ -121,8 +255,33 @@ class AnswerRepository(BaseImageRepository, QuestionAnswerQSBase):
         answer = QuestionAnswer.objects.create(question=question, answer=answer, user=user)
         return answer
 
+    @staticmethod
+    def add_attachments(
+            parent: QuestionAnswer, attachments: list[Attachment]
+    ) -> None:
+        return BaseImageRepository.add_attachments(parent, attachments)
 
-class CommentRepository(CommentQSBase):
+    @staticmethod
+    def remove_is_solving_mark(answer: QuestionAnswer, question: Question):
+        answer.is_solving = False
+        question.is_solved = False
+        answer.save()
+        question.save()
+
+    @staticmethod
+    def make_solving_answer_not_solving(answer: QuestionAnswer):
+        answer.is_solving = False
+        answer.save()
+
+    @staticmethod
+    def mark_answer_as_solving(answer: QuestionAnswer, question: Question):
+        answer.is_solving = True
+        question.is_solved = True
+        answer.save()
+        question.save()
+
+
+class CommentRepository(AbstractCommentRepository):
 
     @staticmethod
     def create_comment(

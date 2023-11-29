@@ -101,8 +101,8 @@ class TestQuestionQueryParams(APITestCase):
         self.question11 = Question.objects.create(title='Заголовок11', content='Контент', user=self.user)
         self.question12 = Question.objects.create(title='Заголовок12', content='Контент', user=self.user)
 
-        LikeDislikeService.like(self.user2, obj=self.question2)
-        LikeDislikeService.like(self.user3, obj=self.question2)
+        LikeDislikeService().like(self.user2, obj=self.question2)
+        LikeDislikeService().like(self.user3, obj=self.question2)
 
         self.answer1 = QuestionAnswer.objects.create(question=self.question, answer='Ответ', user=self.user)
         self.answer2 = QuestionAnswer.objects.create(question=self.question5, answer='Ответ', user=self.user)
