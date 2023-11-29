@@ -93,35 +93,6 @@ class MakeTagRelevantOnQuestionSave:
                 self._notify(receiver=tag.user, target=tag, text='тег становится релевантным')
 
 
-# class QuestionService:
-#     question_repository = QuestionRepository
-#     tag_repository = ThemeTagRepository
-#
-#     @classmethod
-#     def create_question(cls, user: NewUser, title: str, content: str, tags: list, images: list = None) -> Question:
-#         question = cls.question_repository.create_question(title=title, content=content, user=user)
-#         tags = cls.tag_repository.create_tags(tags=tags, user=user)
-#
-#         if images:
-#             cls.question_repository.add_attachments(parent=question, attachments=images)
-#
-#         cls.question_repository.add_tags(question=question, tags=tags)
-#         return question
-#
-#     @classmethod
-#     def make_tag_relevant_on_question_save(cls, question: Question) -> None:
-#         """
-#         Делает релеватными тег, количество вопросов по которому >= 10.
-#         Уведомляет пользователя, что тег релевантен.
-#         """
-#         tags = question.tags.filter(is_user_tag=True, is_relevant=False)
-#         for tag in tags:
-#             if tag.questions.count() >= 10:
-#                 tag.is_relevant = True
-#                 tag.save(update_fields=['is_relevant'])
-#                 notify(receiver=tag.user, target=tag, text='тег становится релевантным')
-#
-
 class CreateAnswerService:
 
     def __init__(self):
