@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from django.db.models import (Count, ExpressionWrapper, F, IntegerField,
@@ -25,6 +27,12 @@ class ObjQSBase:
 class QuestionQSBase(ObjQSBase):
     obj_type = Question
 
+    def filter_solving_answers(self, question: Question) -> bool:
+        return question.question_answers.filter(is_solving=True).exists()
+
+    def get_solving_answer(self, question: Question) -> QuestionAnswer:
+        return question.question_answers.get(is_solving=True)
+
 
 class QuestionAnswerQSBase(ObjQSBase):
     obj_type = QuestionAnswer
@@ -35,11 +43,14 @@ class CommentQSBase(ObjQSBase):
 
 
 class ThemeTagQSBase(ObjQSBase):
-    obj_type = ThemeTag
 
     @classmethod
     def get_most_popular_tags(cls):
         return ThemeTag.objects.annotate(use_amount=Count('questions')).order_by('-use_amount')[:20]
+
+    @staticmethod
+    def get_tags(tag) -> QuerySet[ThemeTag | None]:
+        return ThemeTag.objects.filter(tag_name__icontains=tag).order_by('is_user_tag')
 
 
 class QuestionQS(QuestionQSBase):

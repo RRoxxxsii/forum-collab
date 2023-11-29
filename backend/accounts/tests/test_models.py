@@ -1,8 +1,7 @@
-from django.core.cache import cache
 from rest_framework.test import APITestCase
 
 from accounts.models import NewUser
-from accounts.repository import UserKarmaQS
+from accounts.querysets import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
 
@@ -21,7 +20,7 @@ class TestNewUserModelTest(APITestCase):
         self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)
@@ -33,25 +32,25 @@ class TestNewUserModelTest(APITestCase):
                                                     is_solving=True)
         self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
 
-        LikeDislikeService.like(user=self.user2, obj=self.question)
-        LikeDislikeService.like(user=self.user3, obj=self.question)
-        LikeDislikeService.like(user=self.user4, obj=self.question)
-        LikeDislikeService.dislike(user=self.user5, obj=self.question)
+        LikeDislikeService().like(user=self.user2, obj=self.question)
+        LikeDislikeService().like(user=self.user3, obj=self.question)
+        LikeDislikeService().like(user=self.user4, obj=self.question)
+        LikeDislikeService().dislike(user=self.user5, obj=self.question)
 
-        LikeDislikeService.like(user=self.user, obj=self.question2)
-        LikeDislikeService.like(user=self.user3, obj=self.question2)
-        LikeDislikeService.like(user=self.user4, obj=self.question2)
-        LikeDislikeService.dislike(user=self.user5, obj=self.question2)
+        LikeDislikeService().like(user=self.user, obj=self.question2)
+        LikeDislikeService().like(user=self.user3, obj=self.question2)
+        LikeDislikeService().like(user=self.user4, obj=self.question2)
+        LikeDislikeService().dislike(user=self.user5, obj=self.question2)
 
-        LikeDislikeService.like(user=self.user2, obj=self.answer)
-        LikeDislikeService.like(user=self.user3, obj=self.answer)
-        LikeDislikeService.like(user=self.user4, obj=self.answer)
-        LikeDislikeService.dislike(user=self.user5, obj=self.answer)
+        LikeDislikeService().like(user=self.user2, obj=self.answer)
+        LikeDislikeService().like(user=self.user3, obj=self.answer)
+        LikeDislikeService().like(user=self.user4, obj=self.answer)
+        LikeDislikeService().dislike(user=self.user5, obj=self.answer)
 
-        LikeDislikeService.like(user=self.user, obj=self.answer2)
-        LikeDislikeService.like(user=self.user3, obj=self.answer2)
-        LikeDislikeService.like(user=self.user4, obj=self.answer2)
-        LikeDislikeService.dislike(user=self.user5, obj=self.answer2)
+        LikeDislikeService().like(user=self.user, obj=self.answer2)
+        LikeDislikeService().like(user=self.user3, obj=self.answer2)
+        LikeDislikeService().like(user=self.user4, obj=self.answer2)
+        LikeDislikeService().dislike(user=self.user5, obj=self.answer2)
 
     def test_count_question_user_likes(self):
         self.assertEqual(UserKarmaQS.count_question_likes(self.user), self.question.rating.like_amount)
@@ -105,7 +104,7 @@ class TestCountRatedHimselfIsNotCountedToRating(APITestCase):
         self.user3 = NewUser.objects.create_user(email='testuser3@gmail.com', user_name='testuser3',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)

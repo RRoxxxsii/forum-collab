@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     RetrieveAPIView, ListAPIView)
+                                     ListAPIView, RetrieveAPIView)
 from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.permissions import (IsAuthenticated,
@@ -27,8 +27,9 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import (AnswerService, CommentService, LikeDislikeService,
-                            QuestionService)
+from forum.services import (CreateAnswerService, CreateComment,
+                            CreateQuestionService, LikeDislikeService,
+                            VoteAnswerSolving)
 
 
 class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
@@ -71,7 +72,7 @@ class AskQuestionAPIView(GenericAPIView):
         if not tag:
             raise ValidationError('Тег не указан.')
 
-        suggested_tags = QuestionService.tag_repository.get_tags(tag)
+        suggested_tags = ThemeTagQSBase.get_tags(tag)
         if not suggested_tags:
             raise ValidationError('Тег не указан')
 
@@ -91,7 +92,7 @@ class AskQuestionAPIView(GenericAPIView):
         tags = serializer.data.get('tags')
         images = serializer.data.get('uploaded_images')
 
-        question = QuestionService.create_question(
+        question = CreateQuestionService().execute(
             user=request.user, title=title, tags=tags, images=images, content=content
         )
 
@@ -124,7 +125,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         content = serializer.validated_data.get('answer')
         user = request.user
 
-        answer = AnswerService.create_answer(
+        answer = CreateAnswerService().execute(
             question=question, user=user if isinstance(user, NewUser) else None, answer=content, images=images
         )
 
@@ -153,7 +154,7 @@ class CommentAPIView(CreateAPIView):
             answer_id = serializer.data.get('question_answer')
             parent_id = serializer.data.get('parent')
 
-            comment = CommentService.create_comment(
+            comment = CreateComment().execute(
                 comment=comment, question_answer_id=answer_id, user=request.user, parent_id=parent_id
             )
 
@@ -194,7 +195,7 @@ class LikeDislikeViewSet(GenericViewSet):
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
 
-        LikeDislikeService.like(obj=instance, user=user)
+        LikeDislikeService().like(obj=instance, user=user)
 
         return Response(data='Лайк поставлен успешно')
 
@@ -208,7 +209,7 @@ class LikeDislikeViewSet(GenericViewSet):
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
 
-        LikeDislikeService.dislike(obj=instance, user=user)
+        LikeDislikeService().dislike(obj=instance, user=user)
 
         return Response(data='Дизлайк поставленен успешно')
 
@@ -312,7 +313,7 @@ class MarkAnswerSolving(RetrieveAPIView):
         answer = self.get_object()
         related_question = answer.question
 
-        AnswerService.vote_answer_solving(
+        VoteAnswerSolving().execute(
             answer=answer, related_question=related_question, user=request.user
         )
 

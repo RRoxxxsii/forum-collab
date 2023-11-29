@@ -1,59 +1,89 @@
-from accounts import repository
-from accounts.models import EmailConfirmationToken, NewUser
+from accounts.models import NewUser
 
+from . import dto
+from .di import container
+from .repository import AbstractAccountRepository
 from .tasks import send_confirmation_email
 
 
-class BaseRepository:
-    repository = None
+class CreateUserService:
 
-    @classmethod
-    def get_repository(cls):
-        return cls.repository
+    def __init__(self):
+        self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
 
-
-class BaseAccountService(BaseRepository):
-    repository = repository.BaseAccountRepository
-
-    @classmethod
-    def create_user(cls, data: dict) -> NewUser:
-        password = data.pop('password')
-        instance = NewUser(**data)
-        user = cls.repository.create_user(instance=instance, password=password)
+    def _create_user(self, data: dto.CreateUserDTO) -> NewUser:
+        password = data.password
+        user = self.repo.create_user(data=data, password=password)
         return user
 
-    @classmethod
-    def send_email(cls, user: NewUser, scheme: str, domain: str, path: str, template_name: str, request_path: str) -> None:
+    def execute(self, data: dto.CreateUserDTO):
+        return self._create_user(data)
 
-        instance = EmailConfirmationToken(user=user)
-        token = cls.repository.create_token(instance=instance)
-        current_url = cls.get_current_site(scheme=scheme, domain=domain, path=path, request_path=request_path)
+
+class SendConfirmationEmailService:
+
+    def __init__(self):
+        self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
+
+    def _send_confirmation_email(self, data: dto.RequestForConfirmationEmailDTO):
+        user = data.user
+        token = self.repo.create_token(user)
+
+        current_url = '/'.join(data.request_path.split('/')[:-2]) + f"/{data.path}"
 
         send_confirmation_email.delay(
-            template_name=template_name, current_url=current_url,
+            template_name=data.template_name, current_url=current_url,
             email=user.email, token_id=token.id, user_id=user.pk
         )
 
-    @classmethod
-    def get_current_site(cls, scheme: str, domain: str, path: str, request_path: str) -> str:
-        """
-        Возвращает путь к странице включая доменное имя и тип соединения (http или https).
-        """
-        path = '/'.join(str(request_path).split('/')[:-2]) + f'/{path}/'  # путь к странице без query params
-        current_url = f"{scheme}://{domain}{path}"
-        return current_url
+    def execute(self, data: dto.RequestForConfirmationEmailDTO):
+        return self._send_confirmation_email(data)
 
-    @staticmethod
-    def confirm_with_email(func):
-        def wrapper(view, request, *args, **kwargs):
-            token_id = request.GET.get('token_id')
-            user_id = request.GET.get('user_id')
 
-            token_exists = BaseAccountService.repository.get_token_exists(token_id=token_id, user_id=user_id)
+class ConfirmWithEmailService:
+
+    def __init__(self):
+        self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
+
+    def confirm_with_email(self, func):
+        def wrapper(*args, **kwargs):
+            token_id = kwargs.get('token_id')
+            user_id = kwargs.get('user_id')
+            token_exists = self.repo.get_token_exists(token_id=token_id, user_id=user_id)
 
             if token_exists:
-                token = BaseAccountService.repository.get_token(token_id=token_id, user_id=user_id)
-                user = token.user
-                return func(view, request, user, token_id=None, user_id=None, *args, **kwargs)
-            return func(view, request, None, token_id=None, user_id=None, *args, **kwargs)
+                self.repo.get_token(token_id=token_id, user_id=user_id)
+
+                return func(*args, **kwargs)
+            return func(*args, **kwargs)
         return wrapper
+
+
+class PerformActionWhenConfirm:
+    def __init__(self):
+        self.repo: AbstractAccountRepository = container.resolve(AbstractAccountRepository)
+
+    @ConfirmWithEmailService().confirm_with_email
+    def confirm_email(self, data: dto.ConfirmByEmailDTO):
+        user = data.user
+        if isinstance(user, NewUser):
+            self.repo.confirm_email(user)
+            return True
+        return False
+
+    @ConfirmWithEmailService().confirm_with_email
+    def make_user_active(self, data: dto.ConfirmByEmailDTO):
+        user = data.user
+        if isinstance(user, NewUser):
+            self.repo.make_user_active(user)
+            return True
+        return False
+
+    @ConfirmWithEmailService().confirm_with_email
+    def set_new_email(self, data: dto.ConfirmByEmailWithEmailDTO):
+        user = data.user
+        email = data.email
+        if isinstance(user, NewUser):
+            self.repo.set_new_email(user, email)
+            return True
+        return False

@@ -8,10 +8,10 @@ from rest_framework import status
 from rest_framework.test import APITestCase, override_settings
 
 from accounts.models import NewUser
-from accounts.repository import UserKarmaQS
+from accounts.querysets import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
-from forum.tests.test_serializers import convert_datetime, generate_photo_file
+from forum.tests.test_serializers import generate_photo_file
 
 
 class TestRegistrationAPI(APITestCase):
@@ -36,7 +36,7 @@ class TestRegistrationAPI(APITestCase):
         response = self.client.post(self.url, data={'email': 'a@a.ru', 'user_name': 'test-user'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         try:
-            new_user = NewUser.objects.get(email='a@a.ru')
+            NewUser.objects.get(email='a@a.ru')
         except NewUser.DoesNotExist:
             assert True
         else:
@@ -50,7 +50,7 @@ class TestRegistrationAPI(APITestCase):
                                                     'password': ''})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         try:
-            new_user = NewUser.objects.get(email='a@a.ru')
+            NewUser.objects.get(email='a@a.ru')
         except NewUser.DoesNotExist:
             assert True
         else:
@@ -468,8 +468,8 @@ class TestUserRating(APITestCase):
         self.url = reverse('personal-page')
 
         for i in range(6):
-            user = NewUser.objects.create_user(email=f'testuser{i}@gmail.com', user_name=f'testuser{i}',
-                                               password='Ax6!a7OpNvq', email_confirmed=True)
+            NewUser.objects.create_user(email=f'testuser{i}@gmail.com', user_name=f'testuser{i}',
+                                        password='Ax6!a7OpNvq', email_confirmed=True)
         for i in range(30):
             self.tag = ThemeTag.objects.create(tag_name=f'django{i}')
 
@@ -585,7 +585,7 @@ class TestKarmaCalculated(APITestCase):
         self.user5 = NewUser.objects.create_user(email='testuser5@gmail.com', user_name='testuser5',
                                                  password='Ax6!a7OpNvq', is_active=True)
 
-        self.tag = ThemeTag.objects.create(tag_name=f'django')
+        self.tag = ThemeTag.objects.create(tag_name='django')
 
         self.question = Question.objects.create(title='Заголовок', content='Контент', user=self.user, is_solved=True)
         self.question.tags.add(self.tag)
@@ -597,25 +597,25 @@ class TestKarmaCalculated(APITestCase):
                                                     is_solving=True)
         self.answer2 = QuestionAnswer.objects.create(question=self.question2, user=self.user2, answer='Ответ')
 
-        LikeDislikeService.like(user=self.user2, obj=self.question)
-        LikeDislikeService.like(user=self.user3, obj=self.question)
-        LikeDislikeService.like(user=self.user4, obj=self.question)
-        LikeDislikeService.dislike(user=self.user5, obj=self.question)
+        LikeDislikeService().like(user=self.user2, obj=self.question)
+        LikeDislikeService().like(user=self.user3, obj=self.question)
+        LikeDislikeService().like(user=self.user4, obj=self.question)
+        LikeDislikeService().dislike(user=self.user5, obj=self.question)
 
-        LikeDislikeService.like(user=self.user, obj=self.question2)
-        LikeDislikeService.like(user=self.user3, obj=self.question2)
-        LikeDislikeService.like(user=self.user4, obj=self.question2)
-        LikeDislikeService.dislike(user=self.user5, obj=self.question2)
+        LikeDislikeService().like(user=self.user, obj=self.question2)
+        LikeDislikeService().like(user=self.user3, obj=self.question2)
+        LikeDislikeService().like(user=self.user4, obj=self.question2)
+        LikeDislikeService().dislike(user=self.user5, obj=self.question2)
 
-        LikeDislikeService.like(user=self.user2, obj=self.answer)
-        LikeDislikeService.like(user=self.user3, obj=self.answer)
-        LikeDislikeService.like(user=self.user4, obj=self.answer)
-        LikeDislikeService.dislike(user=self.user5, obj=self.answer)
+        LikeDislikeService().like(user=self.user2, obj=self.answer)
+        LikeDislikeService().like(user=self.user3, obj=self.answer)
+        LikeDislikeService().like(user=self.user4, obj=self.answer)
+        LikeDislikeService().dislike(user=self.user5, obj=self.answer)
 
-        LikeDislikeService.like(user=self.user, obj=self.answer2)
-        LikeDislikeService.like(user=self.user3, obj=self.answer2)
-        LikeDislikeService.like(user=self.user4, obj=self.answer2)
-        LikeDislikeService.dislike(user=self.user5, obj=self.answer2)
+        LikeDislikeService().like(user=self.user, obj=self.answer2)
+        LikeDislikeService().like(user=self.user3, obj=self.answer2)
+        LikeDislikeService().like(user=self.user4, obj=self.answer2)
+        LikeDislikeService().dislike(user=self.user5, obj=self.answer2)
 
         self.url_personal_page = reverse('personal-page')
         self.url = reverse('newuser-detail', kwargs={'pk': self.user2.pk})

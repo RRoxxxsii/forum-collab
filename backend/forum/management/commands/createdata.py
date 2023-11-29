@@ -150,7 +150,7 @@ class Helper(AnswerHelper, QuestionHelper):
     def create_users(self, users_amount):
         fake = Faker(['ru_RU'])
 
-        superuser = NewUser.objects.create_superuser(
+        NewUser.objects.create_superuser(
                 email='testadmin@example.com', password='1234',
                 user_name='root'
             )
