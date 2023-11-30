@@ -13,10 +13,10 @@ from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
-from accounts.serializers import DummySerializer
 from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
                              QuestionQSBase, ThemeTagQSBase)
@@ -320,12 +320,11 @@ class MarkAnswerSolving(RetrieveAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ComplainAPIView(GenericAPIView):
+class ComplainAPIView(APIView):
     """
     Пожаловаться на comment, answer, question. Доступно для
     аутентифицированных пользователей. content_type=question/answer/comment/.
     """
-    serializer_class = DummySerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['patch', ]
 
