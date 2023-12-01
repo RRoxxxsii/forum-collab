@@ -23,6 +23,4 @@ class Favourite(models.Model):
         verbose_name_plural = 'Избранное'
 
     def __str__(self):
-        return self.question
-
-
+        return self.question.title

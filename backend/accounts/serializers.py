@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import NewUser
-from .repository import UserKarmaQS
+from .querysets import UserKarmaQS
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -30,13 +30,6 @@ class UserEmailSerializer(serializers.Serializer):
     Сериализатор для почтового адреса пользователя.
     """
     email = serializers.EmailField()
-
-
-class DummySerializer(serializers.Serializer):
-    """
-    Сериалзиатор-заглушка.
-    """
-    dummy_field = serializers.CharField(required=False, read_only=True, help_text='Поле-заглушка')
 
 
 class EmailTokenObtainSerializer(TokenObtainSerializer):

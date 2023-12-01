@@ -20,7 +20,7 @@ class AddToFavouritesAPIView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         question_id = serializer.data.get('question')
-        is_deleted = FavouriteService.delete_from_favourites_if_exists(
+        is_deleted = FavouriteService().delete_from_favourites_if_exists(
             user=request.user, question_id=question_id
         )
         if is_deleted:
@@ -43,4 +43,3 @@ class FavouritesListAPIView(ListAPIView):
 
     def get_queryset(self):
         return FavouriteQueryset.filter_favourite_by_user(self.request.user)
-

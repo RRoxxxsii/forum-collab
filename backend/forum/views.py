@@ -7,16 +7,16 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     RetrieveAPIView, ListAPIView)
+                                     ListAPIView, RetrieveAPIView)
 from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
-from accounts.serializers import DummySerializer
 from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
                              QuestionQSBase, ThemeTagQSBase)
@@ -27,8 +27,9 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
                                TagFieldWithCountSerializer,
                                UpdateCommentSerializer,
                                UpdateQuestionSerializer)
-from forum.services import (AnswerService, CommentService, LikeDislikeService,
-                            QuestionService)
+from forum.services import (CreateAnswerService, CreateComment,
+                            CreateQuestionService, LikeDislikeService,
+                            VoteAnswerSolving)
 
 
 class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
@@ -71,7 +72,7 @@ class AskQuestionAPIView(GenericAPIView):
         if not tag:
             raise ValidationError('Тег не указан.')
 
-        suggested_tags = QuestionService.tag_repository.get_tags(tag)
+        suggested_tags = ThemeTagQSBase.get_tags(tag)
         if not suggested_tags:
             raise ValidationError('Тег не указан')
 
@@ -86,12 +87,15 @@ class AskQuestionAPIView(GenericAPIView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        title = serializer.data.get('title')
-        content = serializer.data.get('content')
-        tags = serializer.data.get('tags')
-        images = serializer.data.get('uploaded_images')
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content')
+        tags = serializer.validated_data.get('tags')
+        images = serializer.validated_data.get('uploaded_images')
 
-        question = QuestionService.create_question(
+        with open('file.txt', 'w') as f:
+            f.write(str(images))
+
+        question = CreateQuestionService().execute(
             user=request.user, title=title, tags=tags, images=images, content=content
         )
 
@@ -124,7 +128,7 @@ class AnswerQuestionAPIView(CreateAPIView):
         content = serializer.validated_data.get('answer')
         user = request.user
 
-        answer = AnswerService.create_answer(
+        answer = CreateAnswerService().execute(
             question=question, user=user if isinstance(user, NewUser) else None, answer=content, images=images
         )
 
@@ -153,7 +157,7 @@ class CommentAPIView(CreateAPIView):
             answer_id = serializer.data.get('question_answer')
             parent_id = serializer.data.get('parent')
 
-            comment = CommentService.create_comment(
+            comment = CreateComment().execute(
                 comment=comment, question_answer_id=answer_id, user=request.user, parent_id=parent_id
             )
 
@@ -194,7 +198,7 @@ class LikeDislikeViewSet(GenericViewSet):
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
 
-        LikeDislikeService.like(obj=instance, user=user)
+        LikeDislikeService().like(obj=instance, user=user)
 
         return Response(data='Лайк поставлен успешно')
 
@@ -208,7 +212,7 @@ class LikeDislikeViewSet(GenericViewSet):
             return Response(data='Вы не можете голосовать за свою собственную запись.',
                             status=status.HTTP_403_FORBIDDEN)
 
-        LikeDislikeService.dislike(obj=instance, user=user)
+        LikeDislikeService().dislike(obj=instance, user=user)
 
         return Response(data='Дизлайк поставленен успешно')
 
@@ -312,19 +316,18 @@ class MarkAnswerSolving(RetrieveAPIView):
         answer = self.get_object()
         related_question = answer.question
 
-        AnswerService.vote_answer_solving(
+        VoteAnswerSolving().execute(
             answer=answer, related_question=related_question, user=request.user
         )
 
         return Response(status=status.HTTP_200_OK)
 
 
-class ComplainAPIView(GenericAPIView):
+class ComplainAPIView(APIView):
     """
     Пожаловаться на comment, answer, question. Доступно для
     аутентифицированных пользователей. content_type=question/answer/comment/.
     """
-    serializer_class = DummySerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['patch', ]
 
