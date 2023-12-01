@@ -52,7 +52,7 @@ class AskQuestionSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(required=True, validators=[validate_tags_amount],
                                  allow_empty=False)
     uploaded_images = serializers.ListField(
-        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False, write_only=True),
+        required=False, child=serializers.ImageField(allow_empty_file=False, use_url=False),
         validators=[validate_question_related_obj_amount]
     )
 

@@ -87,10 +87,13 @@ class AskQuestionAPIView(GenericAPIView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        title = serializer.data.get('title')
-        content = serializer.data.get('content')
-        tags = serializer.data.get('tags')
-        images = serializer.data.get('uploaded_images')
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content')
+        tags = serializer.validated_data.get('tags')
+        images = serializer.validated_data.get('uploaded_images')
+
+        with open('file.txt', 'w') as f:
+            f.write(str(images))
 
         question = CreateQuestionService().execute(
             user=request.user, title=title, tags=tags, images=images, content=content
