@@ -14,7 +14,7 @@ export async function fetchQuestions<T>({
 }: FetchQuestionProps): Promise<T[] | string> {
 	try {
 		const response = await fetch(
-			`${BASE_URL}/forum/questions/?&sort=${category}&page=${page ?? 1}`,
+			`${BASE_URL}/forum/questions/?&sort=${category}&page=${page ?? 0}`,
 			{
 				method: 'GET',
 				headers: {

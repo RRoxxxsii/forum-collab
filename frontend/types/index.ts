@@ -82,7 +82,7 @@ export interface IAnswer {
 	is_solving: boolean
 	creation_date: string
 	rating: IRating
-	images: string[]
+	images: IImage[]
 	comments: IComment[]
 	uploaded_images: string[]
 }

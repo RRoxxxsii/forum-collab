@@ -137,6 +137,11 @@ export function AnswerCard({
 								variant='body1'
 							/>
 						)}
+						<Box>
+							{answerData.images.map((image) => (
+								<img src={image.image}></img>
+							))}
+						</Box>
 						<Box
 							sx={{
 								display: 'flex',

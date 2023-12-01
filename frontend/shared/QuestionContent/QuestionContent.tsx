@@ -22,7 +22,7 @@ export const QuestionContent = ({
 			<Box sx={{ mb: 2, display: 'flex' }}>
 				{questionData?.images?.map((image) => (
 					<Box sx={{ mr: 1 }}>
-						<Image
+						<img
 							alt={image?.alt_text ?? ''}
 							src={image.image}
 							width={64}

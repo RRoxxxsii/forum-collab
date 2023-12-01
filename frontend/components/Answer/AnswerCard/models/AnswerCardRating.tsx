@@ -35,13 +35,13 @@ export const AnswerCardRating = ({
 	}
 
 	useEffect(() => {
-		if (answerData.rating.is_liked) {
+		if (answerData?.rating?.is_liked) {
 			setChecked(0)
 		}
-		if (answerData.rating.is_disliked) {
+		if (answerData?.rating?.is_disliked) {
 			setChecked(1)
 		}
-	}, [answerData.rating.is_disliked, answerData.rating.is_liked])
+	}, [answerData?.rating?.is_disliked, answerData?.rating?.is_liked])
 
 	return (
 		<>

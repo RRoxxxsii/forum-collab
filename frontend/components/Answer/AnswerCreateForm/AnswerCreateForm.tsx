@@ -2,8 +2,10 @@
 import { TiptapEditor } from '@/components/TiptapEditor'
 import { UploadImage } from '@/components/UploadImage'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
+import { BASE_URL } from '@/shared/constants'
 import { IAnswer, IErrorRes, IQuestion, IUser } from '@/types'
 import { Button, Typography } from '@mui/material'
+import { getCookie } from 'cookies-next'
 import { Dispatch, SetStateAction, useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -22,30 +24,37 @@ async function addAnswer({
 	userDetails: IUser | null
 	answerImages?: File[]
 }) {
+	let formField = new FormData()
+
+	if (questionData) {
+		formField.append('question', questionData?.id.toString())
+	}
+	if (answerContent) {
+		formField.append('answer', answerContent)
+	}
+	if (answerImages) {
+		answerImages?.forEach((image) => {
+			formField.append('uploaded_images', image)
+		})
+	}
+
+	console.log(formField)
+
+	const access_token = getCookie('access_token')
+
 	try {
-		const response = await fetch(`/api/forum/create-answer`, {
+		const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				question_id: questionData?.id,
-				answer_content: answerContent,
-				answerImages: answerImages,
-			}),
+			headers: {
+				Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
+			},
+			body: formField,
 		})
 
 		const data: IAnswer | IErrorRes = await response.json()
 
 		if ('error' in data) {
-			return toast.error(data.error, {
-				position: 'bottom-center',
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				progress: undefined,
-				theme: 'dark',
-			})
+			throw new Error(data.error)
 		}
 
 		setAnswerContent('')
@@ -58,7 +67,20 @@ async function addAnswer({
 			}
 			return null
 		})
-	} catch (error) {}
+	} catch (error) {
+		if (error instanceof Error) {
+			toast.error(error.message, {
+				position: 'bottom-center',
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+				theme: 'dark',
+			})
+		}
+	}
 }
 
 export const AnswerCreateForm = ({
@@ -76,6 +98,23 @@ export const AnswerCreateForm = ({
 
 	return (
 		<>
+			<input
+				type='file'
+				accept='image/*' // only accept image file types
+				multiple // allow multiple images
+				onChange={(e) => {
+					// this gives us the data on what files are selected
+					// however, it's of type `FileList` which is hard to modify.
+					const fileList = e.target.files
+					// let's convert `FileList` into a `File[]`
+					if (fileList) {
+						const files = [...fileList] // now we have `File[]` type
+						// This only works on es6 version make sure to set your tsconfig.json "target" to "es6"
+						setAnswerImages(files)
+					}
+				}}
+				className='bg-gray-100'
+			/>
 			<UploadImage
 				setImages={setAnswerImages}
 				model='answer'

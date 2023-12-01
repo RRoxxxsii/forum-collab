@@ -11,7 +11,8 @@ import { useContext, useEffect, useRef, useState } from 'react'
 
 export const QuestionList = () => {
 	const [questions, setQuestions] = useState<IQuestion[]>([])
-	const [pageIndex, setPageIndex] = useState(1)
+	const [pageIndex, setPageIndex] = useState(0)
+	const [isLastPage, setIsLastPage] = useState(false)
 	const [listLoadingState, setListLoadingState] = useState<FetchStatusType>()
 
 	const { category } = useContext(CategoryContext)
@@ -24,6 +25,7 @@ export const QuestionList = () => {
 		action: 'change' | 'add'
 	}) => {
 		//reset the questions array on refetch
+		if (isLastPage) return
 		setListLoadingState('loading')
 		try {
 			const response: Awaited<IQuestion[] | string> =
@@ -31,12 +33,11 @@ export const QuestionList = () => {
 					category: category,
 					page: page,
 				})
-
+			if (response.length < 10) setIsLastPage(true)
 			//if the response is array then it is the right result
 			if (Array.isArray(response) && typeof response !== 'string') {
-				if (action === 'add') {
-					setQuestions((prev) => [...prev, ...response])
-				}
+				if (action === 'add') setQuestions((prev) => [...prev, ...response])
+
 				if (action === 'change') {
 					setQuestions([])
 					setQuestions(response)
@@ -67,7 +68,7 @@ export const QuestionList = () => {
 	}, [pageIndex])
 
 	useEffect(() => {
-		fetchQuestionList({ page: 1, action: 'change' })
+		fetchQuestionList({ page: 0, action: 'change' })
 		setPageIndex(0)
 	}, [category])
 
@@ -97,11 +98,11 @@ export const QuestionList = () => {
 				<>
 					{Array.from({ length: 10 }).map((_, index) => (
 						<Skeleton
+							key={index}
 							sx={{ mb: 2, borderRadius: 1 }}
 							variant='rectangular'
 							width={'100%'}
 							height={210}
-							key={index}
 						/>
 					))}
 				</>
