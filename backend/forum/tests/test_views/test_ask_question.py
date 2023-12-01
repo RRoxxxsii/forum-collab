@@ -27,10 +27,10 @@ class TestUserAskQuestionPost(APITestCase):
         ThemeTag.objects.create(tag_name='C#')
         ThemeTag.objects.create(tag_name='Java')
 
-        photo = generate_photo_file(fake.unique.file_name)
-        photo2 = generate_photo_file(fake.unique.file_name)
-        photo3 = generate_photo_file(fake.unique.file_name)
-        photo4 = generate_photo_file(fake.unique.file_name)
+        photo = generate_photo_file(fake.unique.file_name())
+        photo2 = generate_photo_file(fake.unique.file_name())
+        photo3 = generate_photo_file(fake.unique.file_name())
+        photo4 = generate_photo_file(fake.unique.file_name())
 
         self.user = NewUser.objects.create_user(email='testuser@gmail.com', user_name='testuser',
                                                 password='Ax6!a7OpNvq')

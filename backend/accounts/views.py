@@ -3,6 +3,7 @@ from rest_framework.generics import (GenericAPIView, RetrieveAPIView,
                                      UpdateAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -11,7 +12,7 @@ from .dto import (ConfirmByEmailDTO, ConfirmByEmailWithEmailDTO, CreateUserDTO,
 from .permissions import EmailIsNotConfirmed
 from .querysets import UsersQS
 from .repository import BaseAccountRepository
-from .serializers import (CustomTokenObtainPairSerializer, DummySerializer,
+from .serializers import (CustomTokenObtainPairSerializer,
                           RegisterUserSerializer, UserEmailSerializer,
                           UserSerializer, UserWithRatingSerializer)
 from .services import (CreateUserService, PerformActionWhenConfirm,
@@ -38,7 +39,7 @@ class BaseUserUpdateProfileMixin(BaseUserMixin):
     http_method_names = ['patch', ]
 
 
-class CustomUserRegisterAPIView(GenericAPIView):
+class CustomUserRegisterAPIView(APIView):
     """
     Создания аккаунта пользователя.
     При успешном запросе: status 201 и success message; В противном случае: status 400 и error message.
@@ -69,7 +70,6 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, EmailIsNotConfirmed]
     success_message = 'Сообщение на электронную почту отправлено. Перейдите по ссылке ' \
                       'внутри письма, чтобы подтвердить почтовый адрес.'
-    serializer_class = DummySerializer
 
     def get(self, request):
         user = request.user
@@ -82,7 +82,7 @@ class RequestEmailToConfirmAPIView(GenericAPIView):
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
-class ConfirmEmailAPIView(GenericAPIView):
+class ConfirmEmailAPIView(APIView):
     """
     Пользователь отправляет GET запрос на url-адрес, полученный в почтовом сообщении и email_confirmed=True.
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
@@ -101,10 +101,6 @@ class ConfirmEmailAPIView(GenericAPIView):
         if is_success:
             return Response(data=self.success_message, status=200)
         return Response(data=self.error_message, status=400)
-
-    def get_serializer_class(self):
-        # Возвращает сериализатор-заглушку, так как представление класса не нуждается в сериализаторе
-        return DummySerializer
 
 
 class ChangeEmailAddressAPIView(GenericAPIView):
@@ -138,7 +134,7 @@ class ChangeEmailAddressAPIView(GenericAPIView):
         return Response(data={"message": self.success_message}, status=status.HTTP_201_CREATED)
 
 
-class ConfirmNewEmailAPIView(GenericAPIView):
+class ConfirmNewEmailAPIView(APIView):
     """
     Пользователь отправляет GET запрос на адрес, полученный в почтовом сообщении и email_confirmed=True.
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
@@ -161,10 +157,6 @@ class ConfirmNewEmailAPIView(GenericAPIView):
             return Response(data=self.success_message, status=200)
         return Response(data=self.error_message, status=400)
 
-    def get_serializer_class(self):
-        # Возвращает сериализатор-заглушку, так как представление класса не нуждается в сериализаторе
-        return DummySerializer
-
 
 class DeleteAccountAPIView(GenericAPIView):
     """
@@ -173,7 +165,6 @@ class DeleteAccountAPIView(GenericAPIView):
     """
     permission_classes = [IsAuthenticated, ]
     success_message = 'Аккаунт удален. Вы можете восстановить его в течение 6 месяцев '
-    serializer_class = DummySerializer
 
     def get(self, request):
         user = request.user
@@ -214,7 +205,7 @@ class RestoreAccountAPIView(GenericAPIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class RestoreAccountFromEmailAPIView(GenericAPIView):
+class RestoreAccountFromEmailAPIView(APIView):
     """
     GET запрос на адрес, полученный в почтовом сообщении - восстановление аккаунта (is_active=True).
     При успешном запросе: status 200 и success message; В противном случае: status 400 и error message.
@@ -233,10 +224,6 @@ class RestoreAccountFromEmailAPIView(GenericAPIView):
         if is_success:
             return Response(data=self.success_message, status=200)
         return Response(data=self.error_message, status=400)
-
-    def get_serializer_class(self):
-        # Возвращает сериализатор-заглушку, так как представление класса не нуждается в сериализаторе
-        return DummySerializer
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):

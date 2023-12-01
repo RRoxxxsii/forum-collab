@@ -233,7 +233,7 @@ class QuestionRepository(AbstractQuestionRepository, BaseImageRepository):
     def add_attachments(
             parent: Question, attachments: list[Attachment]
     ) -> None:
-        return BaseImageRepository.add_attachments(parent, attachments)
+        BaseImageRepository.add_attachments(parent, attachments)
 
     @staticmethod
     def add_tags(

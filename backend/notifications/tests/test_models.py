@@ -214,4 +214,3 @@ class TestNotificationQuerySetUniqueness(APITestCase):
     def test_notifications(self):
         self.assertNotEqual(self.user.notifications.all(),
                             self.user2.notifications.all())
-

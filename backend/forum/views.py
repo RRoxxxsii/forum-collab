@@ -13,10 +13,10 @@ from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from accounts.models import NewUser
-from accounts.serializers import DummySerializer
 from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
                              QuestionQSBase, ThemeTagQSBase)
@@ -87,10 +87,13 @@ class AskQuestionAPIView(GenericAPIView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        title = serializer.data.get('title')
-        content = serializer.data.get('content')
-        tags = serializer.data.get('tags')
-        images = serializer.data.get('uploaded_images')
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content')
+        tags = serializer.validated_data.get('tags')
+        images = serializer.validated_data.get('uploaded_images')
+
+        with open('file.txt', 'w') as f:
+            f.write(str(images))
 
         question = CreateQuestionService().execute(
             user=request.user, title=title, tags=tags, images=images, content=content
@@ -320,12 +323,11 @@ class MarkAnswerSolving(RetrieveAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ComplainAPIView(GenericAPIView):
+class ComplainAPIView(APIView):
     """
     Пожаловаться на comment, answer, question. Доступно для
     аутентифицированных пользователей. content_type=question/answer/comment/.
     """
-    serializer_class = DummySerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['patch', ]
 

@@ -21,5 +21,4 @@ class SearchResultAPIView(ListAPIView):
 
     @swagger_auto_schema(manual_parameters=[q, ])
     def get_queryset(self):
-        print(self.request.query_params.get('q'))
         return SearchQueryset.make_suggestions(self.request.query_params.get('q'))
