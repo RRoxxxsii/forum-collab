@@ -8,7 +8,7 @@ from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 from notifications.models import Notification
 
 
-class TestNotificationsListAPIView(APITestCase):
+class TestNotifications(APITestCase):
 
     def setUp(self) -> None:
 
@@ -27,13 +27,19 @@ class TestNotificationsListAPIView(APITestCase):
                                                     answer='Изначальный ответ...')
         self.comment = AnswerComment.objects.create(user=self.user3, question_answer=self.answer,
                                                     comment='Какой-то комментарий...')
-        for i in range(5):
-            Notification.objects.create(receiver=self.user,
-                                        sender=self.user2,
-                                        target=self.question,
-                                        action_obj=self.answer)
+        self.notification1 = Notification.objects.create(receiver=self.user, sender=self.user2,
+                                                         target=self.question, action_obj=self.answer)
+        self.notification2 = Notification.objects.create(receiver=self.user, sender=self.user2,
+                                                         target=self.question, action_obj=self.answer)
+        self.notification3 = Notification.objects.create(receiver=self.user, sender=self.user2,
+                                                         target=self.question, action_obj=self.answer)
+        self.notification4 = Notification.objects.create(receiver=self.user, sender=self.user2,
+                                                         target=self.question, action_obj=self.answer)
+        self.notification5 = Notification.objects.create(receiver=self.user, sender=self.user2,
+                                                         target=self.question, action_obj=self.answer)
 
         self.url = reverse('notifications')
+        self.url_to_update = reverse('mark-as-read')
 
     def test_notifications_list_content(self):
         self.client.force_authenticate(self.user)
@@ -48,3 +54,11 @@ class TestNotificationsListAPIView(APITestCase):
         self.assertIn('receiver', notification_1)
         self.assertIn('target_content_type', notification_1)
         self.assertIn('action_obj_content_type', notification_1)
+
+    def test_mark_all_as_read(self):
+        self.client.force_authenticate(self.user)
+        self.client.patch(self.url_to_update,
+                          data={'list_id': [int(self.notification1.id), int(self.notification2.id)]})
+        self.assertEqual(len(self.user.notifications.unread()), 3)
+        self.assertEqual(len(self.user.notifications.read()), 2)
+        self.assertEqual(len(self.user.notifications.all()), 5)
