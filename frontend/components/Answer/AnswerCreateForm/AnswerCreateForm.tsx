@@ -98,23 +98,6 @@ export const AnswerCreateForm = ({
 
 	return (
 		<>
-			<input
-				type='file'
-				accept='image/*' // only accept image file types
-				multiple // allow multiple images
-				onChange={(e) => {
-					// this gives us the data on what files are selected
-					// however, it's of type `FileList` which is hard to modify.
-					const fileList = e.target.files
-					// let's convert `FileList` into a `File[]`
-					if (fileList) {
-						const files = [...fileList] // now we have `File[]` type
-						// This only works on es6 version make sure to set your tsconfig.json "target" to "es6"
-						setAnswerImages(files)
-					}
-				}}
-				className='bg-gray-100'
-			/>
 			<UploadImage
 				setImages={setAnswerImages}
 				model='answer'

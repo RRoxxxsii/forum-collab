@@ -138,10 +138,10 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 				{type === 'create' && (
 					<AskQuestionFormSubmit
 						type={type}
-						titleValue={titleValue}
+						questionTitle={titleValue}
 						questionContent={questionContent}
-						tags={selectedTags}
-						images={images.map((image) => image)}
+						questionTags={selectedTags}
+						questionImages={images.map((image) => image)}
 						userId={profileData?.id}
 						questionId={questionData?.id}
 					/>
@@ -150,10 +150,10 @@ export const AskQuestionForm = ({ type }: { type: 'create' | 'edit' }) => {
 				{questionData && type === 'edit' && (
 					<AskQuestionFormSubmit
 						type={type}
-						titleValue={titleValue}
+						questionTitle={titleValue}
 						questionContent={questionContent}
-						tags={selectedTags}
-						images={images.map((image) => image)}
+						questionTags={selectedTags}
+						questionImages={images.map((image) => image)}
 						userId={profileData?.id}
 						questionId={questionData?.id}
 					/>
