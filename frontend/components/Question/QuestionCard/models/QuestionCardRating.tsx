@@ -12,7 +12,7 @@ import { useState } from 'react'
 interface QuestionCardRatingProps {
 	questionData: IQuestion | null
 	handleRating: ({ model, id, action, checked }: IChangeRating) => void
-	profileData: UserDetailsType
+	profileData?: UserDetailsType
 	model: IModelType
 }
 
@@ -39,7 +39,6 @@ export const QuestionCardRating = ({
 			}}>
 			<Checkbox
 				disabled={questionData.user?.id === profileData?.id}
-				checked={checked === 0}
 				icon={<ArrowUpwardOutlined />}
 				checkedIcon={<ArrowUpward />}
 				onChange={(e) =>
@@ -47,7 +46,6 @@ export const QuestionCardRating = ({
 						id: questionData.id,
 						model: model,
 						action: 'like',
-						checked: questionData.rating.is_liked,
 					})
 				}
 			/>
@@ -58,7 +56,6 @@ export const QuestionCardRating = ({
 			</Typography>
 			<Checkbox
 				disabled={questionData.user?.id === profileData?.id}
-				checked={checked === 1}
 				icon={<ArrowDownwardOutlined />}
 				checkedIcon={<ArrowDownward />}
 				onChange={(e) =>
@@ -66,7 +63,6 @@ export const QuestionCardRating = ({
 						id: questionData.id,
 						model: model,
 						action: 'dislike',
-						checked: questionData.rating.is_disliked,
 					})
 				}
 			/>

@@ -63,7 +63,6 @@ export default function QuestionPage() {
 							</Box>
 						</Box>
 						<Divider />
-						{/* Ответы */}
 						<Typography
 							variant='h6'
 							sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>

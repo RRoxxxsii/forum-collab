@@ -12,6 +12,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { AnswerCardEditing, AnswerCardMore, AnswerCardRating } from './models'
 import { useElementSize } from '@/lib/hooks/useElementSize'
+import { SolveButton } from '@/components/SolveButton'
 
 interface AnswerCardProps {
 	answerData: IAnswer
@@ -169,14 +170,7 @@ export function AnswerCard({
 							</Box>
 							{!questionData.is_solved &&
 								questionData.user.id === userDetails?.id && (
-									<Box sx={{ display: 'flex', alignItems: 'center' }}>
-										<Button
-											// onClick={() => handleSolve({ answerId: answerData.id })}
-											size='small'
-											variant='outlined'>
-											Отметить лучшим
-										</Button>
-									</Box>
+									<SolveButton answerId={answerData.id} />
 								)}
 						</Box>
 					</Box>

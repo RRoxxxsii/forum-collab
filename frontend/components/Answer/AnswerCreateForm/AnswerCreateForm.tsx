@@ -88,7 +88,7 @@ export const AnswerCreateForm = ({
 	questionData,
 	setQuestionData,
 }: {
-	profileData: IUser | null
+	profileData?: IUser | null
 	questionData: IQuestion | null
 	setQuestionData: Dispatch<SetStateAction<IQuestion | null>>
 }) => {

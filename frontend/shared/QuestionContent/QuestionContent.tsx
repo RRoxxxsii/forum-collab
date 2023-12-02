@@ -2,6 +2,8 @@ import { IQuestion } from '@/types'
 import { Box, Chip, Typography } from '@mui/material'
 import Image from 'next/image'
 import { UserInformation } from '../UserInformation'
+import { ImageButton } from '../ImageButton'
+import { ImageModal } from '@/components/ImageModal'
 
 export const QuestionContent = ({
 	questionData,
@@ -10,6 +12,7 @@ export const QuestionContent = ({
 }) => {
 	return (
 		<Box sx={{ mb: 2, ml: 1 }}>
+			<ImageModal imageUrl='' />
 			<UserInformation questionData={questionData} />
 			<Typography sx={{ fontSize: 16 }}>{questionData?.title}</Typography>
 			<Typography
@@ -22,11 +25,11 @@ export const QuestionContent = ({
 			<Box sx={{ mb: 2, display: 'flex' }}>
 				{questionData?.images?.map((image) => (
 					<Box sx={{ mr: 1 }}>
-						<img
-							alt={image?.alt_text ?? ''}
-							src={image.image}
-							width={64}
-							height={64}
+						<ImageButton
+							imageAlt={image?.alt_text ?? ''}
+							imageUrl={image.image}
+							width={128}
+							height={128}
 						/>
 					</Box>
 				))}
