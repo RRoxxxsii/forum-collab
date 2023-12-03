@@ -1,120 +1,43 @@
+import { ImageModal } from '@/components/ImageModal'
 import { IQuestion } from '@/types'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Avatar, Box, IconButton, Tooltip, Typography } from '@mui/material'
-import { green } from '@mui/material/colors'
-import dayjs from 'dayjs'
-import ru from 'dayjs/locale/ru'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import Link from 'next/link'
+import { Box, Chip, Typography } from '@mui/material'
+import { ImageButton } from '../../../../shared/ImageButton'
+import { UserInformation } from '../../../../shared/UserInformation'
+
 export const QuestionCardContent = ({
 	questionData,
 }: {
 	questionData: IQuestion
 }) => {
-	const {
-		answers,
-		content,
-		creation_date,
-		id,
-		images,
-		is_solved,
-		rating,
-		title,
-		user,
-	} = questionData
-	dayjs.locale(ru)
-	dayjs.extend(relativeTime)
 	return (
-		<>
-			<Box sx={{ display: 'flex', width: '100%' }}>
-				<Box
-					sx={{
-						display: 'flex',
-						flexDirection: 'column',
-						width: '100%',
-						pb: 1,
-						px: 1,
-					}}>
-					<Box
-						sx={{
-							display: 'flex',
-							justifyContent: 'space-between',
-							alignItems: 'center',
-							width: '100%',
-						}}>
-						<Box
-							sx={{
-								width: '100%',
-								display: 'flex',
-								justifyContent: 'space-between',
-								alignItems: 'center',
-							}}>
-							<Box
-								sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-								<Avatar
-									sx={{
-										width: 20,
-										height: 20,
-										fontSize: 16,
-										bgcolor: green[400],
-										marginRight: 1,
-									}}
-									aria-label='recipe'
-									src={questionData?.user?.profile_image ?? ''}>
-									{!questionData?.user?.profile_image &&
-										questionData?.user?.user_name[0].toUpperCase()}
-								</Avatar>
-								{user ? (
-									<Link href={`/profile/${user?.id}`} className='text-xs mr-1'>
-										{user?.user_name}
-									</Link>
-								) : (
-									<Typography sx={{ marginRight: 1 }} variant='caption'>
-										Гость
-									</Typography>
-								)}
-								<Tooltip
-									placement='top'
-									title={`${
-										questionData.updated_date
-											? `Изменён ${
-													dayjs(questionData.updated_date).toNow(true) +
-													' назад'
-											  }`
-											: ''
-									}`}>
-									<Typography
-										variant='body2'
-										sx={{ ml: 1 }}
-										color='gray'
-										fontSize={12}>
-										{dayjs(creation_date).toNow(true) + ' назад'}
-									</Typography>
-								</Tooltip>
-								{questionData.is_solved && (
-									<Typography sx={{ ml: 1, fontSize: 14, color: 'gray' }}>
-										(Закрыт)
-									</Typography>
-								)}
-							</Box>
-							<Box>
-								<IconButton>
-									<MoreVertIcon></MoreVertIcon>
-								</IconButton>
-							</Box>
-						</Box>
+		<Box sx={{ mb: 2, ml: 1 }}>
+			<ImageModal imageUrl='' />
+			<UserInformation questionData={questionData} />
+			<Typography sx={{ fontSize: 16 }}>{questionData?.title}</Typography>
+			<Typography
+				sx={{ mb: 2 }}
+				variant='body1'
+				dangerouslySetInnerHTML={{
+					__html: questionData?.content ?? 'error',
+				}}
+			/>
+			<Box sx={{ mb: 2, display: 'flex' }}>
+				{questionData?.images?.map((image) => (
+					<Box sx={{ mr: 1 }}>
+						<ImageButton
+							imageAlt={image?.alt_text ?? ''}
+							imageUrl={image.image}
+							width={128}
+							height={128}
+						/>
 					</Box>
-					<Box sx={{ p: 0, ':last-child': { pb: 0 } }}>
-						<Typography fontWeight={700} variant='body1' color='text.primary'>
-							{title}
-						</Typography>
-						<Typography
-							dangerouslySetInnerHTML={{ __html: content }}
-							variant='body1'
-							color='text.secondary'></Typography>
-					</Box>
-				</Box>
+				))}
 			</Box>
-		</>
+			<Box>
+				{questionData.tags.map((tag) => (
+					<Chip key={tag.tag_name} sx={{ mr: 1 }} label={tag.tag_name} />
+				))}
+			</Box>
+		</Box>
 	)
 }

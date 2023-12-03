@@ -1,10 +1,12 @@
 'use client'
 import { useElementSize } from '@/lib/hooks/useElementSize'
 import { Fullscreen, Remove } from '@mui/icons-material'
-import { Box, IconButton } from '@mui/material'
+import { Box, IconButton, useMediaQuery } from '@mui/material'
 import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import classes from './ImageButton.module.scss'
+import { useContext } from 'react'
+import { UserDeviceContext } from '@/providers/UserDeviceProvider'
 interface ImageButtonProps {
 	remove?: boolean
 	fullscreen?: boolean
@@ -29,6 +31,7 @@ export const ImageButton = ({
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
+	const { userDevice } = useContext(UserDeviceContext)
 
 	const handleFullscreen = () => {
 		const current = new URLSearchParams(Array.from(searchParams.entries()))
@@ -46,7 +49,16 @@ export const ImageButton = ({
 	return (
 		<div
 			ref={BoxRef}
-			style={{ width: width, height: height }}
+			style={{
+				width:
+					userDevice === 'mobile' && typeof width === 'number'
+						? width / 2
+						: width,
+				height:
+					userDevice === 'mobile' && typeof height === 'number'
+						? height / 2
+						: height,
+			}}
 			className={classes.ImageButton}>
 			<Image
 				height={boxHeight}
