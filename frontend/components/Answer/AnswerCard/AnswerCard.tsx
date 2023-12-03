@@ -13,6 +13,8 @@ import Link from 'next/link'
 import { AnswerCardEditing, AnswerCardMore, AnswerCardRating } from './models'
 import { useElementSize } from '@/lib/hooks/useElementSize'
 import { SolveButton } from '@/components/SolveButton'
+import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
+import { ImageButton } from '@/shared/ImageButton'
 
 interface AnswerCardProps {
 	answerData: IAnswer
@@ -137,7 +139,11 @@ export function AnswerCard({
 						)}
 						<Box>
 							{answerData.images.map((image) => (
-								<img src={image.image}></img>
+								<ImageButton
+									width={128}
+									height={128}
+									imageUrl={image.image}
+									imageAlt={image.alt_text}></ImageButton>
 							))}
 						</Box>
 						<Box

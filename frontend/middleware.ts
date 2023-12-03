@@ -2,10 +2,6 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { BASE_URL } from './shared/constants'
 
-export const config = {
-	matcher: ['/profile/:path*', '/settings/:path*'],
-}
-
 export async function middleware(request: NextRequest) {
 	const hasRefreshToken = request.cookies.has('refresh_token')
 

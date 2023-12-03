@@ -1,4 +1,5 @@
 'use client'
+import { UserDeviceContext } from '@/providers/UserDeviceProvider'
 import { DeleteContent } from '@/shared/api/deleteContent'
 import { IQuestion, IUser } from '@/types'
 import {
@@ -21,7 +22,7 @@ import {
 } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 
 export const QuestionCardMenu = ({
@@ -40,6 +41,8 @@ export const QuestionCardMenu = ({
 	const handleClose = () => {
 		setMoreButtonEl(null)
 	}
+	const { userDevice } = useContext(UserDeviceContext)
+
 	const router = useRouter()
 	const handleDelete = () => {
 		DeleteContent({
@@ -83,16 +86,20 @@ export const QuestionCardMenu = ({
 	return (
 		<Box sx={{ display: 'flex', alignItems: 'center' }}>
 			<button
-				className='flex mr-4 hover:bg-neutral-800 rounded-md p-2'
+				className={`flex ${
+					userDevice === 'desktop' && 'mr-4'
+				} hover:bg-neutral-800 rounded-md p-2`}
 				onClick={shareHandler}>
-				<Share sx={{ mr: 1 }} />
-				<Typography>Поделиться</Typography>
+				<Share sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
+				{userDevice === 'desktop' && <Typography>Поделиться</Typography>}
 			</button>
 			<button
-				className='flex mr-4 hover:bg-neutral-800 rounded-md p-2'
+				className={`flex ${
+					userDevice === 'desktop' && 'mr-4'
+				} hover:bg-neutral-800 rounded-md p-2`}
 				onClick={FavoriteHandler}>
-				<Bookmark sx={{ mr: 1 }} />
-				<Typography>Избранное</Typography>
+				<Bookmark sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
+				{userDevice === 'desktop' && <Typography>Избранное</Typography>}
 			</button>
 			<IconButton
 				id='more'

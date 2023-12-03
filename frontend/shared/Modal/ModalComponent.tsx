@@ -12,7 +12,7 @@ const style = {
 	minWidth: 280,
 	bgcolor: 'background.paper',
 	boxShadow: 24,
-	p: 4,
+	p: 1,
 }
 
 interface ModalComponentProps {

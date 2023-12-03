@@ -3,6 +3,7 @@ import { AskFastProvider } from '@/providers/AskFastProvider'
 import { CategoryProvider } from '@/providers/CategoryProvider'
 import { NotificationProvider } from '@/providers/NotificationsProvider'
 import { UserDetailsProvider } from '@/providers/UserDetailsProvider'
+import { UserDeviceProvider } from '@/providers/UserDeviceProvider'
 import { Metadata } from 'next'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -32,15 +33,17 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
 				theme='dark'
 				limit={5}
 			/>
-			<UserDetailsProvider>
-				<NotificationProvider>
-					<Header>
-						<CategoryProvider>
-							<AskFastProvider>{children}</AskFastProvider>
-						</CategoryProvider>
-					</Header>
-				</NotificationProvider>
-			</UserDetailsProvider>
+			<UserDeviceProvider>
+				<UserDetailsProvider>
+					<NotificationProvider>
+						<Header>
+							<CategoryProvider>
+								<AskFastProvider>{children}</AskFastProvider>
+							</CategoryProvider>
+						</Header>
+					</NotificationProvider>
+				</UserDetailsProvider>
+			</UserDeviceProvider>
 		</>
 	)
 }

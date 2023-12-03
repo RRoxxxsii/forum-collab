@@ -2,16 +2,19 @@
 import { AnswerCreateForm } from '@/components/Answer/AnswerCreateForm'
 import { AnswerList } from '@/components/Answer/AnswerList'
 import {
+	QuestionCardContent,
 	QuestionCardMenu,
 	QuestionCardRating,
 } from '@/components/Question/QuestionCard/models'
-import { QuestionContent } from '@/shared/QuestionContent'
+
+import { UserDeviceContext } from '@/providers/UserDeviceProvider'
+import { PageWrapper } from '@/shared/PageWrapper/PageWrapper'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IChangeRating, IQuestion, IUser } from '@/types'
 import { Box, Divider, Paper, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useContext, useEffect, useState } from 'react'
 import QuestionLoading from './loading'
 
 export default function QuestionPage() {
@@ -38,12 +41,14 @@ export default function QuestionPage() {
 		ChangeRating({ action: action, checked: checked, id: id, model: model })
 	}
 
+	const { userDevice } = useContext(UserDeviceContext)
+
 	return (
 		<Suspense fallback={<QuestionLoading />}>
-			<Box sx={{ minHeight: '80vh' }}>
+			<PageWrapper>
 				{questionData && (
 					<Paper sx={{ maxWidth: 1280 }}>
-						<Box sx={{ px: 3, py: 2 }}>
+						<Box sx={{ px: userDevice === 'desktop' ? 3 : 1, py: 2 }}>
 							<Box sx={{ display: 'flex' }}>
 								<Box sx={{ justifyContent: 'center' }}>
 									<QuestionCardRating
@@ -54,7 +59,7 @@ export default function QuestionPage() {
 									/>
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
-									<QuestionContent questionData={questionData} />
+									<QuestionCardContent questionData={questionData} />
 									<QuestionCardMenu
 										profileData={profileData}
 										questionData={questionData}
@@ -65,7 +70,12 @@ export default function QuestionPage() {
 						<Divider />
 						<Typography
 							variant='h6'
-							sx={{ px: 3, py: 1, display: 'flex', alignItems: 'center' }}>
+							sx={{
+								px: userDevice === 'desktop' ? 3 : 1,
+								py: 1,
+								display: 'flex',
+								alignItems: 'center',
+							}}>
 							Ответы:
 							<Typography
 								className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
@@ -73,7 +83,13 @@ export default function QuestionPage() {
 								{questionData.answers.length}
 							</Typography>
 						</Typography>
-						<Box sx={{ px: 3, py: 2, width: '100%', pb: 30 }}>
+						<Box
+							sx={{
+								px: userDevice === 'desktop' ? 3 : 1,
+								py: 2,
+								width: '100%',
+								pb: 30,
+							}}>
 							<AnswerCreateForm
 								profileData={profileData}
 								questionData={questionData}
@@ -86,7 +102,7 @@ export default function QuestionPage() {
 						</Box>
 					</Paper>
 				)}
-			</Box>
+			</PageWrapper>
 		</Suspense>
 	)
 }
