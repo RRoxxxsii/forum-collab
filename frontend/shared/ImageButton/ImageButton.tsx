@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import classes from './ImageButton.module.scss'
 interface ImageButtonProps {
+	remove?: boolean
+	fullscreen?: boolean
 	imageUrl: string
 	imageAlt: string
 	handleRemove?: () => void
@@ -15,6 +17,8 @@ interface ImageButtonProps {
 }
 
 export const ImageButton = ({
+	fullscreen = true,
+	remove = false,
 	imageUrl,
 	imageAlt,
 	onClick,
@@ -59,12 +63,16 @@ export const ImageButton = ({
 					left: '50%',
 					transform: 'translate(-50%, -50%)',
 				}}>
-				<IconButton onClick={handleFullscreen} size='small'>
-					<Fullscreen />
-				</IconButton>
-				<IconButton onClick={handleRemove} size='small'>
-					<Remove />
-				</IconButton>
+				{fullscreen && (
+					<IconButton onClick={handleFullscreen} size='small'>
+						<Fullscreen />
+					</IconButton>
+				)}
+				{remove && (
+					<IconButton onClick={handleRemove} size='small'>
+						<Remove />
+					</IconButton>
+				)}
 			</Box>
 		</div>
 	)
