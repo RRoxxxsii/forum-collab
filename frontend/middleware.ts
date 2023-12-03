@@ -24,23 +24,22 @@ export async function middleware(request: NextRequest) {
 
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()
-	try {
-		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
-			method: 'POST',
-			next: {
-				revalidate: 2000,
-			},
-			body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-		const data = await isAuth.json()
 
-		const newAccessToken = data.access
+	const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
+		method: 'POST',
+		next: {
+			revalidate: 2000,
+		},
+		body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
+	const data = await isAuth.json()
 
-		response.cookies.set({ name: 'access_token', value: newAccessToken })
-		response.headers.set('access_token', newAccessToken)
-		return response
-	} catch (error) {}
+	const newAccessToken = data.access
+
+	response.cookies.set({ name: 'access_token', value: newAccessToken })
+	response.headers.set('access_token', newAccessToken)
+	return response
 }

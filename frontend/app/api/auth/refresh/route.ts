@@ -1,31 +1,28 @@
 import { BASE_URL } from '@/shared/constants'
-import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET() {
-	const refreshTokenCookie = cookies().get('refresh_token')?.value
+export async function GET(req: NextRequest) {
+	const hasRefreshToken = req.cookies.has('refresh_token')
+	const refreshTokenCookie = req.cookies.get('refresh_token')
 
-	if (!refreshTokenCookie) {
+	if (!hasRefreshToken) {
 		return NextResponse.json({ message: 'Вы не авторизованы' }, { status: 403 })
 	}
 
-	try {
-		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
-			method: 'POST',
-			body: JSON.stringify({ refresh: refreshTokenCookie }),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-		const response = NextResponse.next()
+	const response = NextResponse.next()
+	const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
+		method: 'POST',
+		next: { revalidate: 3600 },
+		body: JSON.stringify({ refresh: refreshTokenCookie }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
 
-		const data = await isAuth.json()
-		const newAccessToken = data.access
+	const data = await isAuth.json()
+	const newAccessToken = data.access
 
-		response.cookies.delete('access_token')
-
-		response.cookies.set({ name: 'access_token', value: newAccessToken })
-
-		return response
-	} catch (error) {}
+	response.cookies.set({ name: 'access_token', value: newAccessToken })
+	response.headers.set('access_token', newAccessToken)
+	return response
 }
