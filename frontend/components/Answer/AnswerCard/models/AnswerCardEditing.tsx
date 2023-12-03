@@ -1,4 +1,6 @@
+'use client'
 import { AddComment } from '@/components/Comment/AddComment'
+import { useElementSize } from '@/lib/hooks/useElementSize'
 import { IUser, IAnswer } from '@/types'
 import { Box, Divider } from '@mui/material'
 import React, { SetStateAction } from 'react'
@@ -6,16 +8,16 @@ import React, { SetStateAction } from 'react'
 export const AnswerCardEditing = ({
 	isCommenting,
 	answerData,
-	answerHeight,
 	setIsCommenting,
 	userDetails,
 }: {
 	isCommenting: boolean
-	answerHeight: number | undefined
 	setIsCommenting: React.Dispatch<SetStateAction<boolean>>
 	userDetails: IUser | null
 	answerData: IAnswer
 }) => {
+	const [commentAddBox, { width, height }] = useElementSize()
+
 	return (
 		isCommenting && (
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -23,7 +25,7 @@ export const AnswerCardEditing = ({
 					orientation='vertical'
 					sx={{
 						ml: 1.2,
-						height: answerHeight ? answerHeight : 0,
+						height: height ? height : 0,
 					}}
 				/>
 				<Box sx={{ flex: '0 1 100%' }}>

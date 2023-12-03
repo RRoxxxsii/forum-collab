@@ -8,7 +8,7 @@ export const CommentList = ({
 	answerData: IAnswer
 	handleDelete?: ({ id, model }: { id: number; model: IModelType }) => void
 }) => {
-	return answerData.comments.map((comment) => (
+	return answerData?.comments?.map((comment) => (
 		<CommentCard
 			key={comment.id + comment.creation_date}
 			comment={comment}

@@ -1,3 +1,5 @@
+import { useElementSize } from '@/lib/hooks/useElementSize'
+import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside'
 import { UserDetailsContext } from '@/providers/UserDetailsProvider'
 import { IAnswer, IComment, IModelType } from '@/types'
 import { Comment, Delete, Edit, MoreHoriz, Report } from '@mui/icons-material'
@@ -18,9 +20,9 @@ import { green } from '@mui/material/colors'
 import dayjs from 'dayjs'
 import ru from 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import { AddComment } from '../AddComment'
 import Link from 'next/link'
+import React, { useContext, useRef, useState } from 'react'
+import { AddComment } from '../AddComment'
 
 interface CommentCardProps {
 	comment: IComment
@@ -49,47 +51,20 @@ export function CommentCard({
 	const [isEditing, setIsEditing] = useState(false)
 
 	const handleEditing = () => {
-		setIsEditing(!isEditing)
+		setIsEditing(isEditing)
 	}
 	const submitEditing = () => {
 		setIsEditing(!isEditing)
 	}
 	const editingBoxRef = useRef<HTMLDivElement | null>(null)
-	const handleClickOutside = (event: MouseEvent) => {
-		if (
-			editingBoxRef.current &&
-			!editingBoxRef.current.contains(event.target as Node)
-		) {
-			setIsEditing(false)
-		}
-	}
-
 	const [editingCommentContent, setEditingCommentContent] = useState('')
+	const handleClickOutside = (event: MouseEvent) => {
+		setIsEditing(false)
+	}
+	useOnClickOutside(editingBoxRef, handleClickOutside)
 
-	useEffect(() => {
-		if (isEditing) {
-			document.addEventListener('click', handleClickOutside)
-		} else {
-			document.removeEventListener('click', handleClickOutside)
-		}
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside)
-		}
-	}, [isEditing])
-
-	const commentRef = useRef<null | HTMLElement>(null)
-
-	const [commentHeightOffset, setCommentHeightOffset] = useState<
-		number | undefined
-	>(0)
-	const [commentHeightClient, setCommentHeightClient] = useState<
-		number | undefined
-	>(0)
-	useEffect(() => {
-		setCommentHeightOffset(commentRef.current?.offsetHeight)
-		setCommentHeightClient(commentRef.current?.offsetHeight)
-	}, [commentRef?.current?.offsetHeight])
+	const [commentRef, { width: commentWidth, height: commentHeight }] =
+		useElementSize()
 
 	dayjs.locale(ru)
 	dayjs.extend(relativeTime)
@@ -105,7 +80,7 @@ export function CommentCard({
 				<Divider
 					orientation='vertical'
 					sx={{
-						height: commentHeightOffset,
+						height: commentHeight ?? 0,
 						pl: 1.3,
 					}}
 				/>
@@ -121,7 +96,7 @@ export function CommentCard({
 							orientation='vertical'
 							sx={{
 								mr: 3,
-								height: commentHeightClient ? commentHeightClient : 0,
+								height: commentHeight ?? 0,
 							}}
 						/>
 						<Box
@@ -132,7 +107,7 @@ export function CommentCard({
 							}}>
 							<Box
 								sx={{
-									height: commentHeightOffset ? commentHeightOffset - 20 : 0,
+									height: commentHeight ?? 0,
 									mr: 1,
 								}}>
 								<Avatar
@@ -285,7 +260,7 @@ export function CommentCard({
 							<Divider
 								orientation='vertical'
 								sx={{
-									height: commentHeightOffset ? commentHeightOffset + 62 : 0,
+									height: commentHeight ?? 0,
 									position: 'absolute',
 									left: -37,
 								}}
@@ -293,7 +268,7 @@ export function CommentCard({
 							<Divider
 								orientation='vertical'
 								sx={{
-									height: commentHeightOffset ? commentHeightOffset + 62 : 0,
+									height: commentHeight ?? 0,
 								}}
 							/>
 							<Box sx={{ flex: '0 1 100%' }}>

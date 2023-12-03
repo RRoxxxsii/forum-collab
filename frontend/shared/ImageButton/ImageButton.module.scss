@@ -1,0 +1,30 @@
+.ImageButton {
+	position: relative;
+	&:hover {
+		img {
+			filter: brightness(50%);
+		}
+		button {
+			filter: brightness(100%);
+		}
+		svg {
+			path {
+				color: rgba(255, 255, 255, 1);
+			}
+		}
+	}
+	img {
+		transition: all 0.2s ease-in-out;
+		filter: brightness(100%);
+		height: 100%;
+		width: 100%;
+		object-fit: cover;
+		object-position: center;
+	}
+	svg {
+		transition: all 0.2s ease-in-out;
+		path {
+			color: rgba(255, 255, 255, 0.1);
+		}
+	}
+}

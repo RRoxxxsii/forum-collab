@@ -27,6 +27,9 @@ export async function middleware(request: NextRequest) {
 	try {
 		const isAuth = await fetch(`${BASE_URL}/account/refresh/`, {
 			method: 'POST',
+			next: {
+				revalidate: 2000,
+			},
 			body: JSON.stringify({ refresh: refreshTokenCookie?.value }),
 			headers: {
 				'Content-Type': 'application/json',

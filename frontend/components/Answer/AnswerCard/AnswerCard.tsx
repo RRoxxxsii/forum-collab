@@ -11,6 +11,8 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 
 import Link from 'next/link'
 import { AnswerCardEditing, AnswerCardMore, AnswerCardRating } from './models'
+import { useElementSize } from '@/lib/hooks/useElementSize'
+import { SolveButton } from '@/components/SolveButton'
 
 interface AnswerCardProps {
 	answerData: IAnswer
@@ -36,12 +38,8 @@ export function AnswerCard({
 	dayjs.locale(ru)
 	dayjs.extend(relativeTime)
 
-	const answerRef = useRef<null | HTMLElement>(null)
-
-	const [answerHeight, setAnswerHeight] = useState<number | undefined>(0)
-	useEffect(() => {
-		setAnswerHeight(answerRef.current?.offsetHeight)
-	}, [answerRef.current?.offsetHeight])
+	const [answerRef, { width: answerWidth, height: answerHeight }] =
+		useElementSize()
 
 	return (
 		<>
@@ -78,7 +76,7 @@ export function AnswerCard({
 							flexDirection: 'column',
 							alignItems: 'center',
 							mr: 1,
-							height: answerHeight ? answerHeight - 36 : 0,
+							height: answerHeight ? answerHeight : 0,
 						}}>
 						<Avatar
 							sx={{
@@ -95,7 +93,7 @@ export function AnswerCard({
 						</Avatar>
 						<Divider
 							orientation='vertical'
-							sx={{ height: answerHeight ? answerHeight - 36 : 0 }}></Divider>
+							sx={{ height: answerHeight ? answerHeight - 37 : 0 }}></Divider>
 					</Box>
 					<Box sx={{ width: '100%' }}>
 						<Box sx={{ display: 'flex', ml: 1 }}>
@@ -137,6 +135,11 @@ export function AnswerCard({
 								variant='body1'
 							/>
 						)}
+						<Box>
+							{answerData.images.map((image) => (
+								<img src={image.image}></img>
+							))}
+						</Box>
 						<Box
 							sx={{
 								display: 'flex',
@@ -167,21 +170,13 @@ export function AnswerCard({
 							</Box>
 							{!questionData.is_solved &&
 								questionData.user.id === userDetails?.id && (
-									<Box sx={{ display: 'flex', alignItems: 'center' }}>
-										<Button
-											// onClick={() => handleSolve({ answerId: answerData.id })}
-											size='small'
-											variant='outlined'>
-											Отметить лучшим
-										</Button>
-									</Box>
+									<SolveButton answerId={answerData.id} />
 								)}
 						</Box>
 					</Box>
 				</Box>
 				<AnswerCardEditing
 					answerData={answerData}
-					answerHeight={answerHeight}
 					isCommenting={isCommenting}
 					setIsCommenting={setIsCommenting}
 					userDetails={userDetails}

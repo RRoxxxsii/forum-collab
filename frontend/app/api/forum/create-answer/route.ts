@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
 	const response = await fetch(`${BASE_URL}/forum/answer-question/`, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'multipart/form-data; boundary=dqwsdasdqweqw312asdqwe123',
+			'Content-Type':
+				'multipart/form-data; boundary=WebKitFormBoundary8X8G66ilD7YqGFuL',
 			Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 		},
 		body: formField,

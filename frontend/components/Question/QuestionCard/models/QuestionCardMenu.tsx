@@ -29,7 +29,7 @@ export const QuestionCardMenu = ({
 	profileData,
 }: {
 	questionData: IQuestion
-	profileData: IUser | null
+	profileData?: IUser | null
 }) => {
 	const [moreButtonEl, setMoreButtonEl] = useState<HTMLElement | null>(null)
 

@@ -3,6 +3,7 @@ import { BASE_URL } from '@/shared/constants'
 import { Transliterate } from '@/shared/utils/Transliterate'
 import { IErrorRes, IQuestion, ITag } from '@/types'
 import { Button } from '@mui/material'
+import { getCookie } from 'cookies-next'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
 
@@ -15,40 +16,49 @@ interface SubmitResponse {
 	error?: any
 }
 
-export const AskQuestionFormSubmit = ({
-	titleValue,
-	questionContent,
-	tags,
-	images,
-	type,
-	userId,
-	questionId,
-}: {
-	titleValue: string
+interface AskQuestionFormSubmitProps {
+	questionTitle: string
 	questionContent: string
-	tags: string[]
-	images: File[]
-	type: 'edit' | 'create'
-	userId?: number | null
+	questionTags: string[]
+	questionImages: File[]
 	questionId?: number | null
-}) => {
+	userId?: number | null
+	type: 'edit' | 'create'
+}
+
+export const AskQuestionFormSubmit = ({
+	questionTitle,
+	questionContent,
+	questionTags,
+	questionImages,
+	questionId,
+	userId,
+	type,
+}: AskQuestionFormSubmitProps) => {
 	const router = useRouter()
+
+	const access_token = getCookie('access_token')
 
 	async function createSubmit() {
 		const questionToast = toast.loading('Открытие вопроса...')
 
+		let formField = new FormData()
+		formField.append('title', questionTitle)
+		formField.append('content', questionContent)
+		questionTags?.forEach((tag) => {
+			formField.append('tags', tag)
+		})
+		questionImages?.forEach((image) => {
+			formField.append('uploaded_images', image)
+		})
+
 		try {
-			const response = await fetch(`/api/forum/ask-question/`, {
+			const response = await fetch(`${BASE_URL}/forum/ask-question/`, {
 				method: 'POST',
-				body: JSON.stringify({
-					tags: tags,
-					title: titleValue,
-					content: questionContent,
-					uploaded_images: images,
-				}),
 				headers: {
-					'Content-Type': 'application/json',
+					Authorization: `${access_token ? `Bearer ${access_token}` : ''}`,
 				},
+				body: formField,
 			})
 
 			const result: SubmitResponse = await response.json()
@@ -101,7 +111,7 @@ export const AskQuestionFormSubmit = ({
 				method: 'POST',
 				body: JSON.stringify({
 					user: userId,
-					title: titleValue,
+					title: questionTitle,
 					content: questionContent,
 					id: questionId,
 				}),

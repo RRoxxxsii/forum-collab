@@ -1,7 +1,9 @@
 'use client'
+import { useElementSize } from '@/lib/hooks/useElementSize'
+import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside'
 import { IAnswer, IComment, IUser } from '@/types'
 import { TextareaAutosize } from '@mui/base/TextareaAutosize'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, Divider, Typography } from '@mui/material'
 import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 
 export const AddComment = ({
@@ -50,31 +52,21 @@ export const AddComment = ({
 	}
 	const commentBoxRef = useRef<HTMLDivElement | null>(null)
 	const commentInputRef = useRef<HTMLTextAreaElement | null>(null)
+
 	const handleClickOutside = (event: MouseEvent) => {
-		if (
-			commentBoxRef.current &&
-			!commentBoxRef.current.contains(event.target as Node)
-		) {
-			setIsCommenting(false)
-		}
+		setIsCommenting(false)
 	}
-
-	useEffect(() => {
-		if (isCommenting) {
-			document.addEventListener('click', handleClickOutside)
-		} else {
-			document.removeEventListener('click', handleClickOutside)
-		}
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside)
-		}
-	}, [isCommenting])
-
-	console.log(parentComment)
+	useOnClickOutside(commentBoxRef, handleClickOutside)
+	const [commentBoxContentRef, { width, height }] = useElementSize()
 	useEffect(() => {
 		if (parentComment) {
-			setCommentContent(`@${parentComment?.user.user_name}, `)
+			setCommentContent(
+				`@${
+					parentComment?.user?.user_name
+						? parentComment?.user?.user_name
+						: 'Гость'
+				}, `
+			)
 		}
 	}, [parentComment])
 
@@ -86,42 +78,52 @@ export const AddComment = ({
 
 	return (
 		<Box
-			ref={commentBoxRef}
+			ref={commentBoxContentRef}
 			sx={{
-				mb: 2,
-				pl: 4,
 				display: 'flex',
-				flexDirection: 'column',
-				maxWidth: 600,
+				alignItems: 'center',
+				justifyContent: 'flex-start',
+				flex: 1,
 			}}>
-			<Typography variant='caption' color={'GrayText'}>
-				Вы отвечаете пользователю{' '}
-				{'@' +
-					((parentComment
-						? parentComment.user.user_name
-						: answerData?.user?.user_name) ?? 'Гость')}
-			</Typography>
-			<TextareaAutosize
-				ref={commentInputRef}
-				minRows={2}
-				onChange={(e) => setCommentContent(e.target.value)}
-				value={commentContent}
-				className='textarea'
-				maxLength={320}
-			/>
-			<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-				<Button
-					onClick={handleComment}
-					variant='outlined'
-					sx={{ mt: 1, maxWidth: 220 }}>
-					Оставить комментарий
-				</Button>
-				<Typography
-					sx={{ userSelect: 'none' }}
-					color={'ButtonHighlight'}
-					variant='caption'>
-					{commentContent.length}/320
+			<Box
+				ref={commentBoxRef}
+				sx={{
+					flex: 1,
+					mb: 2,
+					pl: 4,
+					display: 'flex',
+					flexDirection: 'column',
+					maxWidth: 600,
+				}}>
+				<Typography variant='caption' color={'GrayText'}>
+					Вы отвечаете пользователю{' '}
+					{'@' +
+						((parentComment
+							? parentComment?.user?.user_name
+							: answerData?.user?.user_name) ?? 'Гость')}
 				</Typography>
+				<TextareaAutosize
+					ref={commentInputRef}
+					minRows={2}
+					onChange={(e) => setCommentContent(e.target.value)}
+					value={commentContent}
+					className='textarea w-full'
+					maxLength={320}
+				/>
+				<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+					<Button
+						onClick={handleComment}
+						variant='outlined'
+						sx={{ mt: 1, maxWidth: 220 }}>
+						Оставить комментарий
+					</Button>
+					<Typography
+						sx={{ userSelect: 'none' }}
+						color={'ButtonHighlight'}
+						variant='caption'>
+						{commentContent.length}/320
+					</Typography>
+				</Box>
 			</Box>
 		</Box>
 	)
