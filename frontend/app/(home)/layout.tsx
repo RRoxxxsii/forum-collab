@@ -1,4 +1,5 @@
 import { Header } from '@/components/Header'
+import { NotificationsModal } from '@/components/NotificationsModal'
 import { AskFastProvider } from '@/providers/AskFastProvider'
 import { CategoryProvider } from '@/providers/CategoryProvider'
 import { NotificationProvider } from '@/providers/NotificationsProvider'
@@ -38,7 +39,10 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
 					<NotificationProvider>
 						<Header>
 							<CategoryProvider>
-								<AskFastProvider>{children}</AskFastProvider>
+								<AskFastProvider>
+									<NotificationsModal />
+									{children}
+								</AskFastProvider>
 							</CategoryProvider>
 						</Header>
 					</NotificationProvider>

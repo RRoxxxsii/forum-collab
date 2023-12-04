@@ -8,7 +8,7 @@ const style = {
 	left: '50%',
 	transform: 'translate(-50%, -50%)',
 	maxWidth: 800,
-	width: '100%',
+	width: 'auto',
 	minWidth: 280,
 	bgcolor: 'background.paper',
 	boxShadow: 24,

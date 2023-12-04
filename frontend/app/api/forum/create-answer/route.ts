@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
 		formField.append('uploaded_images', image)
 	})
 
-	console.log(formField)
 
 	const access_token = cookies().get('access_token')?.value
 

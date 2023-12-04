@@ -38,8 +38,6 @@ async function addAnswer({
 		})
 	}
 
-	console.log(formField)
-
 	const access_token = getCookie('access_token')
 
 	try {

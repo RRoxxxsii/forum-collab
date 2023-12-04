@@ -31,17 +31,19 @@ export interface ILinkType {
 	session?: boolean
 }
 
+export type INotificationLevelType = 'success' | 'info' | 'warning' | 'fail'
+
 export interface INotifications {
 	id: number
-	level: string
+	level: INotificationLevelType
 	target_object_id: number
 	action_obj_object_id: number
 	text: string
 	emailed: boolean
 	unread: boolean
 	creation_date: string // Assuming it's a date string
-	sender: number
-	receiver: number
+	sender: number | null
+	receiver: number | null
 	target_content_type: number
 	action_obj_content_type: number
 }

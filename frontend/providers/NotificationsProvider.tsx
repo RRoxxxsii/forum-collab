@@ -32,7 +32,7 @@ export const NotificationProvider = ({
 	useEffect(() => {
 		fetchNotifications({ setNotifications: setNotifications })
 	}, [])
-	console.log(notifications)
+
 	return (
 		<NotificationContext.Provider value={{ notifications, setNotifications }}>
 			{children}

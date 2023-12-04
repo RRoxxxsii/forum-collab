@@ -21,7 +21,7 @@ export const QuestionCardContent = ({
 					__html: questionData?.content ?? 'error',
 				}}
 			/>
-			<Box sx={{ mb: 2, display: 'flex' }}>
+			<Box sx={{ mb: 1, display: 'flex' }}>
 				{questionData?.images?.map((image) => (
 					<Box sx={{ mr: 1 }}>
 						<ImageButton
