@@ -20,7 +20,6 @@ export default function ProfilePage({ params }: { params: { slug: string } }) {
 	const [profileData, setProfileData] = useState<IUser | null>(null)
 	const userId = params.slug
 
-	console.log(params)
 	dayjs.extend(relativeTime)
 
 	const getProfile = async () => {

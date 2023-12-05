@@ -16,7 +16,6 @@ export async function middleware(request: NextRequest) {
 	if (!hasRefreshToken) {
 		return
 	}
-	console.log('click')
 
 	const refreshTokenCookie = request.cookies.get('refresh_token')
 	const response = NextResponse.next()

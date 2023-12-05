@@ -22,6 +22,7 @@ export const QuestionCardActions = ({
 				width: '100%',
 				justifyContent: 'space-between',
 				p: 0,
+				mb: 1,
 				alignItems: 'center',
 			}}>
 			<Box

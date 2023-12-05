@@ -24,10 +24,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<head />
 			<body className={inter.className}>
-				<ThemeRegistry>
-					{children}
-					<NotificationsModal />
-				</ThemeRegistry>
+				<ThemeRegistry>{children}</ThemeRegistry>
 			</body>
 		</html>
 	)

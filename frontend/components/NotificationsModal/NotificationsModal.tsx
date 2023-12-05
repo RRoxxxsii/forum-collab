@@ -1,23 +1,33 @@
 'use client'
+
 import { NotificationContext } from '@/providers/NotificationsProvider'
 import { ModalComponent } from '@/shared/Modal'
-import { Paper, Typography } from '@mui/material'
+import { INotificationLevelType } from '@/types'
+import { Alert, AlertColor, Typography } from '@mui/material'
+import dayjs from 'dayjs'
+import ru from 'dayjs/locale/ru'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useContext, useState } from 'react'
 import './styles.scss'
-
-export const NotificationsModal = ({}: {}) => {
+export const NotificationsModal = () => {
 	const isOpen = useSearchParams().has('notifications')
 	const router = useRouter()
 
-	const { notifications } = useContext(NotificationContext)
-
+	const { notifications, setNotifications } = useContext(NotificationContext)
+	console.log(notifications)
 	const [value, setValue] = useState<number>(0)
 
 	const handleClose = () => {
 		router.back()
 	}
-	console.log(notifications)
+
+	const notificationLevelStrings: Record<INotificationLevelType, AlertColor> = {
+		info: 'info',
+		fail: 'error',
+		success: 'success',
+		warning: 'warning',
+	}
 	if (!isOpen) return null
 
 	return (
@@ -25,10 +35,19 @@ export const NotificationsModal = ({}: {}) => {
 			<div className='p-2'>
 				<Typography sx={{ fontSize: 24 }}>Уведомления</Typography>
 				{notifications.map((notification) => (
-					<Paper>
-						{notification.level}
-						{notification.text}
-					</Paper>
+					<Alert
+						sx={{ mb: 1 }}
+						color={notificationLevelStrings[notification.level]}>
+						<Link href=''>
+							<Typography>
+								{notification.sender} {notification.text}
+							</Typography>
+							<Typography></Typography>
+							<Typography>
+								{dayjs(notification.creation_date).locale(ru).fromNow()}
+							</Typography>
+						</Link>
+					</Alert>
 				))}
 			</div>
 		</ModalComponent>

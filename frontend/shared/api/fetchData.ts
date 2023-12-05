@@ -96,8 +96,6 @@ export async function fetchNotifications({
 	setNotifications: Dispatch<SetStateAction<INotifications[]>>
 }) {
 	try {
-		if (setNotifications === null) return null
-
 		const response = await fetch(`/api/account/notifications/`)
 
 		const result = await response.json()

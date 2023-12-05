@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from 'react'
 import {
 	QuestionCardActions,
 	QuestionCardContent,
+	QuestionCardMenu,
 	QuestionCardRating,
 } from './models'
 
@@ -55,9 +56,10 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 						profileData={userDetails}
 						handleRating={handleQuestionRating}
 					/>
-					<Box sx={{ width: '100%', ml: 1 }}>
+					<Box sx={{ width: '100%', ml: 1, mt: 2 }}>
 						<QuestionCardContent questionData={questionData} />
 						<QuestionCardActions questionData={questionData} />
+						<QuestionCardMenu questionData={questionData} />
 					</Box>
 				</Link>
 			</Box>

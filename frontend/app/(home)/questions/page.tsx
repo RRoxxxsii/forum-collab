@@ -3,6 +3,7 @@ import { QuestionList } from '@/components/Question/QuestionList'
 import { QuestionListAskFast } from '@/components/Question/QuestionListAskFast'
 
 import { Box } from '@mui/material'
+import { PopularTags } from '@/components/PopularTags'
 
 export default async function QuestionPage() {
 	return (
@@ -13,6 +14,7 @@ export default async function QuestionPage() {
 				<Box sx={questionPageContainer}>
 					<Box sx={desktopList}>
 						<QuestionSearch />
+						<PopularTags />
 						<QuestionList />
 					</Box>
 					<Box sx={mobileList}>
