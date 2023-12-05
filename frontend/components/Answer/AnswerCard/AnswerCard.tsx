@@ -143,7 +143,8 @@ export function AnswerCard({
 									width={128}
 									height={128}
 									imageUrl={image.image}
-									imageAlt={image.alt_text}></ImageButton>
+									imageAlt={image.alt_text}
+								/>
 							))}
 						</Box>
 						<Box

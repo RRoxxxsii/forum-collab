@@ -13,7 +13,9 @@ export const QuestionCardContent = ({
 		<Box sx={{ mb: 2, ml: 1 }}>
 			<ImageModal imageUrl='' />
 			<UserInformation questionData={questionData} />
-			<Typography sx={{ fontSize: 16 }}>{questionData?.title}</Typography>
+			<Typography sx={{ fontSize: 20, fontWeight: 700 }}>
+				{questionData?.title}
+			</Typography>
 			<Typography
 				sx={{ mb: 2 }}
 				variant='body1'
@@ -31,11 +33,6 @@ export const QuestionCardContent = ({
 							height={128}
 						/>
 					</Box>
-				))}
-			</Box>
-			<Box>
-				{questionData.tags.map((tag) => (
-					<Chip key={tag.tag_name} sx={{ mr: 1 }} label={tag.tag_name} />
 				))}
 			</Box>
 		</Box>

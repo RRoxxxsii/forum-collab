@@ -7,6 +7,7 @@ import {
 	QuestionCardRating,
 } from '@/components/Question/QuestionCard/models'
 
+import { QuestionCardTags } from '@/components/Question/QuestionCard/models/QuestionCardTags'
 import { UserDeviceContext } from '@/providers/UserDeviceProvider'
 import { PageWrapper } from '@/shared/PageWrapper/PageWrapper'
 import { ChangeRating } from '@/shared/api/changeRating'
@@ -60,6 +61,7 @@ export default function QuestionPage() {
 								</Box>
 								<Box sx={{ padding: 1.5 }}>
 									<QuestionCardContent questionData={questionData} />
+									<QuestionCardTags questionData={questionData} />
 									<QuestionCardMenu
 										profileData={profileData}
 										questionData={questionData}
