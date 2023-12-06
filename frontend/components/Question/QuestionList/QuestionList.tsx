@@ -92,7 +92,11 @@ export const QuestionList = () => {
 			{/* if there is data we show it, otherwise we show skeletons */}
 			{questions.length !== 0 ? (
 				questions.map((questionData: IQuestion) => (
-					<QuestionCard key={questionData.id} questionData={questionData} />
+					<QuestionCard
+						isCard={true}
+						key={questionData.id}
+						questionData={questionData}
+					/>
 				))
 			) : (
 				<>

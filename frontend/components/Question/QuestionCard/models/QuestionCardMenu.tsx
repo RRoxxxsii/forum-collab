@@ -9,6 +9,7 @@ import {
 	MoreHoriz,
 	Report,
 	Share,
+	Textsms,
 } from '@mui/icons-material'
 import {
 	Box,
@@ -28,7 +29,9 @@ import { toast } from 'react-toastify'
 export const QuestionCardMenu = ({
 	questionData,
 	profileData,
+	isCard,
 }: {
+	isCard: boolean
 	questionData: IQuestion
 	profileData?: IUser | null
 }) => {
@@ -84,74 +87,93 @@ export const QuestionCardMenu = ({
 	}
 
 	return (
-		<Box sx={{ display: 'flex', alignItems: 'center' }}>
-			<button
-				className={`flex ${
-					userDevice === 'desktop' && 'mr-4'
-				} hover:bg-neutral-800 rounded-md p-2`}
-				onClick={shareHandler}>
-				<Share sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
-				{userDevice === 'desktop' && <Typography>Поделиться</Typography>}
-			</button>
-			<button
-				className={`flex ${
-					userDevice === 'desktop' && 'mr-4'
-				} hover:bg-neutral-800 rounded-md p-2`}
-				onClick={FavoriteHandler}>
-				<Bookmark sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
-				{userDevice === 'desktop' && <Typography>Избранное</Typography>}
-			</button>
-			<IconButton
-				id='more'
-				aria-controls={moreDropdownOpen ? 'more options' : undefined}
-				aria-haspopup='true'
-				aria-expanded={moreDropdownOpen ? 'true' : undefined}
-				onClick={handleClick}>
-				<MoreHoriz />
-			</IconButton>
-			<Menu
-				id='more options'
-				anchorEl={moreButtonEl}
-				open={moreDropdownOpen}
-				onClose={handleClose}>
-				{questionData.user.id === profileData?.id && [
-					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-						<Link
-							href={{
-								pathname: `/ask/edit`,
-								query: {
-									id: questionData.id,
-								},
-							}}
-							className='flex'>
-							<Edit sx={{ mr: 1 }} />
-							<Typography>Редактировать</Typography>
-						</Link>
-					</MenuItem>,
+		<Box
+			sx={{
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'space-between',
+			}}>
+			<Box sx={{ display: 'flex', alignItems: 'center' }}>
+				<button
+					className={`flex ${
+						userDevice === 'desktop' && 'mr-4'
+					} hover:bg-neutral-800 rounded-md p-2`}
+					onClick={shareHandler}>
+					<Share sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
+					{userDevice === 'desktop' && <Typography>Поделиться</Typography>}
+				</button>
+				<button
+					className={`flex ${
+						userDevice === 'desktop' && 'mr-4'
+					} hover:bg-neutral-800 rounded-md p-2`}
+					onClick={FavoriteHandler}>
+					<Bookmark sx={{ mr: userDevice === 'desktop' ? 1 : 0 }} />
+					{userDevice === 'desktop' && <Typography>Избранное</Typography>}
+				</button>
+				<IconButton
+					id='more'
+					aria-controls={moreDropdownOpen ? 'more options' : undefined}
+					aria-haspopup='true'
+					aria-expanded={moreDropdownOpen ? 'true' : undefined}
+					onClick={handleClick}>
+					<MoreHoriz />
+				</IconButton>
+				<Menu
+					id='more options'
+					anchorEl={moreButtonEl}
+					open={moreDropdownOpen}
+					onClose={handleClose}>
+					{questionData.user.id === profileData?.id && [
+						<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+							<Link
+								href={{
+									pathname: `/ask/edit`,
+									query: {
+										id: questionData.id,
+									},
+								}}
+								className='flex'>
+								<Edit sx={{ mr: 1 }} />
+								<Typography>Редактировать</Typography>
+							</Link>
+						</MenuItem>,
+						<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+							<FormControlLabel
+								onClick={handleDelete}
+								control={<Delete sx={{ mx: 1.2 }} />}
+								label='Удалить'
+							/>
+						</MenuItem>,
+					]}
+					{questionData.id !== profileData?.id && (
+						<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
+							<FormControlLabel
+								control={<Report sx={{ mx: 1.2 }} />}
+								label='Пожаловаться'
+							/>
+						</MenuItem>
+					)}
+					<Divider />
 					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
 						<FormControlLabel
-							onClick={handleDelete}
-							control={<Delete sx={{ mx: 1.2 }} />}
-							label='Удалить'
-						/>
-					</MenuItem>,
-				]}
-				{questionData.id !== profileData?.id && (
-					<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-						<FormControlLabel
-							control={<Report sx={{ mx: 1.2 }} />}
-							label='Пожаловаться'
+							control={<Checkbox />}
+							label='Включить уведомления'
 						/>
 					</MenuItem>
-				)}
-				<Divider />
-				<MenuItem onClick={handleClose} sx={{ width: '100%', height: 36 }}>
-					<FormControlLabel
-						control={<Checkbox />}
-						label='Включить уведомления'
-					/>
-				</MenuItem>
-			</Menu>
+				</Menu>
+			</Box>
+			{isCard && (
+				<Box
+					sx={{
+						display: 'flex',
+						flex: '10%',
+						justifyContent: 'flex-end',
+						alignItems: 'center',
+					}}>
+					<Typography>{questionData?.answers_amount}</Typography>
+					<Textsms sx={{ m: 1 }} />
+				</Box>
+			)}
 		</Box>
 	)
 }
