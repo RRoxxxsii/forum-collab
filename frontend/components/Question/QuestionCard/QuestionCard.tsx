@@ -11,7 +11,13 @@ import {
 	QuestionCardRating,
 } from './models'
 
-export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
+export const QuestionCard = ({
+	questionData,
+	isCard,
+}: {
+	questionData: IQuestion
+	isCard: boolean
+}) => {
 	const { userDetails } = useContext(UserDetailsContext)
 	const [questionCardData, setQuestionCardData] = useState<IQuestion | null>(
 		null
@@ -59,7 +65,7 @@ export const QuestionCard = ({ questionData }: { questionData: IQuestion }) => {
 					<Box sx={{ width: '100%', ml: 1, mt: 2 }}>
 						<QuestionCardContent questionData={questionData} />
 						<QuestionCardActions questionData={questionData} />
-						<QuestionCardMenu questionData={questionData} />
+						<QuestionCardMenu isCard questionData={questionData} />
 					</Box>
 				</Link>
 			</Box>

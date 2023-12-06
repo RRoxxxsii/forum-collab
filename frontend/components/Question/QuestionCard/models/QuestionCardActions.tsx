@@ -60,16 +60,7 @@ export const QuestionCardActions = ({
 					)
 				})}
 			</Box>
-			<Box
-				sx={{
-					display: 'flex',
-					flex: '10%',
-					justifyContent: 'flex-end',
-					alignItems: 'center',
-				}}>
-				<Typography sx={{}}>{questionData?.answers_amount}</Typography>
-				<TextsmsIcon sx={{ m: 1 }} />
-			</Box>
+
 		</Box>
 	)
 }

@@ -138,7 +138,7 @@ export function AnswerCard({
 							/>
 						)}
 						<Box>
-							{answerData.images.map((image) => (
+							{answerData?.images?.map((image) => (
 								<ImageButton
 									width={128}
 									height={128}
