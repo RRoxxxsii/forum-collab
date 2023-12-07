@@ -1,1 +1,1 @@
-[<InMemoryUploadedFile: david-face-760x985.jpg (image/jpeg)>, <InMemoryUploadedFile: c9375887a6beefa26e4d5dc4bcafba4b.jpg (image/jpeg)>, <InMemoryUploadedFile: image.png (image/png)>]
+[<InMemoryUploadedFile: image.png (image/png)>]
