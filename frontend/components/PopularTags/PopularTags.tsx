@@ -26,7 +26,7 @@ export const PopularTags = () => {
 	}, [])
 
 	return (
-		<Swiper spaceBetween={20} slidesPerView={13}>
+		<Swiper className='mb-5 max-w-7xl' spaceBetween={20} slidesPerView={13}>
 			{popularTags.map((tag) => (
 				<SwiperSlide>
 					<Tag tagData={tag} />

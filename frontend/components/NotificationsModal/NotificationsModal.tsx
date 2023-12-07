@@ -34,21 +34,25 @@ export const NotificationsModal = () => {
 		<ModalComponent handleClose={handleClose}>
 			<div className='p-2'>
 				<Typography sx={{ fontSize: 24 }}>Уведомления</Typography>
-				{notifications.map((notification) => (
-					<Alert
-						sx={{ mb: 1 }}
-						color={notificationLevelStrings[notification.level]}>
-						<Link href=''>
-							<Typography>
-								{notification.sender} {notification.text}
-							</Typography>
-							<Typography></Typography>
-							<Typography>
-								{dayjs(notification.creation_date).locale(ru).fromNow()}
-							</Typography>
-						</Link>
-					</Alert>
-				))}
+				{notifications.length !== 0 ? (
+					notifications.map((notification) => (
+						<Alert
+							sx={{ mb: 1 }}
+							color={notificationLevelStrings[notification.level]}>
+							<Link href=''>
+								<Typography>
+									{notification.sender} {notification.text}
+								</Typography>
+								<Typography></Typography>
+								<Typography sx={{ fontSize: 12 }}>
+									{dayjs(notification.creation_date).locale(ru).fromNow()}
+								</Typography>
+							</Link>
+						</Alert>
+					))
+				) : (
+					<Typography>У вас пока нет уведомлений</Typography>
+				)}
 			</div>
 		</ModalComponent>
 	)

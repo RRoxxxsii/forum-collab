@@ -85,13 +85,13 @@ export const BurgerMenu = ({
 					</IconButton>
 				</DrawerHeader>
 				<Divider />
-				<List>
+				<List onClick={handleDrawerClose}>
 					{LINKS.map(({ href, icon: Icon, text }) => (
 						<Navlink key={href} text={text} href={href} icon={Icon} />
 					))}
 				</List>
 				<Divider />
-				<List>
+				<List onClick={handleDrawerClose}>
 					{session
 						? PRIVATE_USER_LINKS.map(({ href, icon: Icon, text }) => (
 								<Navlink key={href} text={text} href={href} icon={Icon} />

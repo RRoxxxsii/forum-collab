@@ -13,10 +13,9 @@ import { PageWrapper } from '@/shared/PageWrapper/PageWrapper'
 import { ChangeRating } from '@/shared/api/changeRating'
 import { fetchMe, fetchQuestion } from '@/shared/api/fetchData'
 import { IChangeRating, IQuestion, IUser } from '@/types'
-import { Box, Divider, Paper, Typography } from '@mui/material'
+import { Box, Divider, Paper, Skeleton, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
-import { Suspense, useContext, useEffect, useState } from 'react'
-import QuestionLoading from './loading'
+import { useContext, useEffect, useState } from 'react'
 
 export default function QuestionPage() {
 	const pathname = usePathname()
@@ -45,66 +44,80 @@ export default function QuestionPage() {
 	const { userDevice } = useContext(UserDeviceContext)
 
 	return (
-		<Suspense fallback={<QuestionLoading />}>
-			<PageWrapper>
-				{questionData && (
-					<Paper sx={{ maxWidth: 1280 }}>
-						<Box sx={{ px: userDevice === 'desktop' ? 3 : 1, py: 2 }}>
-							<Box sx={{ display: 'flex' }}>
-								<Box sx={{ justifyContent: 'center' }}>
-									<QuestionCardRating
-										model='question'
-										questionData={questionData}
-										handleRating={handleQuestionRating}
-										profileData={profileData}
-									/>
-								</Box>
-								<Box sx={{ padding: 1.5 }}>
-									<QuestionCardContent questionData={questionData} />
-									<QuestionCardTags questionData={questionData} />
-									<QuestionCardMenu
-										profileData={profileData}
-										questionData={questionData}
-									/>
-								</Box>
+		<PageWrapper>
+			{questionData ? (
+				<Paper sx={{ maxWidth: 1280 }}>
+					<Box sx={{ px: userDevice === 'desktop' ? 3 : 1, py: 2 }}>
+						<Box sx={{ display: 'flex' }}>
+							<Box sx={{ justifyContent: 'center' }}>
+								<QuestionCardRating
+									model='question'
+									questionData={questionData}
+									handleRating={handleQuestionRating}
+									profileData={profileData}
+								/>
+							</Box>
+							<Box sx={{ padding: 1.5 }}>
+								<QuestionCardContent questionData={questionData} />
+								<QuestionCardTags questionData={questionData} />
+								<QuestionCardMenu
+									isCard={false}
+									profileData={profileData}
+									questionData={questionData}
+								/>
 							</Box>
 						</Box>
-						<Divider />
+					</Box>
+					<Divider />
+					<Typography
+						variant='h6'
+						sx={{
+							px: userDevice === 'desktop' ? 3 : 1,
+							py: 1,
+							display: 'flex',
+							alignItems: 'center',
+						}}>
+						Ответы:
 						<Typography
-							variant='h6'
-							sx={{
-								px: userDevice === 'desktop' ? 3 : 1,
-								py: 1,
-								display: 'flex',
-								alignItems: 'center',
-							}}>
-							Ответы:
-							<Typography
-								className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
-								sx={{ ml: 1 }}>
-								{questionData.answers.length}
-							</Typography>
+							className='rounded-full bg-neutral-700 h-5 w-5 flex items-center justify-center ml-4'
+							sx={{ ml: 1 }}>
+							{questionData.answers.length}
 						</Typography>
-						<Box
-							sx={{
-								px: userDevice === 'desktop' ? 3 : 1,
-								py: 2,
-								width: '100%',
-								pb: 30,
-							}}>
-							<AnswerCreateForm
-								profileData={profileData}
-								questionData={questionData}
-								setQuestionData={setQuestionData}
-							/>
-							<AnswerList
-								setQuestionData={setQuestionData}
-								questionData={questionData}
-							/>
-						</Box>
-					</Paper>
-				)}
-			</PageWrapper>
-		</Suspense>
+					</Typography>
+					<Box
+						sx={{
+							px: userDevice === 'desktop' ? 3 : 1,
+							py: 2,
+							width: '100%',
+							pb: 30,
+						}}>
+						<AnswerCreateForm
+							profileData={profileData}
+							questionData={questionData}
+							setQuestionData={setQuestionData}
+						/>
+						<AnswerList
+							setQuestionData={setQuestionData}
+							questionData={questionData}
+						/>
+					</Box>
+				</Paper>
+			) : (
+				<>
+					<Skeleton
+						sx={{ mb: 1, maxWidth: '1280px' }}
+						variant='rectangular'
+						width={'100%'}
+						height={380}
+					/>
+					<Skeleton
+						variant='rectangular'
+						sx={{ maxWidth: '1280px' }}
+						width={'100%'}
+						height={'100vh'}
+					/>
+				</>
+			)}
+		</PageWrapper>
 	)
 }
