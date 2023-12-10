@@ -109,7 +109,7 @@ class AnswerHelper(BaseAnswerQuestionHelperMixin):
 
                     notify(sender=answer.user, receiver=question.user,
                            text='ответил на ваш вопрос',
-                           action_object=answer, target=question)
+                           action_obj=answer, target=question)
                     answer.save()
 
                 self._create_answer_images(answer=answer)
