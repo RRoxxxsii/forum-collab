@@ -86,8 +86,15 @@ export const QuestionCardMenu = ({
 		toast('Сохранено в буфер обмена')
 	}
 
+	const handleMenu = (
+		e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+	) => {
+		e.preventDefault()
+	}
+
 	return (
 		<Box
+			onClick={(e) => handleMenu(e)}
 			sx={{
 				display: 'flex',
 				alignItems: 'center',

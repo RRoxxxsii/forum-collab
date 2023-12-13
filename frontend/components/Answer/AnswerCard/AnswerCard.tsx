@@ -49,7 +49,7 @@ export function AnswerCard({
 				sx={{
 					p: 2,
 					width: '100%',
-					borderLeft: solved ? '1px solid rgb(104, 130, 177)' : '',
+					borderBottom: solved ? '1px solid rgb(49, 50, 52)' : '',
 				}}>
 				{solved && (
 					<>

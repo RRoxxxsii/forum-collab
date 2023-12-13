@@ -9,7 +9,7 @@ export const QuestionCardTags = ({
 	questionData: IQuestion
 }) => {
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box sx={{ mb: 2 }} onClick={(e) => e.preventDefault()}>
 			{questionData.tags.map((tag) => (
 				<Link href={`/questions/?tags=${Transliterate(tag?.tag_name)}`}>
 					<Chip
