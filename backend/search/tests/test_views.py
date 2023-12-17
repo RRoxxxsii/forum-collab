@@ -1,9 +1,8 @@
+from accounts.models import NewUser
 from django.urls import reverse
+from forum.models import Question, ThemeTag
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from accounts.models import NewUser
-from forum.models import Question, ThemeTag
 
 
 class TestSearchListAPIView(APITestCase):

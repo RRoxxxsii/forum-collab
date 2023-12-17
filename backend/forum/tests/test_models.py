@@ -1,9 +1,8 @@
-from rest_framework.test import APITestCase
-
 from accounts.models import NewUser
 from forum.models import (Question, QuestionAnswer, QuestionAnswerRating,
                           QuestionRating, ThemeTag)
 from forum.services import LikeDislikeService
+from rest_framework.test import APITestCase
 
 
 class TestThemeTagMakingTagRelevant(APITestCase):

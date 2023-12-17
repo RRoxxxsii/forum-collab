@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from django.utils import timezone
-
 from accounts.models import EmailConfirmationToken, NewUser
+from django.utils import timezone
 
 from . import dto
 

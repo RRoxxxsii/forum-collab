@@ -1,9 +1,8 @@
-from rest_framework.test import APITestCase
-
 from accounts.models import NewUser
 from accounts.querysets import UserKarmaQS
 from forum.models import Question, QuestionAnswer, ThemeTag
 from forum.services import LikeDislikeService
+from rest_framework.test import APITestCase
 
 
 class TestNewUserModelTest(APITestCase):

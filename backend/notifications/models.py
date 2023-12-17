@@ -1,8 +1,7 @@
+from accounts.models import NewUser
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-
-from accounts.models import NewUser
 
 
 class NotificationManager(models.query.QuerySet):

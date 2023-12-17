@@ -1,8 +1,7 @@
-from rest_framework import serializers
-
 from accounts.serializers import UserSerializer
 from favourites.models import Favourite
 from forum.serializers import ListQuestionSerializer
+from rest_framework import serializers
 
 
 class FavouritesSerializer(serializers.ModelSerializer):

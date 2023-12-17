@@ -1,9 +1,8 @@
+from accounts.cache_manager import CacheManager
+from accounts.models import NewUser
 from django.conf import settings
 from django.db.models import Count, QuerySet, Sum
 from django.db.models.functions import Coalesce
-
-from accounts.cache_manager import CacheManager
-from accounts.models import NewUser
 
 
 class UsersQS:

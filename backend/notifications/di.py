@@ -1,5 +1,4 @@
 import punq
-
 from notifications.repository import (AbstractNotificationsRepository,
                                       NotificationsRepository)
 

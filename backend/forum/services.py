@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import re
 
-from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
-
 from accounts.cache_manager import CacheManager
 from accounts.models import NewUser
+from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from forum import repository
 from forum.di import container
 from forum.models import AnswerComment, Question, QuestionAnswer

@@ -4,7 +4,6 @@ from datetime import datetime
 
 from django.db.models import (Count, ExpressionWrapper, F, IntegerField,
                               QuerySet)
-
 from forum.models import AnswerComment, Question, QuestionAnswer, ThemeTag
 
 

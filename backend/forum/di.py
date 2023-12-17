@@ -1,5 +1,4 @@
 import punq
-
 from forum import repository
 
 container = punq.Container()

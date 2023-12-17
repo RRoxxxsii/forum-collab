@@ -1,22 +1,9 @@
 from datetime import timedelta
 
+from accounts.models import NewUser
 from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import (CreateAPIView, GenericAPIView,
-                                     ListAPIView, RetrieveAPIView)
-from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
-
-from accounts.models import NewUser
 from forum.permissions import IsOwner, IsQuestionOwner
 from forum.querysets import (CommentQSBase, QuestionAnswerQSBase, QuestionQS,
                              QuestionQSBase, ThemeTagQSBase)
@@ -30,6 +17,18 @@ from forum.serializers import (AnswerSerializer, AskQuestionSerializer,
 from forum.services import (CreateAnswerService, CreateComment,
                             CreateQuestionService, LikeDislikeService,
                             VoteAnswerSolving)
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import (CreateAPIView, GenericAPIView,
+                                     ListAPIView, RetrieveAPIView)
+from rest_framework.mixins import (DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 
 class UpdateDestroyRetrieveMixin(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):

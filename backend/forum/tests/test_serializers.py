@@ -2,17 +2,16 @@ import io
 import json
 
 import pytz
+from accounts.models import NewUser
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from faker import Faker
-from PIL import Image
-from rest_framework.test import APITestCase
-
-from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 from forum.serializers import DetailQuestionSerializer
+from PIL import Image
+from rest_framework.test import APITestCase
 
 
 def convert_datetime(dt):

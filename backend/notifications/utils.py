@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from django.contrib.auth.models import AnonymousUser
-
 from accounts.models import NewUser
+from django.contrib.auth.models import AnonymousUser
 
 from .models import Notification
 

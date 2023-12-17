@@ -1,5 +1,4 @@
 import punq
-
 from accounts.repository import (AbstractAccountRepository,
                                  BaseAccountRepository)
 

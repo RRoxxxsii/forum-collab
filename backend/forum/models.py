@@ -1,6 +1,5 @@
-from django.db import models
-
 from accounts.models import NewUser
+from django.db import models
 
 
 class Attachment(models.Model):

@@ -1,12 +1,11 @@
 import json
 
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-
 from accounts.models import NewUser
+from django.urls import reverse
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerRating, QuestionRating, ThemeTag)
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 
 class TestLikeDislikeAPIView(APITestCase):

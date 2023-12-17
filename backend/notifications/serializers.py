@@ -1,9 +1,8 @@
-from rest_framework import serializers
-
-from forum.models import Question, QuestionAnswer, AnswerComment, ThemeTag
-from forum.serializers import BaseQuestionSerializer, BaseTagFieldSerializer, AnswerSerializer, CommentSerializer
-
+from forum.models import AnswerComment, Question, QuestionAnswer
+from forum.serializers import (BaseAnswerSerializer, BaseQuestionSerializer,
+                               CommentSerializer)
 from notifications.models import Notification
+from rest_framework import serializers
 
 
 class NotificationsSerializer(serializers.ModelSerializer):
@@ -20,22 +19,35 @@ class NotificationsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super(NotificationsSerializer, self).to_representation(instance)
-        if isinstance(instance.target, ThemeTag):
-            data.update({'target': 'tag'})
-        elif isinstance(instance.target, Question):
-            data.update({'target': 'question'})
-        elif isinstance(instance.target, QuestionAnswer):
-            data.update({'target': 'answer'})
-        elif isinstance(instance.target, AnswerComment):
-            data.update({'target': 'comment'})
-        if isinstance(instance.action_obj, ThemeTag):
-            data.update({'action_obj': 'tag'})
-        elif isinstance(instance.action_obj, Question):
-            data.update({'action_obj': 'question'})
-        elif isinstance(instance.action_obj, QuestionAnswer):
-            data.update({'action_obj': 'answer'})
-        elif isinstance(instance.action_obj, AnswerComment):
-            data.update({'action_obj': 'comment'})
+        if isinstance(instance.target, Question) and isinstance(instance.action_obj, QuestionAnswer):
+            data.update(
+                {
+                    "target": BaseQuestionSerializer(instance.target).data,
+                    "target_content_type": "question",
+                    "action_obj": BaseAnswerSerializer(instance.action_obj).data,
+                    "action_obj_content_type": "answer"
+                }
+            )
+        elif isinstance(instance.target, QuestionAnswer) and isinstance(instance.action_obj, AnswerComment):
+            data.update(
+                {
+                    "question": BaseQuestionSerializer(instance.target.question).data,
+                    "target": BaseAnswerSerializer(instance.target).data,
+                    "target_content_type": "answer",
+                    "comment": CommentSerializer(instance.action_obj).data,
+                    "action_obj_content_type": "comment"
+                }
+            )
+        elif isinstance(instance.target, AnswerComment) and instance(instance.action_obj, AnswerComment):
+            data.update(
+                {
+                    "question": BaseQuestionSerializer(instance.target.question_answer.question.data),
+                    "target": CommentSerializer(instance.target).data,
+                    "target_content_type": "comment",
+                    "action_obj": CommentSerializer(instance.action_obj).data,
+                    "action_obj_content_type": "comment"
+                }
+            )
         return data
 
 

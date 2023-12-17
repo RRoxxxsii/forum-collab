@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import random
 
+from accounts.models import NewUser
 from django.core.management import BaseCommand
 from django.db import transaction
 from django.db.models import QuerySet
 from faker import Faker
-
-from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 from forum.tests.test_serializers import generate_photo_file
