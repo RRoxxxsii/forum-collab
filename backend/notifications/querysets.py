@@ -1,6 +1,5 @@
-from django.db.models import QuerySet
-
 from accounts.models import NewUser
+from django.db.models import QuerySet
 from notifications.models import Notification
 
 

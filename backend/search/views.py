@@ -1,9 +1,8 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from forum.serializers import ListQuestionSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
-
-from forum.serializers import ListQuestionSerializer
 from search.querysets import SearchQueryset
 
 

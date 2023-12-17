@@ -1,8 +1,7 @@
+from accounts import views
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-
-from accounts import views
 
 urlpatterns = [
     path('create-account/', views.CustomUserRegisterAPIView.as_view(), name='create-account'),

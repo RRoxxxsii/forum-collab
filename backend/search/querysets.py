@@ -1,7 +1,6 @@
 from django.contrib.postgres.search import (SearchHeadline, SearchQuery,
                                             SearchRank, SearchVector)
 from django.db.models import QuerySet
-
 from forum.models import Question
 
 

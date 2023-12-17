@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from rest_framework import serializers
-
 from accounts.serializers import UserSerializer
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerRating, QuestionRating, ThemeTag)
 from forum.validators import (validate_answer_related_obj_amount,
                               validate_question_related_obj_amount,
                               validate_tags_amount)
+from rest_framework import serializers
 
 
 class ImageSerializer(serializers.Serializer):
@@ -210,15 +209,12 @@ class DetailQuestionSerializer(QuestionRelatedAnswersAmountSerializer, serialize
         return serializer.data
 
 
-class GenericObjNotificationRelatedField(serializers.RelatedField):
-    """
-    Возвращает сериализованные данные объекта в зависимости от типа.
-    """
-    def to_representation(self, value: [Question | AnswerComment | QuestionAnswer]):
-        if isinstance(value, Question):
-            serializer = ListQuestionSerializer(value)
-        if isinstance(value, AnswerComment):
-            serializer = CommentSerializer(value)
-        if isinstance(value, QuestionAnswer):
-            serializer = AnswerSerializer(value)
-        return serializer.data
+class BaseAnswerSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = QuestionAnswer
+        fields = ('id', 'question', 'user', 'answer', 'is_solving', 'creation_date', 'updated_date')
+        extra_kwargs = {'creation_date': {'format': "%Y-%m-%d %H:%M:%S"},
+                        'updated_date': {'format': "%Y-%m-%d %H:%M:%S"}}
+        read_only_fields = ('id', 'user', 'is_solving', 'creation_date', 'updated_date')

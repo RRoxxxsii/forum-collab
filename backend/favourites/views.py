@@ -1,11 +1,10 @@
+from favourites.querysets import FavouriteQueryset
+from favourites.serializers import FavouritesSerializer
+from favourites.services import FavouriteService
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from favourites.querysets import FavouriteQueryset
-from favourites.serializers import FavouritesSerializer
-from favourites.services import FavouriteService
 
 
 class AddToFavouritesAPIView(CreateAPIView):

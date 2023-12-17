@@ -1,5 +1,4 @@
 import punq
-
 from favourites.repository import (AbstractFavouriteRepository,
                                    FavouriteRepository)
 

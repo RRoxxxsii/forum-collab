@@ -1,15 +1,14 @@
 import json
 
+from accounts.models import NewUser
 from django.urls import reverse
 from faker import Faker
-from rest_framework import status
-from rest_framework.test import APITestCase
-
-from accounts.models import NewUser
 from forum.models import (AnswerComment, Question, QuestionAnswer,
                           QuestionAnswerImages, QuestionImages, ThemeTag)
 from forum.services import LikeDislikeService
 from forum.tests.test_serializers import generate_photo_file
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 
 class TestQuestionViewSet(APITestCase):

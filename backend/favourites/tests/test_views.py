@@ -1,12 +1,11 @@
 import json
 
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-
 from accounts.models import NewUser
+from django.urls import reverse
 from favourites.models import Favourite
 from forum.models import Question, ThemeTag
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 
 class AddToFavourites(APITestCase):
